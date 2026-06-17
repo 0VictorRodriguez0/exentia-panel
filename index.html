@@ -440,7 +440,7 @@
     setBootText('Verificando tu sesión...');
     const payload = decodeJWT(jwt);
     if (!payload) {
-      logout();
+      localStorage.removeItem(STORAGE_KEY);
       setTimeout(() => showLogin('Sesión inválida. Vuelve a iniciar sesión.'), 220);
       return;
     }
@@ -448,6 +448,14 @@
     if (!payload.exp || payload.exp < now) {
       localStorage.removeItem(STORAGE_KEY);
       setTimeout(() => showLogin('Tu sesión expiró. Vuelve a iniciar sesión.'), 220);
+      return;
+    }
+    // Defensa contra JWT viejos (versiones anteriores del workflow):
+    // solo aceptamos sesiones con rol "masajista" + tag presente.
+    const tags = (payload.tags || []).map(t => (t || '').toLowerCase().trim());
+    if (payload.role !== 'masajista' || !tags.includes('masajista')) {
+      localStorage.removeItem(STORAGE_KEY);
+      setTimeout(() => showLogin('Tu sesión es de una versión vieja del panel. Vuelve a iniciar sesión.'), 220);
       return;
     }
     setTimeout(() => showPanel(payload), 240);
