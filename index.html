@@ -20,6 +20,7 @@
     --gray-soft: #9a8d75;
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
     font-family: 'Inter', sans-serif;
@@ -29,6 +30,52 @@
     display: flex;
     flex-direction: column;
   }
+
+  /* ── Boot loader (overlay full-page mientras parseamos JWT, JS, etc.) ── */
+  .boot-loader {
+    position: fixed; inset: 0;
+    background: var(--off-white);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    transition: opacity 280ms ease, visibility 280ms;
+  }
+  .boot-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  .boot-logo {
+    font: 700 44px 'Cormorant Garamond', serif;
+    color: var(--olive-dark);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+    animation: fadeIn 380ms ease-out;
+  }
+  .boot-sub {
+    font: 700 10px 'Lato', sans-serif;
+    color: var(--gray-soft);
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+    animation: fadeIn 480ms ease-out;
+  }
+  .spinner {
+    width: 38px; height: 38px;
+    border: 3px solid rgba(154,152,84,0.18);
+    border-top-color: var(--olive);
+    border-radius: 50%;
+    animation: spin .9s linear infinite;
+  }
+  .spinner.sm { width: 22px; height: 22px; border-width: 2.5px; }
+  .boot-text {
+    margin-top: 18px;
+    color: var(--gray-soft);
+    font-size: 12.5px;
+    letter-spacing: .5px;
+    font-style: italic;
+    min-height: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+
   /* ── Topbar ── */
   .topbar {
     background: var(--olive-dark);
@@ -59,22 +106,43 @@
     border-radius: 20px; padding: 44px 36px;
     box-shadow: 0 8px 32px rgba(92,58,30,0.08);
     text-align: center;
+    animation: fadeIn 280ms ease-out;
   }
   .login-logo { font: 700 36px 'Cormorant Garamond', serif; color: var(--olive-dark); letter-spacing: 2px; margin-bottom: 4px; }
   .login-sub { font: 700 10px 'Lato', sans-serif; color: var(--gray-soft); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 32px; }
   .login-card h1 { font: 600 26px 'Cormorant Garamond', serif; color: var(--brown); margin: 0 0 8px; }
   .login-card h1 em { color: var(--olive-light); }
   .login-card p { color: var(--gray-soft); font-size: 14px; margin: 0 0 28px; line-height: 1.5; }
-  #google-btn-wrap { display: flex; justify-content: center; margin: 18px 0 4px; min-height: 44px; }
+  #google-btn-wrap {
+    display: flex; justify-content: center; align-items: center;
+    margin: 18px 0 4px; min-height: 44px;
+    position: relative;
+  }
+  /* Skeleton del botón Google mientras GSI carga */
+  .google-btn-skeleton {
+    width: 320px; height: 44px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #ededed 0%, #f7f7f7 50%, #ededed 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  /* Estado mientras enviamos el token al backend */
+  .login-inflight {
+    display: none; align-items: center; justify-content: center;
+    gap: 10px; margin-top: 14px; color: var(--olive-dark);
+    font-size: 13px; font-weight: 500;
+  }
+  .login-inflight.show { display: flex; }
   .login-error {
     margin-top: 18px; padding: 12px 14px;
     background: #fef0f0; color: #a02020;
     border-radius: 8px; font-size: 13px; border: 1px solid #f5c8c8;
+    text-align: left;
   }
-  .login-loading { color: var(--gray-soft); font-size: 12px; font-style: italic; margin-top: 10px; }
 
   /* ── Panel ── */
-  .panel-wrap { flex: 1; max-width: 960px; width: 100%; margin: 0 auto; padding: 36px 24px; }
+  .panel-wrap { flex: 1; max-width: 960px; width: 100%; margin: 0 auto; padding: 36px 24px; animation: fadeIn 280ms ease-out; }
   .panel-header { margin-bottom: 28px; }
   .panel-header h1 { font: 600 34px 'Cormorant Garamond', serif; color: var(--brown); margin: 0; }
   .panel-header h1 em { color: var(--olive-light); }
@@ -98,16 +166,37 @@
     white-space: pre-wrap; word-break: break-all;
     max-height: 240px; overflow: auto;
   }
+  .tag-chip {
+    display: inline-block;
+    background: rgba(154,152,84,0.14);
+    color: var(--olive-dark);
+    border: 1px solid rgba(154,152,84,0.28);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font: 600 11px 'Inter', sans-serif;
+    letter-spacing: .3px;
+    margin: 2px 4px 2px 0;
+  }
   @media (max-width: 600px) {
     .panel-wrap { padding: 22px 16px; }
     .panel-header h1 { font-size: 26px; }
     .panel-grid { grid-template-columns: 1fr; }
     .topbar { padding: 12px 16px; flex-direction: column; gap: 8px; }
     .login-card { padding: 32px 24px; }
+    .boot-logo { font-size: 36px; }
+    .google-btn-skeleton { width: 280px; }
   }
 </style>
 </head>
 <body>
+
+<!-- ── BOOT LOADER (visible inmediato hasta que init decida vista) ── -->
+<div id="boot-loader" class="boot-loader">
+  <div class="boot-logo">exentia</div>
+  <div class="boot-sub">SPA &amp; BEAUTY SALON</div>
+  <div class="spinner"></div>
+  <div class="boot-text" id="boot-text">Cargando panel...</div>
+</div>
 
 <!-- ── LOGIN ── -->
 <div id="view-login" class="login-wrap" style="display:none">
@@ -115,9 +204,14 @@
     <div class="login-logo">exentia</div>
     <div class="login-sub">SPA &amp; BEAUTY SALON</div>
     <h1>Panel del <em>equipo</em></h1>
-    <p>Acceso exclusivo para el staff de Exentia. Inicia sesión con tu cuenta de Google para revisar y confirmar las citas del día.</p>
-    <div id="google-btn-wrap"></div>
-    <div id="login-loading" class="login-loading" style="display:none">Verificando tu acceso...</div>
+    <p>Acceso exclusivo para masajistas de Exentia. Inicia sesión con tu cuenta de Google para revisar y confirmar las citas del día.</p>
+    <div id="google-btn-wrap">
+      <div id="google-btn-skeleton" class="google-btn-skeleton"></div>
+    </div>
+    <div id="login-inflight" class="login-inflight">
+      <div class="spinner sm"></div>
+      <span>Verificando tu acceso...</span>
+    </div>
     <div id="login-error" class="login-error" style="display:none"></div>
   </div>
 </div>
@@ -144,9 +238,13 @@
       <div class="panel-grid">
         <div><div class="panel-field-label">Nombre</div><div class="panel-field-val" id="f-name">—</div></div>
         <div><div class="panel-field-label">Correo</div><div class="panel-field-val" id="f-email">—</div></div>
-        <div><div class="panel-field-label">User ID (GHL)</div><div class="panel-field-val" id="f-userid">—</div></div>
+        <div><div class="panel-field-label">Contact ID (GHL)</div><div class="panel-field-val" id="f-contactid">—</div></div>
         <div><div class="panel-field-label">Rol</div><div class="panel-field-val" id="f-role">—</div></div>
       </div>
+    </div>
+    <div class="panel-section">
+      <h2>Tus tags</h2>
+      <div id="f-tags">—</div>
     </div>
     <div class="panel-section">
       <h2>JWT decodificado</h2>
@@ -160,6 +258,24 @@
   const GOOGLE_CLIENT_ID = '223783119059-nnt368qs43fmhd72uo93v9jh91r89clp.apps.googleusercontent.com';
   const AUTH_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-google-login';
   const STORAGE_KEY = 'exentia_panel_jwt';
+  const GSI_TIMEOUT_MS = 12000; // si GSI no carga en 12s asumimos error de red
+
+  // ── Estado UI ──
+  function setBootText(msg) {
+    const el = document.getElementById('boot-text');
+    if (el) el.textContent = msg;
+  }
+  function hideBootLoader() {
+    const el = document.getElementById('boot-loader');
+    el.classList.add('hide');
+    setTimeout(() => { el.style.display = 'none'; }, 320);
+  }
+  function showBootLoader(msg) {
+    const el = document.getElementById('boot-loader');
+    el.style.display = 'flex';
+    el.classList.remove('hide');
+    if (msg) setBootText(msg);
+  }
 
   function decodeJWT(token) {
     try {
@@ -172,19 +288,18 @@
   }
 
   function showLogin(errorMsg) {
-    document.getElementById('view-login').style.display = 'flex';
     document.getElementById('view-panel').style.display = 'none';
+    document.getElementById('view-login').style.display = 'flex';
+    document.getElementById('login-inflight').classList.remove('show');
+    const errEl = document.getElementById('login-error');
     if (errorMsg) {
-      const el = document.getElementById('login-error');
-      el.textContent = errorMsg;
-      el.style.display = 'block';
+      errEl.textContent = errorMsg;
+      errEl.style.display = 'block';
     } else {
-      document.getElementById('login-error').style.display = 'none';
+      errEl.style.display = 'none';
     }
-    document.getElementById('login-loading').style.display = 'none';
-
-    // Render Google button (cuando GSI esté listo)
     renderGoogleButton();
+    hideBootLoader();
   }
 
   function showPanel(payload) {
@@ -197,20 +312,32 @@
     document.getElementById('h-exp').textContent = new Date(payload.exp * 1000).toLocaleString('es-MX');
     document.getElementById('f-name').textContent = payload.name || '—';
     document.getElementById('f-email').textContent = payload.email || '—';
-    document.getElementById('f-userid').textContent = payload.userId || '—';
+    document.getElementById('f-contactid').textContent = payload.contactId || payload.userId || '—';
     document.getElementById('f-role').textContent = payload.role || '—';
+    const tagsEl = document.getElementById('f-tags');
+    if (payload.tags && payload.tags.length) {
+      tagsEl.innerHTML = payload.tags.map(t => `<span class="tag-chip">${t}</span>`).join('');
+    } else {
+      tagsEl.textContent = 'Sin tags';
+    }
     document.getElementById('f-payload').textContent = JSON.stringify(payload, null, 2);
+    hideBootLoader();
   }
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
-    showLogin();
+    showBootLoader('Cerrando sesión...');
+    setTimeout(() => showLogin(), 250);
   }
 
   let _gsiReady = false;
   let _pendingRender = false;
 
-  // ── Render del botón de Google ──
+  function removeButtonSkeleton() {
+    const sk = document.getElementById('google-btn-skeleton');
+    if (sk) sk.remove();
+  }
+
   function renderGoogleButton() {
     if (!window.google || !window.google.accounts || !window.google.accounts.id) {
       _pendingRender = true;
@@ -225,6 +352,8 @@
       _gsiReady = true;
     }
     const wrap = document.getElementById('google-btn-wrap');
+    if (!wrap) return;
+    removeButtonSkeleton();
     wrap.innerHTML = '';
     window.google.accounts.id.renderButton(wrap, {
       type: 'standard',
@@ -237,7 +366,7 @@
     });
   }
 
-  // GSI llama esto cuando carga
+  // GSI llama esto cuando la librería termina de cargar
   window.onGoogleLibraryLoad = function () {
     if (_pendingRender) {
       _pendingRender = false;
@@ -245,15 +374,26 @@
     }
   };
 
-  // ── Manejar respuesta de Google ──
+  // Si GSI tarda demasiado, muestra mensaje al usuario
+  setTimeout(() => {
+    if (!_gsiReady && document.getElementById('view-login').style.display === 'flex') {
+      const errEl = document.getElementById('login-error');
+      if (errEl.style.display === 'none') {
+        errEl.textContent = 'No pudimos cargar Google Sign-In. Revisa tu conexión a internet y recarga la página.';
+        errEl.style.display = 'block';
+        removeButtonSkeleton();
+      }
+    }
+  }, GSI_TIMEOUT_MS);
+
   async function handleGoogleResponse(response) {
     const idToken = response.credential;
     if (!idToken) {
       showLogin('Google no devolvió un token válido.');
       return;
     }
-    document.getElementById('login-loading').style.display = 'block';
     document.getElementById('login-error').style.display = 'none';
+    document.getElementById('login-inflight').classList.add('show');
 
     try {
       const res = await fetch(AUTH_ENDPOINT, {
@@ -265,10 +405,25 @@
       if (res.ok && data.sessionJwt) {
         localStorage.setItem(STORAGE_KEY, data.sessionJwt);
         const payload = decodeJWT(data.sessionJwt);
-        if (payload) showPanel(payload);
-        else showLogin('Sesión inválida.');
+        if (payload) {
+          showBootLoader('Entrando al panel...');
+          setTimeout(() => showPanel(payload), 280);
+        } else {
+          showLogin('Sesión inválida.');
+        }
       } else {
-        showLogin(data.error || 'Tu correo no está autorizado para este panel. Contacta al equipo de Exentia.');
+        const errCode = data.error || '';
+        let msg = data.detail || 'No autorizado.';
+        if (errCode === 'not_in_crm') {
+          msg = 'Tu correo no está registrado como masajista de Exentia. Pídele al admin que te agregue.';
+        } else if (errCode === 'not_authorized_role') {
+          msg = 'Tu cuenta existe pero no tiene permiso para acceder al panel. Falta el tag de masajista.';
+        } else if (errCode === 'token_invalid' || errCode === 'audience_mismatch' || errCode === 'issuer_invalid') {
+          msg = 'No pudimos validar tu cuenta de Google. Intenta cerrar sesión de Google y volver a entrar.';
+        } else if (errCode === 'email_not_verified') {
+          msg = 'Tu cuenta de Google no tiene el correo verificado. Verifícalo en tu cuenta y vuelve a intentar.';
+        }
+        showLogin(msg);
       }
     } catch (err) {
       showLogin('Error de conexión. Intenta de nuevo en unos segundos.');
@@ -276,20 +431,34 @@
   }
 
   function init() {
+    setBootText('Cargando panel...');
     const jwt = localStorage.getItem(STORAGE_KEY);
-    if (!jwt) { showLogin(); return; }
-    const payload = decodeJWT(jwt);
-    if (!payload) { logout(); showLogin('Sesión inválida.'); return; }
-    const now = Math.floor(Date.now() / 1000);
-    if (!payload.exp || payload.exp < now) {
-      logout();
-      showLogin('Tu sesión expiró. Vuelve a iniciar sesión.');
+    if (!jwt) {
+      setTimeout(() => showLogin(), 220);
       return;
     }
-    showPanel(payload);
+    setBootText('Verificando tu sesión...');
+    const payload = decodeJWT(jwt);
+    if (!payload) {
+      logout();
+      setTimeout(() => showLogin('Sesión inválida. Vuelve a iniciar sesión.'), 220);
+      return;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    if (!payload.exp || payload.exp < now) {
+      localStorage.removeItem(STORAGE_KEY);
+      setTimeout(() => showLogin('Tu sesión expiró. Vuelve a iniciar sesión.'), 220);
+      return;
+    }
+    setTimeout(() => showPanel(payload), 240);
   }
 
-  init();
+  // Arranca cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 </script>
 
 </body>
