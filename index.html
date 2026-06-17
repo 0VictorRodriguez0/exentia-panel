@@ -278,12 +278,8 @@
     <div class="login-sub">SPA &amp; BEAUTY SALON</div>
     <h1>Panel del <em>equipo</em></h1>
     <p>Acceso exclusivo para masajistas de Exentia. Inicia sesión para revisar y confirmar las citas del día.</p>
-    <div id="google-btn-wrap">
-      <div id="google-btn-skeleton" class="google-btn-skeleton"></div>
-    </div>
-    <div class="separator"><span>o</span></div>
     <form id="magic-form" class="magic-form" autocomplete="email">
-      <label for="magic-email" class="magic-label">Inicia con cualquier correo</label>
+      <label for="magic-email" class="magic-label">Inicia con tu correo</label>
       <input id="magic-email" type="email" name="email" placeholder="tu@correo.com" required autocomplete="email" inputmode="email">
       <button type="submit" id="magic-submit" class="magic-btn">Enviar enlace de acceso</button>
     </form>
@@ -292,6 +288,10 @@
       <p><strong>Revisa tu correo.</strong></p>
       <p class="magic-sent-detail">Si tu correo está autorizado, te enviamos un enlace válido por <strong>15 minutos</strong>. Si no llega en 1-2 minutos, revisa la carpeta de spam.</p>
       <button type="button" class="magic-link-back" onclick="resetMagicForm()">Probar con otro correo</button>
+    </div>
+    <div class="separator"><span>o</span></div>
+    <div id="google-btn-wrap">
+      <div id="google-btn-skeleton" class="google-btn-skeleton"></div>
     </div>
     <div id="login-inflight" class="login-inflight">
       <div class="spinner sm"></div>
