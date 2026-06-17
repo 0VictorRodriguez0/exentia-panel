@@ -207,6 +207,69 @@
     text-decoration: underline;
   }
   .magic-link-back:hover { color: var(--olive); }
+
+  /* ── Pantalla del código OTP ── */
+  .code-form { animation: fadeIn 280ms ease-out; }
+  .code-header { text-align: center; margin-bottom: 18px; }
+  .code-sent-to { color: var(--gray-soft); font-size: 13px; margin: 0; }
+  .code-email-shown { color: var(--brown); font-weight: 600; font-size: 14px; margin: 4px 0 0; word-break: break-all; }
+  .code-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin: 18px 0 14px;
+  }
+  .code-inputs input {
+    width: 100%; height: 56px;
+    text-align: center;
+    font: 600 24px 'Menlo', monospace;
+    color: var(--brown);
+    background: #fff;
+    border: 1.5px solid rgba(154,152,84,0.30);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color .15s ease, transform .12s ease;
+  }
+  .code-inputs input:focus { border-color: var(--olive); transform: scale(1.02); }
+  .code-inputs input:disabled { background: #f7f5ee; opacity: .7; }
+  .code-inputs.shake { animation: shake .4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .code-countdown {
+    text-align: center;
+    color: var(--gray-soft);
+    font-size: 12.5px;
+    margin: 6px 0 0;
+  }
+  .code-countdown strong { color: var(--olive-dark); font-weight: 700; }
+  .code-actions {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    font-size: 12.5px;
+  }
+  .code-link {
+    background: transparent; border: none;
+    color: var(--olive-dark);
+    font: 600 12.5px 'Inter', sans-serif;
+    text-decoration: underline;
+    cursor: pointer; padding: 0;
+  }
+  .code-link:hover:not(:disabled) { color: var(--olive); }
+  .code-link:disabled {
+    color: var(--gray-soft);
+    cursor: not-allowed;
+    text-decoration: none;
+  }
+  .code-sep { color: var(--gray-soft); }
+
+  @media (max-width: 600px) {
+    .code-inputs { gap: 6px; }
+    .code-inputs input { height: 50px; font-size: 22px; }
+  }
   .login-error {
     margin-top: 18px; padding: 12px 14px;
     background: #fef0f0; color: #a02020;
@@ -278,16 +341,30 @@
     <div class="login-sub">SPA &amp; BEAUTY SALON</div>
     <h1>Panel del <em>equipo</em></h1>
     <p>Acceso exclusivo para masajistas de Exentia. Inicia sesión para revisar y confirmar las citas del día.</p>
-    <form id="magic-form" class="magic-form" autocomplete="email">
-      <label for="magic-email" class="magic-label">Inicia con tu correo</label>
-      <input id="magic-email" type="email" name="email" placeholder="tu@correo.com" required autocomplete="email" inputmode="email">
-      <button type="submit" id="magic-submit" class="magic-btn">Enviar enlace de acceso</button>
+    <form id="email-form" class="magic-form" autocomplete="email">
+      <label for="email-input" class="magic-label">Inicia con tu correo</label>
+      <input id="email-input" type="email" name="email" placeholder="tu@correo.com" required autocomplete="email" inputmode="email">
+      <button type="submit" id="email-submit" class="magic-btn">Enviar código</button>
     </form>
-    <div id="magic-sent" class="magic-sent" style="display:none">
-      <div class="magic-sent-check">✓</div>
-      <p><strong>Revisa tu correo.</strong></p>
-      <p class="magic-sent-detail">Si tu correo está autorizado, te enviamos un enlace válido por <strong>15 minutos</strong>. Si no llega en 1-2 minutos, revisa la carpeta de spam.</p>
-      <button type="button" class="magic-link-back" onclick="resetMagicForm()">Probar con otro correo</button>
+    <div id="code-form" class="code-form" style="display:none">
+      <div class="code-header">
+        <p class="code-sent-to">Te mandamos un código a</p>
+        <p class="code-email-shown" id="code-email-shown">—</p>
+      </div>
+      <div class="code-inputs" id="code-inputs">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="0">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="1">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="2">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="3">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="4">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" data-idx="5">
+      </div>
+      <div class="code-countdown" id="code-countdown">El código vence en <strong>3:00</strong></div>
+      <div class="code-actions">
+        <button type="button" class="code-link" id="code-resend" disabled>Reenviar código</button>
+        <span class="code-sep">·</span>
+        <button type="button" class="code-link" onclick="resetToEmail()">Cambiar correo</button>
+      </div>
     </div>
     <div class="separator"><span>o</span></div>
     <div id="google-btn-wrap">
@@ -342,10 +419,18 @@
   // ── Config ──
   const GOOGLE_CLIENT_ID = '223783119059-nnt368qs43fmhd72uo93v9jh91r89clp.apps.googleusercontent.com';
   const AUTH_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-google-login';
-  const MAGIC_REQUEST_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-magic-link-request';
-  const MAGIC_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-magic-link-verify';
+  const OTP_REQUEST_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-request';
+  const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
   const STORAGE_KEY = 'exentia_panel_jwt';
+  const OTP_PENDING_KEY = 'exentia_otp_pending';
   const GSI_TIMEOUT_MS = 12000; // si GSI no carga en 12s asumimos error de red
+  const OTP_TTL_SECONDS = 180; // 3 minutos
+  const RESEND_COOLDOWN_SECONDS = 30;
+
+  // Estado OTP
+  let otpState = { jwt: null, email: null, expiresAt: 0 };
+  let countdownTimer = null;
+  let resendTimer = null;
 
   // ── Estado UI ──
   function setBootText(msg) {
@@ -378,6 +463,27 @@
     document.getElementById('view-panel').style.display = 'none';
     document.getElementById('view-login').style.display = 'flex';
     document.getElementById('login-inflight').classList.remove('show');
+
+    // ¿Hay OTP pendiente en localStorage? Restaurarlo si no expiró
+    const pendingRaw = localStorage.getItem(OTP_PENDING_KEY);
+    let restoredOtp = false;
+    if (pendingRaw) {
+      try {
+        const pending = JSON.parse(pendingRaw);
+        if (pending && pending.jwt && pending.email && pending.expiresAt && pending.expiresAt > Date.now()) {
+          otpState = pending;
+          showCodeScreen(pending.email);
+          restoredOtp = true;
+        } else {
+          localStorage.removeItem(OTP_PENDING_KEY);
+        }
+      } catch (_) {
+        localStorage.removeItem(OTP_PENDING_KEY);
+      }
+    }
+    if (!restoredOtp) resetToEmail();
+
+    // Error después del reset (resetToEmail oculta el error)
     const errEl = document.getElementById('login-error');
     if (errorMsg) {
       errEl.textContent = errorMsg;
@@ -385,6 +491,7 @@
     } else {
       errEl.style.display = 'none';
     }
+
     renderGoogleButton();
     hideBootLoader();
   }
@@ -473,85 +580,250 @@
     }
   }, GSI_TIMEOUT_MS);
 
-  // ── Magic Link ──
-  function resetMagicForm() {
-    document.getElementById('magic-sent').style.display = 'none';
-    document.getElementById('magic-form').style.display = 'flex';
-    document.getElementById('magic-email').value = '';
-    document.getElementById('magic-submit').disabled = false;
-    document.getElementById('login-error').style.display = 'none';
+  // ── OTP (código 6 dígitos por email) ──
+  function clearOtpTimers() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    if (resendTimer) { clearInterval(resendTimer); resendTimer = null; }
   }
 
-  async function handleMagicSubmit(e) {
-    e.preventDefault();
-    const emailInput = document.getElementById('magic-email');
-    const submitBtn = document.getElementById('magic-submit');
-    const email = (emailInput.value || '').trim().toLowerCase();
-    if (!email) return;
-
+  function resetToEmail() {
+    clearOtpTimers();
+    otpState = { jwt: null, email: null, expiresAt: 0 };
+    localStorage.removeItem(OTP_PENDING_KEY);
+    document.getElementById('code-form').style.display = 'none';
+    document.getElementById('email-form').style.display = 'flex';
+    document.getElementById('email-input').value = '';
+    document.getElementById('email-submit').disabled = false;
+    document.getElementById('email-input').disabled = false;
     document.getElementById('login-error').style.display = 'none';
-    emailInput.disabled = true;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
+    clearCodeInputs();
+  }
 
+  function clearCodeInputs() {
+    document.querySelectorAll('.code-inputs input').forEach(inp => { inp.value = ''; inp.disabled = false; });
+  }
+
+  function maskEmail(email) {
+    const [user, dom] = (email || '').split('@');
+    if (!dom) return email;
+    const short = user.length <= 2 ? user : user.slice(0, 2) + '***';
+    return short + '@' + dom;
+  }
+
+  function startCountdown(expiresAt) {
+    const elTxt = document.getElementById('code-countdown');
+    function tick() {
+      const remain = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+      const m = Math.floor(remain / 60), s = remain % 60;
+      elTxt.innerHTML = remain > 0
+        ? 'El código vence en <strong>' + m + ':' + String(s).padStart(2, '0') + '</strong>'
+        : '<strong>El código venció.</strong> Pide uno nuevo.';
+      if (remain <= 0) {
+        clearInterval(countdownTimer); countdownTimer = null;
+        document.querySelectorAll('.code-inputs input').forEach(i => i.disabled = true);
+      }
+    }
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  function startResendCooldown() {
+    const btn = document.getElementById('code-resend');
+    btn.disabled = true;
+    let left = RESEND_COOLDOWN_SECONDS;
+    btn.textContent = 'Reenviar código (' + left + 's)';
+    resendTimer = setInterval(() => {
+      left--;
+      if (left <= 0) {
+        clearInterval(resendTimer); resendTimer = null;
+        btn.disabled = false;
+        btn.textContent = 'Reenviar código';
+      } else {
+        btn.textContent = 'Reenviar código (' + left + 's)';
+      }
+    }, 1000);
+  }
+
+  function showCodeScreen(email) {
+    document.getElementById('email-form').style.display = 'none';
+    document.getElementById('code-form').style.display = 'block';
+    document.getElementById('code-email-shown').textContent = maskEmail(email);
+    clearCodeInputs();
+    setTimeout(() => {
+      const first = document.querySelector('.code-inputs input[data-idx="0"]');
+      if (first) first.focus();
+    }, 80);
+    startCountdown(otpState.expiresAt);
+    startResendCooldown();
+  }
+
+  async function requestOTP(email) {
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
     try {
-      const res = await fetch(MAGIC_REQUEST_ENDPOINT, {
+      const res = await fetch(OTP_REQUEST_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) {
-        // Mostrar pantalla de "revisa tu correo"
-        document.getElementById('magic-form').style.display = 'none';
-        document.getElementById('magic-sent').style.display = 'block';
-      } else {
-        const err = document.getElementById('login-error');
-        err.textContent = data.detail || 'No pudimos enviar el enlace. Revisa el correo e intenta de nuevo.';
-        err.style.display = 'block';
+      if (res.ok && data.ok && data.otpJwt) {
+        otpState = {
+          jwt: data.otpJwt,
+          email,
+          expiresAt: Date.now() + (data.expSeconds || OTP_TTL_SECONDS) * 1000
+        };
+        localStorage.setItem(OTP_PENDING_KEY, JSON.stringify(otpState));
+        return true;
       }
-    } catch (err) {
-      const errEl = document.getElementById('login-error');
+      errEl.textContent = data.detail || 'No pudimos enviar el código. Intenta de nuevo.';
+      errEl.style.display = 'block';
+      return false;
+    } catch (e) {
       errEl.textContent = 'Error de conexión. Intenta de nuevo en unos segundos.';
       errEl.style.display = 'block';
-    } finally {
-      emailInput.disabled = false;
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar enlace de acceso';
+      return false;
     }
   }
 
-  async function verifyMagicToken(magicToken) {
-    showBootLoader('Validando tu enlace de acceso...');
+  async function handleEmailSubmit(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('email-input');
+    const submitBtn = document.getElementById('email-submit');
+    const email = (emailInput.value || '').trim().toLowerCase();
+    if (!email) return;
+
+    emailInput.disabled = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+    const ok = await requestOTP(email);
+    submitBtn.textContent = 'Enviar código';
+    if (ok) {
+      showCodeScreen(email);
+    } else {
+      emailInput.disabled = false;
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function handleResend() {
+    if (!otpState.email) return;
+    const btn = document.getElementById('code-resend');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    const ok = await requestOTP(otpState.email);
+    if (ok) {
+      clearOtpTimers();
+      clearCodeInputs();
+      startCountdown(otpState.expiresAt);
+      startResendCooldown();
+      const first = document.querySelector('.code-inputs input[data-idx="0"]');
+      if (first) first.focus();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Reenviar código';
+    }
+  }
+
+  function getEnteredCode() {
+    return Array.from(document.querySelectorAll('.code-inputs input'))
+      .map(i => (i.value || '').replace(/\D/g, ''))
+      .join('');
+  }
+
+  function shakeCode() {
+    const wrap = document.getElementById('code-inputs');
+    wrap.classList.add('shake');
+    setTimeout(() => wrap.classList.remove('shake'), 400);
+  }
+
+  async function submitCode() {
+    const code = getEnteredCode();
+    if (code.length !== 6 || !otpState.jwt) return;
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    document.querySelectorAll('.code-inputs input').forEach(i => i.disabled = true);
+    document.getElementById('login-inflight-msg').textContent = 'Verificando código...';
+    document.getElementById('login-inflight').classList.add('show');
+
     try {
-      const res = await fetch(MAGIC_VERIFY_ENDPOINT, {
+      const res = await fetch(OTP_VERIFY_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ magicToken })
+        body: JSON.stringify({ otpJwt: otpState.jwt, code, email: otpState.email })
       });
       const data = await res.json().catch(() => ({}));
+      document.getElementById('login-inflight').classList.remove('show');
       if (res.ok && data.sessionJwt) {
+        clearOtpTimers();
+        localStorage.removeItem(OTP_PENDING_KEY);
         localStorage.setItem(STORAGE_KEY, data.sessionJwt);
-        // Limpia ?magic= de la URL antes de mostrar el panel
-        window.history.replaceState({}, document.title, window.location.pathname);
         const payload = decodeJWT(data.sessionJwt);
         if (payload) {
-          setBootText('Entrando al panel...');
-          setTimeout(() => showPanel(payload), 250);
+          showBootLoader('Entrando al panel...');
+          setTimeout(() => showPanel(payload), 280);
         } else {
           showLogin('Sesión inválida.');
         }
       } else {
-        // Magic link inválido/expirado
-        window.history.replaceState({}, document.title, window.location.pathname);
-        let msg = 'Tu enlace de acceso expiró o ya fue usado. Pide uno nuevo.';
-        if (data.error === 'access_denied') msg = 'No tienes permiso para acceder a este panel.';
-        showLogin(msg);
+        shakeCode();
+        clearCodeInputs();
+        document.querySelectorAll('.code-inputs input').forEach(i => i.disabled = false);
+        const first = document.querySelector('.code-inputs input[data-idx="0"]');
+        if (first) first.focus();
+        errEl.textContent = data.detail || 'Código inválido o vencido.';
+        errEl.style.display = 'block';
       }
-    } catch (err) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showLogin('Error de conexión al validar el enlace. Intenta de nuevo.');
+    } catch (e) {
+      document.getElementById('login-inflight').classList.remove('show');
+      document.querySelectorAll('.code-inputs input').forEach(i => i.disabled = false);
+      errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+      errEl.style.display = 'block';
     }
+  }
+
+  function bindCodeInputs() {
+    const inputs = Array.from(document.querySelectorAll('.code-inputs input'));
+    inputs.forEach((inp, idx) => {
+      inp.addEventListener('input', (e) => {
+        const v = (e.target.value || '').replace(/\D/g, '');
+        if (v.length > 1) {
+          // Probable autofill o paste de varios dígitos
+          const digits = v.split('');
+          for (let i = 0; i < digits.length && idx + i < inputs.length; i++) {
+            inputs[idx + i].value = digits[i];
+          }
+          const next = inputs[Math.min(idx + digits.length, inputs.length - 1)];
+          if (next) next.focus();
+        } else {
+          inp.value = v;
+          if (v && inputs[idx + 1]) inputs[idx + 1].focus();
+        }
+        // Si los 6 están llenos → submit auto
+        if (getEnteredCode().length === 6) submitCode();
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !inp.value && inputs[idx - 1]) {
+          inputs[idx - 1].focus();
+        } else if (e.key === 'ArrowLeft' && inputs[idx - 1]) {
+          inputs[idx - 1].focus();
+        } else if (e.key === 'ArrowRight' && inputs[idx + 1]) {
+          inputs[idx + 1].focus();
+        }
+      });
+      inp.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const digits = text.replace(/\D/g, '').slice(0, 6);
+        if (!digits) return;
+        for (let i = 0; i < digits.length && i < inputs.length; i++) {
+          inputs[i].value = digits[i];
+        }
+        const last = inputs[Math.min(digits.length, inputs.length) - 1];
+        if (last) last.focus();
+        if (digits.length === 6) submitCode();
+      });
+    });
   }
 
   async function handleGoogleResponse(response) {
@@ -599,17 +871,12 @@
   function init() {
     setBootText('Cargando panel...');
 
-    // Bind magic form (sin importar la vista que se muestre después)
-    const magicForm = document.getElementById('magic-form');
-    if (magicForm) magicForm.addEventListener('submit', handleMagicSubmit);
-
-    // ¿Llegamos desde el email con ?magic=TOKEN?
-    const params = new URLSearchParams(window.location.search);
-    const magicToken = params.get('magic');
-    if (magicToken) {
-      verifyMagicToken(magicToken);
-      return;
-    }
+    // Bind formularios + inputs OTP
+    const emailForm = document.getElementById('email-form');
+    if (emailForm) emailForm.addEventListener('submit', handleEmailSubmit);
+    const resendBtn = document.getElementById('code-resend');
+    if (resendBtn) resendBtn.addEventListener('click', handleResend);
+    bindCodeInputs();
 
     const jwt = localStorage.getItem(STORAGE_KEY);
     if (!jwt) {
