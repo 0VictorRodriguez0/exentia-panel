@@ -134,6 +134,79 @@
     font-size: 13px; font-weight: 500;
   }
   .login-inflight.show { display: flex; }
+
+  /* Separador "o" */
+  .separator {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0 16px;
+    color: var(--gray-soft);
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 1.5px;
+  }
+  .separator::before, .separator::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(154,152,84,0.25);
+  }
+
+  /* Magic link form */
+  .magic-form { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+  .magic-label {
+    font: 700 10.5px 'Lato', sans-serif;
+    color: var(--olive-dark); letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .magic-form input[type="email"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid rgba(154,152,84,0.30);
+    border-radius: 8px;
+    font: 500 15px 'Inter', sans-serif;
+    color: var(--brown);
+    background: #fff;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .magic-form input[type="email"]:focus { border-color: var(--olive); }
+  .magic-form input[type="email"]:disabled { background: #f7f5ee; opacity: .7; }
+  .magic-btn {
+    width: 100%; padding: 13px 16px;
+    background: var(--olive); color: #fff;
+    border: none; border-radius: 8px;
+    font: 700 13px 'Inter', sans-serif;
+    letter-spacing: .4px; text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .magic-btn:hover:not(:disabled) { background: var(--olive-dark); }
+  .magic-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+  .magic-sent {
+    text-align: center;
+    padding: 20px 6px 6px;
+    animation: fadeIn 280ms ease-out;
+  }
+  .magic-sent-check {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(154,152,84,0.14);
+    color: var(--olive-dark);
+    font-size: 26px; font-weight: 700;
+    line-height: 52px;
+    margin: 0 auto 14px;
+  }
+  .magic-sent p { color: var(--brown); margin: 4px 0; font-size: 14px; }
+  .magic-sent-detail { color: var(--gray-soft) !important; font-size: 12.5px !important; line-height: 1.5; margin-top: 10px !important; }
+  .magic-link-back {
+    margin-top: 14px;
+    background: transparent;
+    color: var(--olive-dark);
+    border: none;
+    font: 600 12.5px 'Inter', sans-serif;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .magic-link-back:hover { color: var(--olive); }
   .login-error {
     margin-top: 18px; padding: 12px 14px;
     background: #fef0f0; color: #a02020;
@@ -204,13 +277,25 @@
     <div class="login-logo">exentia</div>
     <div class="login-sub">SPA &amp; BEAUTY SALON</div>
     <h1>Panel del <em>equipo</em></h1>
-    <p>Acceso exclusivo para masajistas de Exentia. Inicia sesión con tu cuenta de Google para revisar y confirmar las citas del día.</p>
+    <p>Acceso exclusivo para masajistas de Exentia. Inicia sesión para revisar y confirmar las citas del día.</p>
     <div id="google-btn-wrap">
       <div id="google-btn-skeleton" class="google-btn-skeleton"></div>
     </div>
+    <div class="separator"><span>o</span></div>
+    <form id="magic-form" class="magic-form" autocomplete="email">
+      <label for="magic-email" class="magic-label">Inicia con cualquier correo</label>
+      <input id="magic-email" type="email" name="email" placeholder="tu@correo.com" required autocomplete="email" inputmode="email">
+      <button type="submit" id="magic-submit" class="magic-btn">Enviar enlace de acceso</button>
+    </form>
+    <div id="magic-sent" class="magic-sent" style="display:none">
+      <div class="magic-sent-check">✓</div>
+      <p><strong>Revisa tu correo.</strong></p>
+      <p class="magic-sent-detail">Si tu correo está autorizado, te enviamos un enlace válido por <strong>15 minutos</strong>. Si no llega en 1-2 minutos, revisa la carpeta de spam.</p>
+      <button type="button" class="magic-link-back" onclick="resetMagicForm()">Probar con otro correo</button>
+    </div>
     <div id="login-inflight" class="login-inflight">
       <div class="spinner sm"></div>
-      <span>Verificando tu acceso...</span>
+      <span id="login-inflight-msg">Verificando tu acceso...</span>
     </div>
     <div id="login-error" class="login-error" style="display:none"></div>
   </div>
@@ -257,6 +342,8 @@
   // ── Config ──
   const GOOGLE_CLIENT_ID = '223783119059-nnt368qs43fmhd72uo93v9jh91r89clp.apps.googleusercontent.com';
   const AUTH_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-google-login';
+  const MAGIC_REQUEST_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-magic-link-request';
+  const MAGIC_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-magic-link-verify';
   const STORAGE_KEY = 'exentia_panel_jwt';
   const GSI_TIMEOUT_MS = 12000; // si GSI no carga en 12s asumimos error de red
 
@@ -386,6 +473,87 @@
     }
   }, GSI_TIMEOUT_MS);
 
+  // ── Magic Link ──
+  function resetMagicForm() {
+    document.getElementById('magic-sent').style.display = 'none';
+    document.getElementById('magic-form').style.display = 'flex';
+    document.getElementById('magic-email').value = '';
+    document.getElementById('magic-submit').disabled = false;
+    document.getElementById('login-error').style.display = 'none';
+  }
+
+  async function handleMagicSubmit(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('magic-email');
+    const submitBtn = document.getElementById('magic-submit');
+    const email = (emailInput.value || '').trim().toLowerCase();
+    if (!email) return;
+
+    document.getElementById('login-error').style.display = 'none';
+    emailInput.disabled = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+
+    try {
+      const res = await fetch(MAGIC_REQUEST_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        // Mostrar pantalla de "revisa tu correo"
+        document.getElementById('magic-form').style.display = 'none';
+        document.getElementById('magic-sent').style.display = 'block';
+      } else {
+        const err = document.getElementById('login-error');
+        err.textContent = data.detail || 'No pudimos enviar el enlace. Revisa el correo e intenta de nuevo.';
+        err.style.display = 'block';
+      }
+    } catch (err) {
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = 'Error de conexión. Intenta de nuevo en unos segundos.';
+      errEl.style.display = 'block';
+    } finally {
+      emailInput.disabled = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar enlace de acceso';
+    }
+  }
+
+  async function verifyMagicToken(magicToken) {
+    showBootLoader('Validando tu enlace de acceso...');
+    try {
+      const res = await fetch(MAGIC_VERIFY_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ magicToken })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.sessionJwt) {
+        localStorage.setItem(STORAGE_KEY, data.sessionJwt);
+        // Limpia ?magic= de la URL antes de mostrar el panel
+        window.history.replaceState({}, document.title, window.location.pathname);
+        const payload = decodeJWT(data.sessionJwt);
+        if (payload) {
+          setBootText('Entrando al panel...');
+          setTimeout(() => showPanel(payload), 250);
+        } else {
+          showLogin('Sesión inválida.');
+        }
+      } else {
+        // Magic link inválido/expirado
+        window.history.replaceState({}, document.title, window.location.pathname);
+        let msg = 'Tu enlace de acceso expiró o ya fue usado. Pide uno nuevo.';
+        if (data.error === 'access_denied') msg = 'No tienes permiso para acceder a este panel.';
+        showLogin(msg);
+      }
+    } catch (err) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showLogin('Error de conexión al validar el enlace. Intenta de nuevo.');
+    }
+  }
+
   async function handleGoogleResponse(response) {
     const idToken = response.credential;
     if (!idToken) {
@@ -430,6 +598,19 @@
 
   function init() {
     setBootText('Cargando panel...');
+
+    // Bind magic form (sin importar la vista que se muestre después)
+    const magicForm = document.getElementById('magic-form');
+    if (magicForm) magicForm.addEventListener('submit', handleMagicSubmit);
+
+    // ¿Llegamos desde el email con ?magic=TOKEN?
+    const params = new URLSearchParams(window.location.search);
+    const magicToken = params.get('magic');
+    if (magicToken) {
+      verifyMagicToken(magicToken);
+      return;
+    }
+
     const jwt = localStorage.getItem(STORAGE_KEY);
     if (!jwt) {
       setTimeout(() => showLogin(), 220);
