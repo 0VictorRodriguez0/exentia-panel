@@ -414,10 +414,8 @@
       } else {
         const errCode = data.error || '';
         let msg = data.detail || 'No autorizado.';
-        if (errCode === 'not_in_crm') {
-          msg = 'Tu correo no está registrado como masajista de Exentia. Pídele al admin que te agregue.';
-        } else if (errCode === 'not_authorized_role') {
-          msg = 'Tu cuenta existe pero no tiene permiso para acceder al panel. Falta el tag de masajista.';
+        if (errCode === 'not_in_crm' || errCode === 'not_authorized_role') {
+          msg = 'No tienes permiso para acceder a este panel. Si crees que es un error, contacta al administrador de Exentia.';
         } else if (errCode === 'token_invalid' || errCode === 'audience_mismatch' || errCode === 'issuer_invalid') {
           msg = 'No pudimos validar tu cuenta de Google. Intenta cerrar sesión de Google y volver a entrar.';
         } else if (errCode === 'email_not_verified') {
