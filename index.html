@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del equipo · Exentia Spa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --olive: #9a9854;
+    --olive-light: #b5b062;
+    --olive-dark: #7d7c3f;
+    --cream: #f3e4c7;
+    --cream-soft: #e8dfc0;
+    --brown: #5c3a1e;
+    --off-white: #fdfbf4;
+    --gray-soft: #9a8d75;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--off-white);
+    color: var(--brown);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  /* ── Topbar (visible logueado) ── */
+  .topbar {
+    background: var(--olive-dark);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(92,58,30,0.08);
+  }
+  .topbar-brand {
+    font: 700 22px 'Cormorant Garamond', serif;
+    letter-spacing: 1px;
+  }
+  .topbar-brand .sub {
+    font: 700 9px 'Lato', sans-serif;
+    letter-spacing: 2px;
+    margin-left: 8px;
+    opacity: .8;
+  }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+  }
+  .topbar-user-name { font-weight: 600; }
+  .topbar-user-role { opacity: .8; font-size: 11px; }
+  .topbar-logout {
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: 600 12px 'Inter', sans-serif;
+    transition: all .15s ease;
+  }
+  .topbar-logout:hover { background: rgba(255,255,255,.22); }
+
+  /* ── Vista LOGIN (no autenticado) ── */
+  .login-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .login-card {
+    background: #fff;
+    max-width: 460px;
+    width: 100%;
+    border-radius: 20px;
+    padding: 44px 36px;
+    box-shadow: 0 8px 32px rgba(92,58,30,0.08);
+    text-align: center;
+  }
+  .login-logo {
+    font: 700 36px 'Cormorant Garamond', serif;
+    color: var(--olive-dark);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    font: 700 10px 'Lato', sans-serif;
+    color: var(--gray-soft);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .login-card h1 {
+    font: 600 26px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin: 0 0 8px;
+  }
+  .login-card h1 em { color: var(--olive-light); }
+  .login-card p {
+    color: var(--gray-soft);
+    font-size: 14px;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+  .login-btn {
+    display: inline-block;
+    background: var(--olive);
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font: 700 14px 'Inter', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .login-btn:hover { background: var(--olive-dark); transform: translateY(-1px); }
+  .login-error {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: #fef0f0;
+    color: #a02020;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid #f5c8c8;
+  }
+
+  /* ── Vista PANEL (autenticado) ── */
+  .panel-wrap {
+    flex: 1;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+  .panel-header {
+    margin-bottom: 28px;
+  }
+  .panel-header h1 {
+    font: 600 34px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin: 0;
+  }
+  .panel-header h1 em { color: var(--olive-light); }
+  .panel-header p {
+    color: var(--gray-soft);
+    margin: 6px 0 0;
+    font-size: 14px;
+  }
+  .panel-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
+    margin-bottom: 20px;
+  }
+  .panel-section h2 {
+    font: 600 20px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(154,152,84,0.30);
+  }
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    font-size: 14px;
+  }
+  .panel-field-label {
+    font: 700 10.5px 'Lato', sans-serif;
+    color: var(--olive-dark);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .panel-field-val {
+    color: var(--brown);
+    font-weight: 500;
+    word-break: break-all;
+  }
+  .panel-debug {
+    background: #f7f5ee;
+    border: 1px solid rgba(154,152,84,0.18);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font: 12px/1.5 'Menlo', monospace;
+    color: #5c3a1e;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 240px;
+    overflow: auto;
+  }
+
+  @media (max-width: 600px) {
+    .panel-wrap { padding: 22px 16px; }
+    .panel-header h1 { font-size: 26px; }
+    .panel-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 12px 16px; flex-direction: column; gap: 8px; }
+    .login-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── VISTA LOGIN ── -->
+<div id="view-login" class="login-wrap" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">exentia</div>
+    <div class="login-sub">SPA &amp; BEAUTY SALON</div>
+    <h1>Panel del <em>equipo</em></h1>
+    <p>Acceso exclusivo para el staff de Exentia. Inicia sesión con tu cuenta del sistema para revisar y confirmar las citas del día.</p>
+    <a href="#" id="login-btn" class="login-btn">Iniciar sesión</a>
+    <div id="login-error" class="login-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── VISTA PANEL ── -->
+<div id="view-panel" style="display:none; flex:1; display:flex; flex-direction:column;">
+  <div class="topbar">
+    <div class="topbar-brand">
+      exentia <span class="sub">PANEL DEL EQUIPO</span>
+    </div>
+    <div class="topbar-user">
+      <div>
+        <div class="topbar-user-name" id="t-name">—</div>
+        <div class="topbar-user-role" id="t-role">—</div>
+      </div>
+      <button class="topbar-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="panel-wrap">
+    <div class="panel-header">
+      <h1>Hola, <em><span id="h-name">—</span></em></h1>
+      <p>Sesión activa hasta <span id="h-exp">—</span></p>
+    </div>
+    <div class="panel-section">
+      <h2>Datos de tu sesión</h2>
+      <div class="panel-grid">
+        <div>
+          <div class="panel-field-label">Nombre</div>
+          <div class="panel-field-val" id="f-name">—</div>
+        </div>
+        <div>
+          <div class="panel-field-label">Correo</div>
+          <div class="panel-field-val" id="f-email">—</div>
+        </div>
+        <div>
+          <div class="panel-field-label">User ID (GHL)</div>
+          <div class="panel-field-val" id="f-userid">—</div>
+        </div>
+        <div>
+          <div class="panel-field-label">Location ID</div>
+          <div class="panel-field-val" id="f-locationid">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h2>JWT decodificado</h2>
+      <div class="panel-debug" id="f-payload">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Config ──
+  const INSTALL_URL = 'https://marketplace.gohighlevel.com/oauth/chooselocation?response_type=code&redirect_uri=https%3A%2F%2Fn8n-ntcue-clone-u59578.vm.elestio.app%2Fwebhook%2Fexentia-auth-callback&client_id=6a32bbbcfa863c565968d724-mqia1wg0&scope=users.readonly+locations.readonly';
+  const STORAGE_KEY = 'exentia_panel_jwt';
+
+  // ── Decodifica payload del JWT (sin verificar firma — la firma se valida
+  //    server-side. El front solo lee los claims para mostrar info y revisar exp).
+  function decodeJWT(token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = payload + '='.repeat((4 - payload.length % 4) % 4);
+      return JSON.parse(atob(padded));
+    } catch (e) { return null; }
+  }
+
+  function showLogin(errorMsg) {
+    document.getElementById('view-login').style.display = 'flex';
+    document.getElementById('view-panel').style.display = 'none';
+    document.getElementById('login-btn').href = INSTALL_URL;
+    if (errorMsg) {
+      const el = document.getElementById('login-error');
+      el.textContent = errorMsg;
+      el.style.display = 'block';
+    }
+  }
+
+  function showPanel(payload) {
+    document.getElementById('view-login').style.display = 'none';
+    const v = document.getElementById('view-panel');
+    v.style.display = 'flex';
+    document.getElementById('t-name').textContent = payload.name || '—';
+    document.getElementById('t-role').textContent = payload.role || 'user';
+    document.getElementById('h-name').textContent = (payload.name || '—').split(' ')[0];
+    document.getElementById('h-exp').textContent = new Date(payload.exp * 1000).toLocaleString('es-MX');
+    document.getElementById('f-name').textContent = payload.name || '—';
+    document.getElementById('f-email').textContent = payload.email || '—';
+    document.getElementById('f-userid').textContent = payload.userId || '—';
+    document.getElementById('f-locationid').textContent = payload.locationId || '—';
+    document.getElementById('f-payload').textContent = JSON.stringify(payload, null, 2);
+  }
+
+  function logout() {
+    localStorage.removeItem(STORAGE_KEY);
+    showLogin();
+  }
+
+  function init() {
+    // ¿Llegó un token en la URL? (vuelta del callback n8n)
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    if (urlToken) {
+      localStorage.setItem(STORAGE_KEY, urlToken);
+      // limpiar la URL para no exponer el token en historial
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { showLogin(); return; }
+
+    const payload = decodeJWT(jwt);
+    if (!payload) { logout(); showLogin('El token de sesión es inválido. Vuelve a iniciar sesión.'); return; }
+
+    // Verificar expiración
+    const now = Math.floor(Date.now() / 1000);
+    if (!payload.exp || payload.exp < now) {
+      logout();
+      showLogin('Tu sesión expiró. Vuelve a iniciar sesión.');
+      return;
+    }
+
+    showPanel(payload);
+  }
+
+  init();
+</script>
+
+</body>
+</html>
