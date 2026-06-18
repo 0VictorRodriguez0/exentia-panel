@@ -322,6 +322,343 @@
     .boot-logo { font-size: 36px; }
     .google-btn-skeleton { width: 280px; }
   }
+
+  /* ── Calendario semanal del panel ── */
+  .panel-wrap-cal { max-width: 1180px; }
+  .cal-subtitle { color: var(--gray-soft); font-size: 14px; margin-top: 6px; }
+  .cal-header { margin-bottom: 18px; }
+
+  .cal-toolbar {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
+    margin-bottom: 14px;
+  }
+  .cal-nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(154,152,84,0.30);
+    color: var(--olive-dark);
+    cursor: pointer;
+    font-size: 18px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease;
+  }
+  .cal-nav-btn:hover { background: rgba(154,152,84,0.12); }
+  .cal-today-btn {
+    background: var(--olive);
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font: 600 12.5px 'Inter', sans-serif;
+    cursor: pointer;
+    margin-left: 6px;
+  }
+  .cal-today-btn:hover { background: var(--olive-dark); }
+  .cal-range {
+    font: 600 15px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    text-transform: capitalize;
+    flex: 0 0 auto;
+    min-width: 200px;
+    text-align: center;
+  }
+  .cal-spacer { flex: 1; }
+  .cal-refresh {
+    background: transparent;
+    border: 1px solid rgba(154,152,84,0.30);
+    color: var(--olive-dark);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .25s ease;
+  }
+  .cal-refresh:hover { transform: rotate(180deg); }
+  .cal-refresh.spinning { animation: spin 0.9s linear infinite; }
+
+  .cal-legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    margin-bottom: 12px;
+    font-size: 12.5px; color: var(--gray-soft);
+  }
+  .cal-legend-item { display: flex; align-items: center; gap: 7px; }
+  .cal-chip-sample {
+    display: inline-block; width: 16px; height: 16px;
+    border-radius: 4px; padding: 0;
+  }
+
+  /* Grid semanal */
+  .cal-week {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
+    min-height: 320px;
+  }
+  .cal-loading {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px;
+    color: var(--gray-soft);
+    font-size: 13px;
+    font-style: italic;
+    padding: 60px 0;
+  }
+  .cal-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  .cal-day {
+    background: #fbf9f1;
+    border-radius: 10px;
+    padding: 10px 8px 8px;
+    min-height: 220px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .cal-day.is-today {
+    background: rgba(154,152,84,0.10);
+    box-shadow: inset 0 0 0 1px rgba(154,152,84,0.30);
+  }
+  .cal-day.is-past { opacity: 0.55; }
+  .cal-day-head {
+    font: 700 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--gray-soft);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .cal-day-head .cal-day-num {
+    display: block;
+    font: 700 18px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin-top: 2px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .cal-day.is-today .cal-day-head .cal-day-num { color: var(--olive-dark); }
+  .cal-day-empty {
+    color: rgba(154,138,117,0.5);
+    font-style: italic;
+    font-size: 11.5px;
+    text-align: center;
+    margin: auto 0;
+  }
+
+  /* Chip de cita */
+  .cal-chip {
+    background: #fff;
+    border-radius: 8px;
+    padding: 7px 9px;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+    border: 1.5px solid transparent;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--brown);
+  }
+  .cal-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(92,58,30,0.10); }
+  .cal-chip-time {
+    font: 700 12.5px 'Inter', sans-serif;
+    letter-spacing: 0.3px;
+  }
+  .cal-chip-cliente {
+    font-size: 11.5px;
+    color: var(--brown);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cal-chip-svc {
+    font-size: 10.5px;
+    color: var(--gray-soft);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cal-chip-mine {
+    background: var(--olive);
+    color: #fff;
+    border-color: var(--olive-dark);
+  }
+  .cal-chip-mine .cal-chip-cliente,
+  .cal-chip-mine .cal-chip-svc { color: rgba(255,255,255,.85); }
+  .cal-chip-pool {
+    background: #fff;
+    border: 1.5px dashed var(--olive);
+  }
+  .cal-chip-pool-claim-window {
+    border-style: solid;
+    border-color: #d97706;
+    background: rgba(217,119,6,0.07);
+  }
+  .cal-chip-busy {
+    background: rgba(154,138,117,0.18);
+    color: rgba(154,138,117,0.85);
+    cursor: not-allowed;
+    border-color: transparent;
+  }
+  .cal-chip-busy:hover { transform: none; box-shadow: none; }
+  .cal-chip-busy .cal-chip-time { color: var(--gray-soft); }
+
+  /* Modal de detalle de cita */
+  .cita-modal {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 180ms ease-out;
+  }
+  .cita-modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(92,58,30,0.45);
+  }
+  .cita-modal-box {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    width: min(440px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px 28px 24px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+    animation: fadeIn 220ms ease-out;
+  }
+  .cita-modal-close {
+    position: absolute; top: 10px; right: 14px;
+    background: transparent; border: none;
+    color: var(--gray-soft);
+    font-size: 26px; line-height: 1;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  .cita-modal-close:hover { color: var(--brown); }
+  .cita-modal-badge {
+    display: inline-block;
+    font: 700 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .cita-modal-badge.is-mine { background: var(--olive); color: #fff; }
+  .cita-modal-badge.is-pool { background: rgba(154,152,84,0.18); color: var(--olive-dark); }
+  .cita-modal-badge.is-window { background: rgba(217,119,6,0.18); color: #b45309; }
+  .cita-modal-title {
+    font: 600 22px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin: 0 0 6px;
+  }
+  .cita-modal-when {
+    color: var(--gray-soft);
+    font-size: 14px;
+    margin: 0 0 18px;
+  }
+  .cita-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    padding: 14px 0;
+    border-top: 1px dashed rgba(154,152,84,0.30);
+    border-bottom: 1px dashed rgba(154,152,84,0.30);
+  }
+  .cita-modal-label {
+    font: 700 10px 'Lato', sans-serif;
+    color: var(--olive-dark);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .cita-modal-val {
+    color: var(--brown); font-weight: 500; font-size: 13.5px;
+    word-break: break-word;
+  }
+  .cita-modal-services { margin: 14px 0 6px; }
+  .cita-modal-services .cita-modal-val {
+    background: #f7f5ee;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .cita-modal-actions {
+    display: flex; gap: 10px;
+    margin-top: 18px;
+  }
+  .cita-modal-actions button {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: none;
+    font: 700 13px 'Inter', sans-serif;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .cita-btn-primary {
+    background: var(--olive); color: #fff;
+  }
+  .cita-btn-primary:hover { background: var(--olive-dark); }
+  .cita-btn-primary:disabled {
+    background: rgba(154,152,84,0.35); color: rgba(255,255,255,.8);
+    cursor: not-allowed;
+  }
+  .cita-btn-secondary {
+    background: #f7f5ee; color: var(--brown);
+  }
+  .cita-btn-secondary:hover { background: #eee9d9; }
+  .cita-modal-note {
+    color: var(--gray-soft);
+    font-size: 11.5px;
+    font-style: italic;
+    margin: 10px 0 0;
+    text-align: center;
+  }
+
+  /* Toast */
+  .toast-host {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    display: flex; flex-direction: column;
+    gap: 8px; align-items: center;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--olive-dark);
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font: 600 13.5px 'Inter', sans-serif;
+    box-shadow: 0 8px 24px rgba(92,58,30,0.22);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .22s ease, transform .22s ease;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast-warn { background: #b45309; }
+  .toast-err  { background: #9a2c2c; }
+
+  @media (max-width: 900px) {
+    .cal-week-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .cal-day { min-height: 160px; }
+  }
+  @media (max-width: 600px) {
+    .panel-wrap-cal { padding: 16px 12px; }
+    .cal-week-grid { grid-template-columns: 1fr; }
+    .cal-day { min-height: auto; }
+    .cita-modal-box { padding: 26px 20px 18px; }
+    .cita-modal-grid { grid-template-columns: 1fr; }
+    .cal-toolbar { flex-wrap: wrap; }
+    .cal-range { width: 100%; order: -1; }
+  }
 </style>
 </head>
 <body>
@@ -390,28 +727,58 @@
       <button class="topbar-logout" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
-  <div class="panel-wrap">
-    <div class="panel-header">
+  <div class="panel-wrap panel-wrap-cal">
+    <div class="panel-header cal-header">
       <h1>Hola, <em><span id="h-name">—</span></em></h1>
-      <p>Sesión activa hasta <span id="h-exp">—</span></p>
+      <p class="cal-subtitle">Tus citas y las disponibles en el pool de masajistas.</p>
     </div>
-    <div class="panel-section">
-      <h2>Datos de tu sesión</h2>
-      <div class="panel-grid">
-        <div><div class="panel-field-label">Nombre</div><div class="panel-field-val" id="f-name">—</div></div>
-        <div><div class="panel-field-label">Correo</div><div class="panel-field-val" id="f-email">—</div></div>
-        <div><div class="panel-field-label">Contact ID (GHL)</div><div class="panel-field-val" id="f-contactid">—</div></div>
-        <div><div class="panel-field-label">Rol</div><div class="panel-field-val" id="f-role">—</div></div>
+
+    <div class="cal-toolbar">
+      <button class="cal-nav-btn" id="cal-prev" title="Semana anterior">‹</button>
+      <div class="cal-range" id="cal-range">—</div>
+      <button class="cal-nav-btn" id="cal-next" title="Semana siguiente">›</button>
+      <button class="cal-today-btn" id="cal-today">Hoy</button>
+      <div class="cal-spacer"></div>
+      <button class="cal-refresh" id="cal-refresh" title="Refrescar">↻</button>
+    </div>
+
+    <div class="cal-legend">
+      <span class="cal-legend-item"><span class="cal-chip cal-chip-mine cal-chip-sample"></span>Mía</span>
+      <span class="cal-legend-item"><span class="cal-chip cal-chip-pool cal-chip-sample"></span>Pool (disponible)</span>
+      <span class="cal-legend-item"><span class="cal-chip cal-chip-busy cal-chip-sample"></span>Ocupada por otro</span>
+    </div>
+
+    <div class="cal-week" id="cal-week">
+      <div class="cal-loading">
+        <div class="spinner sm"></div>
+        <span>Cargando citas...</span>
       </div>
     </div>
-    <div class="panel-section">
-      <h2>Tus tags</h2>
-      <div id="f-tags">—</div>
+  </div>
+</div>
+
+<!-- ── MODAL detalle de cita ── -->
+<div id="cita-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeCitaModal()"></div>
+  <div class="cita-modal-box">
+    <button class="cita-modal-close" onclick="closeCitaModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge" id="cita-badge">—</div>
+    <h2 class="cita-modal-title" id="cita-title">—</h2>
+    <p class="cita-modal-when" id="cita-when">—</p>
+    <div class="cita-modal-grid">
+      <div><div class="cita-modal-label">Cliente</div><div class="cita-modal-val" id="cita-cliente">—</div></div>
+      <div><div class="cita-modal-label">Teléfono</div><div class="cita-modal-val" id="cita-tel">—</div></div>
+      <div><div class="cita-modal-label">Duración</div><div class="cita-modal-val" id="cita-dur">—</div></div>
+      <div><div class="cita-modal-label">Precio</div><div class="cita-modal-val" id="cita-precio">—</div></div>
+      <div><div class="cita-modal-label">Zona</div><div class="cita-modal-val" id="cita-zona">—</div></div>
+      <div><div class="cita-modal-label">Preferencia</div><div class="cita-modal-val" id="cita-pref">—</div></div>
     </div>
-    <div class="panel-section">
-      <h2>JWT decodificado</h2>
-      <div class="panel-debug" id="f-payload">—</div>
+    <div class="cita-modal-services" id="cita-services-wrap">
+      <div class="cita-modal-label">Servicios</div>
+      <div id="cita-services">—</div>
     </div>
+    <div class="cita-modal-actions" id="cita-actions"></div>
+    <p class="cita-modal-note" id="cita-note"></p>
   </div>
 </div>
 
@@ -503,19 +870,8 @@
     document.getElementById('t-name').textContent = payload.name || '—';
     document.getElementById('t-role').textContent = payload.role || 'user';
     document.getElementById('h-name').textContent = (payload.name || '—').split(' ')[0];
-    document.getElementById('h-exp').textContent = new Date(payload.exp * 1000).toLocaleString('es-MX');
-    document.getElementById('f-name').textContent = payload.name || '—';
-    document.getElementById('f-email').textContent = payload.email || '—';
-    document.getElementById('f-contactid').textContent = payload.contactId || payload.userId || '—';
-    document.getElementById('f-role').textContent = payload.role || '—';
-    const tagsEl = document.getElementById('f-tags');
-    if (payload.tags && payload.tags.length) {
-      tagsEl.innerHTML = payload.tags.map(t => `<span class="tag-chip">${t}</span>`).join('');
-    } else {
-      tagsEl.textContent = 'Sin tags';
-    }
-    document.getElementById('f-payload').textContent = JSON.stringify(payload, null, 2);
     hideBootLoader();
+    initCalendar();
   }
 
   function logout() {
@@ -523,6 +879,339 @@
     showBootLoader('Cerrando sesión...');
     setTimeout(() => showLogin(), 250);
   }
+
+  // ─── Calendario semanal del panel ───────────────────────────────────────
+  const CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-citas';
+  const CLAIM_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-claim';
+
+  const calState = {
+    weekStart: null,        // lunes de la semana visible (Date a las 00:00)
+    payload: null,          // último response del endpoint
+    bookingsById: {}        // index para abrir modal sin volver a buscar
+  };
+
+  function startOfWeek(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay();           // 0=domingo, 1=lunes...
+    const diff = (day === 0 ? -6 : 1 - day); // lunes como inicio
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d; }
+  function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
+  }
+  function fmtRange(start) {
+    const end = addDays(start, 6);
+    const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const sM = months[start.getMonth()];
+    const eM = months[end.getMonth()];
+    if (start.getMonth() === end.getMonth()) {
+      return `${start.getDate()}–${end.getDate()} ${sM} ${start.getFullYear()}`;
+    }
+    return `${start.getDate()} ${sM} – ${end.getDate()} ${eM} ${start.getFullYear()}`;
+  }
+  function parseDateYMD(ymd) {
+    if (!ymd) return null;
+    const [y, m, d] = ymd.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function fmtHora(h) {
+    if (!h) return '';
+    const m = String(h).match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return String(h).slice(0, 5);
+    const hh = +m[1], mm = +m[2];
+    const ampm = hh >= 12 ? 'pm' : 'am';
+    const h12 = ((hh + 11) % 12) + 1;
+    return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
+  }
+
+  function initCalendar() {
+    calState.weekStart = startOfWeek(new Date());
+    // Listeners (idempotentes; los bind sólo una vez)
+    const prev = document.getElementById('cal-prev');
+    if (prev && !prev.dataset.bound) {
+      prev.dataset.bound = '1';
+      prev.addEventListener('click', () => { calState.weekStart = addDays(calState.weekStart, -7); renderCalendar(); });
+      document.getElementById('cal-next').addEventListener('click', () => { calState.weekStart = addDays(calState.weekStart, 7); renderCalendar(); });
+      document.getElementById('cal-today').addEventListener('click', () => { calState.weekStart = startOfWeek(new Date()); fetchCitas(); });
+      document.getElementById('cal-refresh').addEventListener('click', () => fetchCitas());
+    }
+    fetchCitas();
+  }
+
+  async function fetchCitas() {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) return;
+    const refresh = document.getElementById('cal-refresh');
+    if (refresh) refresh.classList.add('spinning');
+    const wrap = document.getElementById('cal-week');
+    wrap.innerHTML = '<div class="cal-loading"><div class="spinner sm"></div><span>Cargando citas...</span></div>';
+    try {
+      const res = await fetch(CITAS_ENDPOINT, {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+        wrap.innerHTML = '<div class="cal-loading"><span>No pudimos cargar tus citas. ' + (txt ? '(' + res.status + ')' : '') + '</span></div>';
+        return;
+      }
+      const data = await res.json();
+      calState.payload = data;
+      calState.bookingsById = {};
+      (data.mias || []).forEach(b => calState.bookingsById[b.id] = { kind: 'mine', booking: b });
+      (data.pool || []).forEach(b => calState.bookingsById[b.id] = { kind: 'pool', booking: b });
+      renderCalendar();
+    } catch (e) {
+      wrap.innerHTML = '<div class="cal-loading"><span>Error de conexión. Intenta el botón ↻ en un momento.</span></div>';
+    } finally {
+      if (refresh) refresh.classList.remove('spinning');
+    }
+  }
+
+  function renderCalendar() {
+    const wrap = document.getElementById('cal-week');
+    const range = document.getElementById('cal-range');
+    range.textContent = fmtRange(calState.weekStart);
+
+    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    // Agrupar citas por YYYY-MM-DD
+    const byDay = {};
+    function bucket(key) { return (byDay[key] = byDay[key] || []); }
+
+    (calState.payload?.mias || []).forEach(b => {
+      bucket(b.fecha).push({ kind: 'mine', booking: b });
+    });
+    (calState.payload?.pool || []).forEach(b => {
+      bucket(b.fecha).push({ kind: 'pool', booking: b });
+    });
+    (calState.payload?.ocupadas_ajenas || []).forEach(b => {
+      bucket(b.fecha).push({ kind: 'busy', booking: b });
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'cal-week-grid';
+
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(calState.weekStart, i);
+      const key = d.toISOString().slice(0, 10);
+      const isToday = isSameDay(d, today);
+      const isPast = d < today;
+
+      const dayCol = document.createElement('div');
+      dayCol.className = 'cal-day' + (isToday ? ' is-today' : '') + (isPast ? ' is-past' : '');
+
+      const head = document.createElement('div');
+      head.className = 'cal-day-head';
+      head.innerHTML = days[i] + '<span class="cal-day-num">' + d.getDate() + '</span>';
+      dayCol.appendChild(head);
+
+      const items = (byDay[key] || []).slice()
+        .sort((a, b) => (a.booking.hora || '').localeCompare(b.booking.hora || ''));
+
+      if (items.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-day-empty';
+        empty.textContent = isPast ? '—' : 'Sin citas';
+        dayCol.appendChild(empty);
+      } else {
+        items.forEach(it => dayCol.appendChild(renderChip(it)));
+      }
+
+      grid.appendChild(dayCol);
+    }
+
+    wrap.innerHTML = '';
+    wrap.appendChild(grid);
+  }
+
+  function renderChip(item) {
+    const b = item.booking;
+    const chip = document.createElement('div');
+    let extra = '';
+    if (item.kind === 'mine') {
+      chip.className = 'cal-chip cal-chip-mine';
+      chip.innerHTML =
+        '<div class="cal-chip-time">' + fmtHora(b.hora) + '</div>' +
+        '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
+        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : '');
+      chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
+    } else if (item.kind === 'pool') {
+      const isReoffer = b.estado_asignacion === 'release_window';
+      chip.className = 'cal-chip cal-chip-pool' + (isReoffer ? ' cal-chip-pool-claim-window' : '');
+      chip.innerHTML =
+        '<div class="cal-chip-time">' + fmtHora(b.hora) + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
+        '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
+        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : '');
+      chip.addEventListener('click', () => openCitaModal(b.id, 'pool'));
+    } else { // busy
+      chip.className = 'cal-chip cal-chip-busy';
+      chip.innerHTML =
+        '<div class="cal-chip-time">' + fmtHora(b.hora) + '</div>' +
+        '<div class="cal-chip-cliente">Ocupada</div>' +
+        (b.duracion_min ? '<div class="cal-chip-svc">' + b.duracion_min + ' min</div>' : '');
+    }
+    return chip;
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ─── Modal de detalle de cita ───────────────────────────────────────────
+  function openCitaModal(bookingId, kind) {
+    const ref = calState.bookingsById[bookingId];
+    if (!ref) return;
+    const b = ref.booking;
+    const isReoffer = b.estado_asignacion === 'release_window';
+    const finalKind = kind || ref.kind;
+
+    const badge = document.getElementById('cita-badge');
+    badge.className = 'cita-modal-badge ' +
+      (finalKind === 'mine' ? 'is-mine' : isReoffer ? 'is-window' : 'is-pool');
+    badge.textContent = finalKind === 'mine'
+      ? (isReoffer ? 'Mía · re-ofrecida' : 'Mía')
+      : (isReoffer ? 'Re-ofrecida en el pool' : 'En el pool');
+
+    document.getElementById('cita-title').textContent = (b.cliente || '—');
+
+    const d = parseDateYMD(b.fecha);
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const fechaStr = d ? `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}` : '—';
+    document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}`;
+
+    document.getElementById('cita-cliente').textContent = b.cliente || '—';
+    document.getElementById('cita-tel').textContent = b.cliente_telefono || '—';
+    document.getElementById('cita-dur').textContent = b.duracion_min ? (b.duracion_min + ' min') : '—';
+    document.getElementById('cita-precio').textContent = b.precio_mxn ? ('$' + Number(b.precio_mxn).toLocaleString('es-MX')) : '—';
+    document.getElementById('cita-zona').textContent = b.zona || '—';
+    document.getElementById('cita-pref').textContent = b.preferencia_sexo || 'Indistinto';
+
+    const services = Array.isArray(b.servicios) ? b.servicios : [];
+    const svcEl = document.getElementById('cita-services');
+    if (services.length) {
+      svcEl.innerHTML = services.map(s =>
+        `<div>• ${escapeHtml(s.name || '—')}${s.duracion_min ? ' · ' + s.duracion_min + ' min' : ''}${s.precio_mxn ? ' · $' + Number(s.precio_mxn).toLocaleString('es-MX') : ''}</div>`
+      ).join('');
+    } else {
+      svcEl.textContent = '—';
+    }
+
+    // Acciones según tipo
+    const actions = document.getElementById('cita-actions');
+    const note = document.getElementById('cita-note');
+    actions.innerHTML = '';
+    note.textContent = '';
+    if (finalKind === 'pool') {
+      const btn = document.createElement('button');
+      btn.className = 'cita-btn-primary';
+      btn.textContent = 'Tomar cita';
+      btn.dataset.bookingId = b.id;
+      btn.addEventListener('click', () => claimBooking(b.id, btn));
+      actions.appendChild(btn);
+      const close = document.createElement('button');
+      close.className = 'cita-btn-secondary';
+      close.textContent = 'Cerrar';
+      close.addEventListener('click', closeCitaModal);
+      actions.appendChild(close);
+      const isReoffer2 = b.estado_asignacion === 'release_window';
+      note.textContent = isReoffer2
+        ? 'Esta cita fue cancelada por otro masajista. Tómala antes de que alguien más lo haga.'
+        : 'Al tomarla, queda asignada a ti y deja de aparecer en el pool de los demás.';
+    } else { // mine
+      const close = document.createElement('button');
+      close.className = 'cita-btn-secondary';
+      close.textContent = 'Cerrar';
+      close.addEventListener('click', closeCitaModal);
+      actions.appendChild(close);
+      const cancel = document.createElement('button');
+      cancel.className = 'cita-btn-primary';
+      cancel.textContent = 'Cancelar cita';
+      cancel.disabled = true;
+      actions.appendChild(cancel);
+      note.textContent = 'Las cancelaciones se habilitarán en la siguiente fase del panel.';
+    }
+
+    document.getElementById('cita-modal').style.display = 'flex';
+  }
+
+  // ─── Claim ─────────────────────────────────────────────────────────────
+  async function claimBooking(bookingId, btn) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { logout(); return; }
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Tomando...';
+    try {
+      const res = await fetch(CLAIM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ bookingId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { logout(); return; }
+      if (res.ok && (data.status === 'claimed' || data.status === 'self_already_claimed')) {
+        const cliente = data.booking && data.booking.cliente ? data.booking.cliente : 'la cita';
+        showToast('Tomaste la cita de ' + cliente, 'ok');
+        closeCitaModal();
+        await fetchCitas();
+        return;
+      }
+      // 409, 404 o status inesperado
+      if (data.status === 'already_claimed') {
+        showToast('Otro masajista la tomó hace un momento.', 'warn');
+      } else if (data.status === 'not_found') {
+        showToast('Esta cita ya no existe.', 'warn');
+      } else {
+        showToast(data.detail || 'No pudimos tomar la cita. Intenta de nuevo.', 'err');
+      }
+      closeCitaModal();
+      await fetchCitas();
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      showToast('Error de conexión. Intenta de nuevo.', 'err');
+    }
+  }
+
+  // ─── Toast ─────────────────────────────────────────────────────────────
+  let _toastTimer = null;
+  function showToast(message, kind) {
+    let host = document.getElementById('toast-host');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'toast-host';
+      host.className = 'toast-host';
+      document.body.appendChild(host);
+    }
+    const t = document.createElement('div');
+    t.className = 'toast toast-' + (kind || 'ok');
+    t.textContent = message;
+    host.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 240);
+    }, 3600);
+  }
+
+  function closeCitaModal() {
+    document.getElementById('cita-modal').style.display = 'none';
+  }
+  // expongo al onclick inline del backdrop/cerrar
+  window.closeCitaModal = closeCitaModal;
 
   let _gsiReady = false;
   let _pendingRender = false;
