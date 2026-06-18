@@ -489,6 +489,15 @@
   }
   .cal-chip-mine .cal-chip-cliente,
   .cal-chip-mine .cal-chip-svc { color: rgba(255,255,255,.85); }
+  .cal-chip-mine-reoffer {
+    background: #fff;
+    color: var(--brown);
+    border: 1.5px solid #d97706;
+    box-shadow: inset 0 0 0 1px rgba(217,119,6,0.15);
+  }
+  .cal-chip-mine-reoffer .cal-chip-cliente,
+  .cal-chip-mine-reoffer .cal-chip-svc { color: var(--brown); }
+  .cal-chip-mine-reoffer .cal-chip-time { color: #b45309; }
   .cal-chip-pool {
     background: #fff;
     border: 1.5px dashed var(--olive);
@@ -883,6 +892,8 @@
   // ─── Calendario semanal del panel ───────────────────────────────────────
   const CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-citas';
   const CLAIM_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-claim';
+  const RELEASE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-release';
+  const RELEASE_MIN_HOURS = 2;   // mismo valor que la RPC
 
   const calState = {
     weekStart: null,        // lunes de la semana visible (Date a las 00:00)
@@ -1039,9 +1050,10 @@
     const chip = document.createElement('div');
     let extra = '';
     if (item.kind === 'mine') {
-      chip.className = 'cal-chip cal-chip-mine';
+      const isReoffer = b.estado_asignacion === 'release_window';
+      chip.className = 'cal-chip cal-chip-mine' + (isReoffer ? ' cal-chip-mine-reoffer' : '');
       chip.innerHTML =
-        '<div class="cal-chip-time">' + fmtHora(b.hora) + '</div>' +
+        '<div class="cal-chip-time">' + fmtHora(b.hora) + (isReoffer ? ' · En cancelación' : '') + '</div>' +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
         (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : '');
       chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
@@ -1135,15 +1147,91 @@
       close.textContent = 'Cerrar';
       close.addEventListener('click', closeCitaModal);
       actions.appendChild(close);
+
       const cancel = document.createElement('button');
       cancel.className = 'cita-btn-primary';
       cancel.textContent = 'Cancelar cita';
-      cancel.disabled = true;
+      cancel.dataset.bookingId = b.id;
+
+      // Calcular horas hasta la cita
+      const hoursLeft = hoursUntilCita(b.fecha, b.hora);
+      if (hoursLeft === null) {
+        cancel.disabled = true;
+        note.textContent = 'No se puede determinar la hora exacta de la cita.';
+      } else if (hoursLeft < RELEASE_MIN_HOURS) {
+        cancel.disabled = true;
+        if (hoursLeft <= 0) {
+          note.textContent = 'La cita ya pasó o está en curso. No se puede liberar.';
+        } else {
+          const mins = Math.round(hoursLeft * 60);
+          note.textContent = `Solo se puede cancelar con más de ${RELEASE_MIN_HOURS}h de anticipación (faltan ${mins} min).`;
+        }
+      } else {
+        cancel.addEventListener('click', () => releaseBooking(b, cancel));
+        note.textContent = 'Al cancelar, la cita queda disponible para otros masajistas. Si nadie la toma antes de la hora de la cita, se te reasigna automáticamente.';
+      }
       actions.appendChild(cancel);
-      note.textContent = 'Las cancelaciones se habilitarán en la siguiente fase del panel.';
     }
 
     document.getElementById('cita-modal').style.display = 'flex';
+  }
+
+  // ─── Helper: horas hasta la cita ───────────────────────────────────────
+  function hoursUntilCita(fechaYMD, horaHHMMSS) {
+    if (!fechaYMD || !horaHHMMSS) return null;
+    const [y, m, d] = String(fechaYMD).slice(0, 10).split('-').map(Number);
+    const hms = String(horaHHMMSS).match(/^(\d{1,2}):(\d{2})/);
+    if (!y || !hms) return null;
+    // La cita está en zona Cancún (UTC-5). Creamos el Date interpretando como local de Cancún.
+    // Hack simple: usar Date.UTC + offset fijo -05:00
+    const ts = Date.UTC(y, m - 1, d, +hms[1] + 5, +hms[2]);
+    return (ts - Date.now()) / (1000 * 60 * 60);
+  }
+
+  // ─── Release (cancelar cita propia) ────────────────────────────────────
+  async function releaseBooking(booking, btn) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { logout(); return; }
+    const cliente = booking.cliente || 'esta cita';
+    if (!confirm(`¿Liberar la cita de ${cliente}?\n\nQuedará disponible para otros masajistas. Si nadie la toma antes de la hora, se te reasigna automáticamente.`)) {
+      return;
+    }
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Liberando...';
+    try {
+      const res = await fetch(RELEASE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ bookingId: booking.id })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { logout(); return; }
+      if (res.ok && data.status === 'released') {
+        showToast('Cita liberada al pool', 'ok');
+        closeCitaModal();
+        await fetchCitas();
+        return;
+      }
+      // 409, 403, 404 o status inesperado
+      if (data.status === 'too_late') {
+        showToast('Solo se puede cancelar con más de 2h de anticipación.', 'warn');
+      } else if (data.status === 'not_your_booking') {
+        showToast('Esta cita ya no es tuya.', 'warn');
+      } else if (data.status === 'wrong_state') {
+        showToast('La cita ya está en otro estado.', 'warn');
+      } else if (data.status === 'not_found') {
+        showToast('La cita ya no existe.', 'warn');
+      } else {
+        showToast(data.detail || 'No pudimos liberar la cita. Intenta de nuevo.', 'err');
+      }
+      closeCitaModal();
+      await fetchCitas();
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      showToast('Error de conexión. Intenta de nuevo.', 'err');
+    }
   }
 
   // ─── Claim ─────────────────────────────────────────────────────────────
