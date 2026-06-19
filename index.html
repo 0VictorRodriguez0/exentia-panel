@@ -507,6 +507,14 @@
     border-color: #d97706;
     background: rgba(217,119,6,0.07);
   }
+  .cal-chip-highlight {
+    animation: chipGlow 1.8s ease-in-out 3;
+    box-shadow: 0 0 0 3px rgba(217,119,6,0.45);
+  }
+  @keyframes chipGlow {
+    0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.45); }
+    50%     { box-shadow: 0 0 0 8px rgba(217,119,6,0.15); }
+  }
   .cal-chip-busy {
     background: rgba(154,138,117,0.18);
     color: rgba(154,138,117,0.85);
@@ -751,6 +759,11 @@
       <button class="cal-refresh" id="cal-refresh" title="Refrescar">↻</button>
     </div>
 
+    <div id="cal-needs-calendar-banner" style="display:none;background:#fff7ec;border:1.5px solid #f5c896;color:#9a4c00;padding:14px 18px;border-radius:12px;margin:0 0 12px;font-size:14px;line-height:1.45;">
+      <strong>Tu cuenta aún no tiene un calendario asignado.</strong><br>
+      Para empezar a recibir citas necesitas que un administrador te dé de alta como staff en GHL y te configure tu calendario personal.<br>
+      Mientras tanto puedes seguir viendo el pool, pero no podrás tomar citas todavía.
+    </div>
     <div class="cal-legend">
       <span class="cal-legend-item"><span class="cal-chip cal-chip-mine cal-chip-sample"></span>Mía</span>
       <span class="cal-legend-item"><span class="cal-chip cal-chip-pool cal-chip-sample"></span>Pool (disponible)</span>
@@ -940,6 +953,32 @@
     return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
   }
 
+  // Convierte HH:MM:SS o HH:MM en minutos desde 00:00
+  function horaToMin(h) {
+    if (!h) return null;
+    const m = String(h).match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    return (+m[1]) * 60 + (+m[2]);
+  }
+  // Busca si una cita pool choca con alguna mia (mismo día, intervalo se cruza)
+  function findTimeConflict(poolBooking) {
+    const fecha = poolBooking.fecha;
+    const start = horaToMin(poolBooking.hora);
+    const dur = parseInt(poolBooking.duracion_min, 10) || 60;
+    if (!fecha || start === null) return null;
+    const end = start + dur;
+    const mias = (calState.payload?.mias || []);
+    for (const m of mias) {
+      if (m.fecha !== fecha) continue;
+      const mStart = horaToMin(m.hora);
+      const mDur = parseInt(m.duracion_min, 10) || 60;
+      if (mStart === null) continue;
+      const mEnd = mStart + mDur;
+      if (mStart < end && mEnd > start) return m;
+    }
+    return null;
+  }
+
   function initCalendar() {
     calState.weekStart = startOfWeek(new Date());
     // Listeners (idempotentes; los bind sólo una vez)
@@ -979,12 +1018,54 @@
       calState.bookingsById = {};
       (data.mias || []).forEach(b => calState.bookingsById[b.id] = { kind: 'mine', booking: b });
       (data.pool || []).forEach(b => calState.bookingsById[b.id] = { kind: 'pool', booking: b });
+      const banner = document.getElementById('cal-needs-calendar-banner');
+      if (banner) banner.style.display = data.needs_calendar ? '' : 'none';
+      calState.needsCalendar = data.needs_calendar === true;
       renderCalendar();
+      handleDeepLink();
     } catch (e) {
       wrap.innerHTML = '<div class="cal-loading"><span>Error de conexión. Intenta el botón ↻ en un momento.</span></div>';
     } finally {
       if (refresh) refresh.classList.remove('spinning');
     }
+  }
+
+  function handleDeepLink() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const code = (params.get('b') || '').trim().toUpperCase();
+      if (!code) return;
+      // Find booking by booking_code in mias or pool
+      let match = null;
+      for (const ref of Object.values(calState.bookingsById || {})) {
+        const bc = (ref.booking && ref.booking.booking_code || '').toUpperCase();
+        if (bc === code) { match = ref; break; }
+      }
+      if (!match) {
+        // Booking ya no está en pool/mias (ya alguien la tomó o fuera de la semana)
+        const wrap = document.getElementById('cal-week');
+        if (wrap) {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:#fff7ec;border:1px solid #f5c896;color:#9a4c00;padding:10px 14px;border-radius:10px;margin:0 0 12px;font-size:13.5px;';
+          banner.textContent = `La cita ${code} ya no está disponible en el pool (otra masajista la tomó o está fuera de esta semana).`;
+          wrap.parentNode.insertBefore(banner, wrap);
+          setTimeout(() => banner.remove(), 8000);
+        }
+        history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+      // Open modal + scroll + glow
+      openCitaModal(match.booking.id, match.kind);
+      setTimeout(() => {
+        const chip = document.querySelector(`[data-booking-id="${match.booking.id}"]`);
+        if (chip) {
+          chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          chip.classList.add('cal-chip-highlight');
+          setTimeout(() => chip.classList.remove('cal-chip-highlight'), 6000);
+        }
+      }, 200);
+      history.replaceState(null, '', window.location.pathname);
+    } catch(e) { console.warn('deep link error', e); }
   }
 
   function renderCalendar() {
@@ -995,19 +1076,36 @@
     const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
-    // Agrupar citas por YYYY-MM-DD
+    // Separar sin_fecha de las que sí tienen
+    const sinFecha = [];
     const byDay = {};
     function bucket(key) { return (byDay[key] = byDay[key] || []); }
 
     (calState.payload?.mias || []).forEach(b => {
-      bucket(b.fecha).push({ kind: 'mine', booking: b });
+      if (b.sin_fecha || !b.fecha) sinFecha.push({ kind: 'mine', booking: b });
+      else bucket(b.fecha).push({ kind: 'mine', booking: b });
     });
     (calState.payload?.pool || []).forEach(b => {
-      bucket(b.fecha).push({ kind: 'pool', booking: b });
+      if (b.sin_fecha || !b.fecha) sinFecha.push({ kind: 'pool', booking: b });
+      else bucket(b.fecha).push({ kind: 'pool', booking: b });
     });
     (calState.payload?.ocupadas_ajenas || []).forEach(b => {
-      bucket(b.fecha).push({ kind: 'busy', booking: b });
+      if (b.fecha) bucket(b.fecha).push({ kind: 'busy', booking: b });
     });
+
+    // Renderizar sección "sin fecha" arriba del calendario
+    const noFechaSection = document.createElement('div');
+    if (sinFecha.length) {
+      noFechaSection.style.cssText = 'margin:0 0 16px;padding:14px 16px;background:#fff7ec;border:1.5px solid #f5c896;border-radius:12px;';
+      const titleEl = document.createElement('div');
+      titleEl.style.cssText = 'font-weight:700;color:#9a4c00;margin-bottom:8px;font-size:14px;';
+      titleEl.textContent = `📋 ${sinFecha.length} cita${sinFecha.length>1?'s':''} pendiente${sinFecha.length>1?'s':''} de fecha — contacta al cliente para cerrar`;
+      noFechaSection.appendChild(titleEl);
+      const listEl = document.createElement('div');
+      listEl.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+      sinFecha.forEach(it => listEl.appendChild(renderChip(it)));
+      noFechaSection.appendChild(listEl);
+    }
 
     const grid = document.createElement('div');
     grid.className = 'cal-week-grid';
@@ -1042,28 +1140,39 @@
     }
 
     wrap.innerHTML = '';
+    if (sinFecha.length) wrap.appendChild(noFechaSection);
     wrap.appendChild(grid);
   }
 
   function renderChip(item) {
     const b = item.booking;
     const chip = document.createElement('div');
+    chip.dataset.bookingId = b.id;
+    const isMulti = b.cupos_total && b.cupos_total > 1;
+    const sinFechaBadge = (b.sin_fecha || !b.hora)
+      ? `<span style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(217,119,6,0.18);color:#b45309;padding:1px 6px;border-radius:8px;">⏳ sin fecha</span>` : '';
+    const horaTxt = (b.sin_fecha || !b.hora) ? 'Contactar cliente' : fmtHora(b.hora);
+    const cuposBadge = isMulti ? `<span style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 6px;border-radius:8px;">${b.cupos_tomados||0}/${b.cupos_total}</span>` : '';
+    const personaLine = (isMulti && b.persona_label) ? `<div class="cal-chip-svc" style="font-style:italic;">${escapeHtml(b.persona_label)}</div>` : '';
+    const durLine = b.duracion_min ? `<div class="cal-chip-svc">${b.duracion_min} min</div>` : '';
     let extra = '';
     if (item.kind === 'mine') {
       const isReoffer = b.estado_asignacion === 'release_window';
       chip.className = 'cal-chip cal-chip-mine' + (isReoffer ? ' cal-chip-mine-reoffer' : '');
       chip.innerHTML =
-        '<div class="cal-chip-time">' + fmtHora(b.hora) + (isReoffer ? ' · En cancelación' : '') + '</div>' +
+        '<div class="cal-chip-time">' + horaTxt + sinFechaBadge + cuposBadge + (isReoffer ? ' · En cancelación' : '') + '</div>' +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
-        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : '');
+        personaLine +
+        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : durLine);
       chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
     } else if (item.kind === 'pool') {
       const isReoffer = b.estado_asignacion === 'release_window';
       chip.className = 'cal-chip cal-chip-pool' + (isReoffer ? ' cal-chip-pool-claim-window' : '');
       chip.innerHTML =
-        '<div class="cal-chip-time">' + fmtHora(b.hora) + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
+        '<div class="cal-chip-time">' + horaTxt + sinFechaBadge + cuposBadge + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
-        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : '');
+        personaLine +
+        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : durLine);
       chip.addEventListener('click', () => openCitaModal(b.id, 'pool'));
     } else { // busy
       chip.className = 'cal-chip cal-chip-busy';
@@ -1095,26 +1204,34 @@
       ? (isReoffer ? 'Mía · re-ofrecida' : 'Mía')
       : (isReoffer ? 'Re-ofrecida en el pool' : 'En el pool');
 
-    document.getElementById('cita-title').textContent = (b.cliente || '—');
+    const isMulti = b.cupos_total && b.cupos_total > 1;
+    const titleSuffix = isMulti && b.persona_label ? ` · ${b.persona_label}` : '';
+    document.getElementById('cita-title').textContent = (b.cliente || '—') + titleSuffix;
 
     const d = parseDateYMD(b.fecha);
     const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const fechaStr = d ? `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}` : '—';
-    document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}`;
+    const cuposSuffix = isMulti ? ` · ${b.cupos_tomados||0}/${b.cupos_total} cupos` : '';
+    document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}${cuposSuffix}`;
 
     document.getElementById('cita-cliente').textContent = b.cliente || '—';
     document.getElementById('cita-tel').textContent = b.cliente_telefono || '—';
     document.getElementById('cita-dur').textContent = b.duracion_min ? (b.duracion_min + ' min') : '—';
     document.getElementById('cita-precio').textContent = b.precio_mxn ? ('$' + Number(b.precio_mxn).toLocaleString('es-MX')) : '—';
-    document.getElementById('cita-zona').textContent = b.zona || '—';
+    const zonaTxt = b.zona || '—';
+    const mapsLink = b.direccion_maps_url
+      ? ` · <a href="${escapeHtml(b.direccion_maps_url)}" target="_blank" rel="noopener" style="color:var(--olive-dark);text-decoration:underline;">Maps ↗</a>`
+      : '';
+    const zonaEl = document.getElementById('cita-zona');
+    zonaEl.innerHTML = escapeHtml(zonaTxt) + mapsLink;
     document.getElementById('cita-pref').textContent = b.preferencia_sexo || 'Indistinto';
 
     const services = Array.isArray(b.servicios) ? b.servicios : [];
     const svcEl = document.getElementById('cita-services');
     if (services.length) {
       svcEl.innerHTML = services.map(s =>
-        `<div>• ${escapeHtml(s.name || '—')}${s.duracion_min ? ' · ' + s.duracion_min + ' min' : ''}${s.precio_mxn ? ' · $' + Number(s.precio_mxn).toLocaleString('es-MX') : ''}</div>`
+        `<div>• ${escapeHtml(s.name || s.slug || '—')}${s.duracion_min ? ' · ' + s.duracion_min + ' min' : ''}${s.precio_mxn ? ' · $' + Number(s.precio_mxn).toLocaleString('es-MX') : ''}</div>`
       ).join('');
     } else {
       svcEl.textContent = '—';
@@ -1128,19 +1245,34 @@
     if (finalKind === 'pool') {
       const btn = document.createElement('button');
       btn.className = 'cita-btn-primary';
-      btn.textContent = 'Tomar cita';
+      btn.textContent = (b.cupos_total && b.cupos_total > 1) ? `Tomar ${b.persona_label || 'este cupo'}` : 'Tomar cita';
       btn.dataset.bookingId = b.id;
-      btn.addEventListener('click', () => claimBooking(b.id, btn));
+      const conflict = findTimeConflict(b);
+      if (calState.needsCalendar) {
+        btn.disabled = true;
+        btn.title = 'Necesitas calendario configurado para tomar citas';
+        note.textContent = 'Tu cuenta aún no tiene calendario asignado. Contacta al administrador para activar esta función.';
+      } else if (conflict) {
+        btn.disabled = true;
+        btn.title = 'Choca con otra de tus citas';
+        const cHora = fmtHora(conflict.hora);
+        const cCli = conflict.cliente || 'otra cita';
+        note.textContent = `Choca con tu cita de las ${cHora} (${cCli}, ${conflict.duracion_min || '?'} min). No puedes tomarla.`;
+      } else {
+        btn.addEventListener('click', () => claimBooking(b.id, btn));
+      }
       actions.appendChild(btn);
       const close = document.createElement('button');
       close.className = 'cita-btn-secondary';
       close.textContent = 'Cerrar';
       close.addEventListener('click', closeCitaModal);
       actions.appendChild(close);
-      const isReoffer2 = b.estado_asignacion === 'release_window';
-      note.textContent = isReoffer2
-        ? 'Esta cita fue cancelada por otro masajista. Tómala antes de que alguien más lo haga.'
-        : 'Al tomarla, queda asignada a ti y deja de aparecer en el pool de los demás.';
+      if (!conflict && !calState.needsCalendar) {
+        const isReoffer2 = b.estado_asignacion === 'release_window';
+        note.textContent = isReoffer2
+          ? 'Esta cita fue cancelada por otro masajista. Tómala antes de que alguien más lo haga.'
+          : 'Al tomarla, queda asignada a ti y deja de aparecer en el pool de los demás.';
+      }
     } else { // mine
       const close = document.createElement('button');
       close.className = 'cita-btn-secondary';
@@ -1203,7 +1335,7 @@
       const res = await fetch(RELEASE_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ bookingId: booking.id })
+        body: JSON.stringify({ slotId: booking.id, bookingId: booking.id })
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) { logout(); return; }
@@ -1245,7 +1377,7 @@
       const res = await fetch(CLAIM_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ bookingId })
+        body: JSON.stringify({ slotId: bookingId, bookingId })
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) { logout(); return; }
@@ -1261,6 +1393,9 @@
         showToast('Otro masajista la tomó hace un momento.', 'warn');
       } else if (data.status === 'not_found') {
         showToast('Esta cita ya no existe.', 'warn');
+      } else if (data.status === 'time_conflict') {
+        const c = data.booking || {};
+        showToast(`Choca con tu cita de las ${c.conflict_hora || '?'} (${c.conflict_cliente || '—'}).`, 'warn');
       } else {
         showToast(data.detail || 'No pudimos tomar la cita. Intenta de nuevo.', 'err');
       }
