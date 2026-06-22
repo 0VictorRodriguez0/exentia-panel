@@ -528,11 +528,21 @@
 
   /* ════════ Badges / pills sin emojis ════════ */
   .chip-pill {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 7px; border-radius: 999px;
-    font: 700 9.5px 'Inter', sans-serif;
-    letter-spacing: 0.4px; text-transform: uppercase;
-    white-space: nowrap; line-height: 1.4;
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: 999px;
+    font: 700 9px 'Inter', sans-serif;
+    letter-spacing: 0.2px; text-transform: uppercase;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chip-pill > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
   .chip-pill-warning {
     background: #fff5e8; color: #b45309;
@@ -1259,7 +1269,7 @@
     const iconCalendar = '<svg class="chip-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
 
     // Modalidad legible: turnos → "Por turnos", simultaneo → "Al mismo tiempo", sucesivo → "Un masajista"
-    const modLabel = ({simultaneo:'Al mismo tiempo', turnos:'Por turnos', sucesivo:'Un masajista', economica:'1 masajista', domicilio:'A domicilio'})[b.modalidad] || b.modalidad;
+    const modLabel = ({simultaneo:'Simultáneo', turnos:'Por turnos', sucesivo:'Un masajista', economica:'Económico', domicilio:'A domicilio'})[b.modalidad] || b.modalidad;
     const showModBadge = b.modalidad && b.modalidad !== 'individual';
 
     // Badges
@@ -1269,8 +1279,9 @@
       if (!isMulti) return '';
       const tomados = b.cupos_tomados || 0;
       const falta = b.cupos_total - tomados;
-      const txt = falta === 0 ? 'Completa' : (falta === 1 ? 'Falta 1 masajista' : `Faltan ${falta} masajistas`);
-      return `<span class="chip-pill chip-pill-info" title="${tomados} de ${b.cupos_total} masajistas asignadas">${iconUsers}<span>${txt}</span></span>`;
+      const txt = falta === 0 ? 'Completa' : (falta === 1 ? 'Falta 1' : `Faltan ${falta}`);
+      const title = falta === 0 ? 'Todos los masajistas asignados' : `${tomados} de ${b.cupos_total} masajistas asignadas`;
+      return `<span class="chip-pill chip-pill-info" title="${title}">${iconUsers}<span>${txt}</span></span>`;
     })();
     const modPill = showModBadge ? `<span class="chip-pill chip-pill-mode">${escapeHtml(modLabel)}</span>` : '';
 
