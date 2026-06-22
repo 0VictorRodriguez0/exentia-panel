@@ -991,6 +991,12 @@
       document.getElementById('cal-refresh').addEventListener('click', () => fetchCitas());
     }
     fetchCitas();
+    // Auto-refresh cada 30s para que aparezcan citas nuevas sin necesidad de recargar
+    if (!calState._pollTimer) {
+      calState._pollTimer = setInterval(() => {
+        if (!document.hidden && localStorage.getItem(STORAGE_KEY)) fetchCitas();
+      }, 30000);
+    }
   }
 
   async function fetchCitas() {
@@ -1139,8 +1145,50 @@
       grid.appendChild(dayCol);
     }
 
+    // Buscar citas FUERA de esta semana (futuras)
+    const weekEnd = addDays(calState.weekStart, 6);
+    weekEnd.setHours(23, 59, 59, 999);
+    const futurasFueraSemana = [];
+    Object.entries(byDay).forEach(([fecha, items]) => {
+      const fd = parseDateYMD(fecha);
+      if (!fd) return;
+      if (fd < calState.weekStart || fd > weekEnd) {
+        items.forEach(it => futurasFueraSemana.push({ ...it, fecha }));
+      }
+    });
+    // Ordenar por fecha
+    futurasFueraSemana.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+
+    let futurasSection = null;
+    if (futurasFueraSemana.length) {
+      futurasSection = document.createElement('div');
+      futurasSection.style.cssText = 'margin:0 0 16px;padding:14px 16px;background:rgba(154,152,84,0.08);border:1.5px solid rgba(154,152,84,0.35);border-radius:12px;';
+      const titleEl = document.createElement('div');
+      titleEl.style.cssText = 'font-weight:700;color:var(--olive-dark);margin-bottom:8px;font-size:14px;';
+      titleEl.textContent = `📅 ${futurasFueraSemana.length} cita${futurasFueraSemana.length>1?'s':''} fuera de esta semana`;
+      futurasSection.appendChild(titleEl);
+      const listEl = document.createElement('div');
+      listEl.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+      futurasFueraSemana.slice(0, 5).forEach(it => {
+        const b = it.booking;
+        const link = document.createElement('div');
+        link.style.cssText = 'cursor:pointer;padding:8px 10px;background:#fff;border-radius:8px;border:1px solid rgba(154,152,84,0.25);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;';
+        const fd = parseDateYMD(it.fecha);
+        const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        const fechaTxt = fd ? `${dias[fd.getDay()]} ${fd.getDate()} ${meses[fd.getMonth()]}` : it.fecha;
+        link.innerHTML = `<span><strong>${escapeHtml(b.cliente || '—')}</strong> · ${fechaTxt} ${fmtHora(b.hora)}</span><span style="color:var(--olive-dark);font-weight:600;">→ ir</span>`;
+        link.addEventListener('click', () => {
+          if (fd) { calState.weekStart = startOfWeek(fd); renderCalendar(); setTimeout(() => openCitaModal(b.id, it.kind), 200); }
+        });
+        listEl.appendChild(link);
+      });
+      futurasSection.appendChild(listEl);
+    }
+
     wrap.innerHTML = '';
     if (sinFecha.length) wrap.appendChild(noFechaSection);
+    if (futurasSection) wrap.appendChild(futurasSection);
     wrap.appendChild(grid);
   }
 
