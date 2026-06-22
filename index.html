@@ -591,13 +591,31 @@
     50%     { box-shadow: 0 0 0 8px rgba(217,119,6,0.15); }
   }
   .cal-chip-busy {
-    background: rgba(154,138,117,0.18);
+    background: rgba(154,138,117,0.14);
     color: rgba(154,138,117,0.85);
     cursor: not-allowed;
     border-color: transparent;
+    padding: 5px 8px;
+    opacity: 0.72;
   }
-  .cal-chip-busy:hover { transform: none; box-shadow: none; }
-  .cal-chip-busy .cal-chip-time { color: var(--gray-soft); }
+  .cal-chip-busy:hover { transform: none; box-shadow: none; opacity: 1; }
+  .cal-chip-busy .cal-chip-time {
+    color: var(--gray-soft);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .cal-chip-busy .cal-chip-state {
+    font-size: 8.5px;
+    padding: 0 5px;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+  }
+  .cal-chip-busy .cal-chip-cliente,
+  .cal-chip-busy .cal-chip-svc {
+    font-size: 9.5px;
+    line-height: 1.2;
+    opacity: 0.85;
+  }
 
   /* ════════ Badges / pills sin emojis ════════ */
   .chip-pill {
@@ -1446,11 +1464,12 @@
       chip.addEventListener('click', () => openCitaModal(b.id, 'pool'));
     } else { // busy
       chip.className = 'cal-chip cal-chip-busy';
+      chip.title = `${b.cliente || 'Tomada'} · ${fmtHora(b.hora)}${b.persona_label ? ' · ' + b.persona_label : ''}${b.duracion_min ? ' · ' + b.duracion_min + ' min' : ''}`;
       chip.innerHTML =
         '<span class="cal-chip-state" style="background:rgba(154,138,117,0.30);color:var(--gray-soft);">Tomada</span>' +
-        '<div class="cal-chip-time">' + fmtHora(b.hora) + '</div>' +
-        '<div class="cal-chip-cliente">Otra masajista</div>' +
-        (b.duracion_min ? '<div class="cal-chip-svc">' + b.duracion_min + ' min</div>' : '');
+        '<div class="cal-chip-time">' + fmtHora(b.hora) + (b.duracion_min ? ' · ' + b.duracion_min + 'm' : '') + '</div>' +
+        (b.cliente ? '<div class="cal-chip-cliente">' + escapeHtml(b.cliente) + '</div>' : '') +
+        (b.persona_label ? '<div class="cal-chip-svc">' + escapeHtml(b.persona_label) + '</div>' : '');
     }
     return chip;
   }
