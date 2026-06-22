@@ -409,8 +409,8 @@
     text-transform: uppercase; flex-shrink: 0;
   }
   .cal-state-desc { font-size: 11.5px; color: var(--gray-soft); }
-  .cal-state-acatada     .cal-state-dot { background: var(--olive); border: 1.5px solid var(--olive-dark); }
-  .cal-state-acatada     .cal-state-name { color: var(--olive-dark); }
+  .cal-state-asignada     .cal-state-dot { background: var(--olive); border: 1.5px solid var(--olive-dark); }
+  .cal-state-asignada     .cal-state-name { color: var(--olive-dark); }
   .cal-state-disponible  .cal-state-dot { background: #fff; border: 1.5px dashed var(--olive); }
   .cal-state-disponible  .cal-state-name { color: var(--olive-dark); }
   .cal-state-bloqueada   .cal-state-dot { background: rgba(154,138,117,0.18); border: 1.5px dashed rgba(92,58,30,0.45); }
@@ -877,10 +877,10 @@
       Mientras tanto puedes seguir viendo el pool, pero no podrás tomar citas todavía.
     </div>
     <div class="cal-states-banner">
-      <div class="cal-state-item cal-state-acatada">
+      <div class="cal-state-item cal-state-asignada">
         <span class="cal-state-dot"></span>
-        <span class="cal-state-name">Acatada</span>
-        <span class="cal-state-desc">Ya la tomaste</span>
+        <span class="cal-state-name">Asignada</span>
+        <span class="cal-state-desc">Ya es tuya, vas a atenderla</span>
       </div>
       <div class="cal-state-item cal-state-disponible">
         <span class="cal-state-dot"></span>
@@ -1402,7 +1402,7 @@
       chip.className = 'cal-chip cal-chip-mine' + (isReoffer ? ' cal-chip-mine-reoffer' : '');
       const stateLabel = isReoffer
         ? '<span class="cal-chip-state" style="background:rgba(255,247,236,0.85);color:#b45309;">Liberándose</span>'
-        : '<span class="cal-chip-state" style="background:rgba(255,255,255,0.22);color:#fff;">Acatada</span>';
+        : '<span class="cal-chip-state" style="background:rgba(255,255,255,0.22);color:#fff;">Asignada</span>';
       chip.innerHTML =
         stateLabel +
         '<div class="cal-chip-time">' + horaTxt + '</div>' +
@@ -1413,20 +1413,20 @@
       chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
     } else if (item.kind === 'pool') {
       const isReoffer = b.estado_asignacion === 'release_window';
-      // Detectar choque con horario propio
+      // Detectar choque con horario propio (BLOQUEADA visualiza solo; tooltip explica)
       const conflict = findTimeConflict(b);
-      const conflictPill = conflict
-        ? `<span class="chip-pill chip-pill-conflict" title="Choca con tu cita de las ${fmtHora(conflict.hora)} (${(conflict.cliente||'cita')}, ${conflict.duracion_min||'?'} min)">Choca con tu horario</span>`
-        : '';
       const extraClass = isReoffer ? ' cal-chip-pool-claim-window' : (conflict ? ' cal-chip-pool-conflict' : '');
       chip.className = 'cal-chip cal-chip-pool' + extraClass;
+      if (conflict) {
+        chip.title = `Bloqueada: choca con tu cita de las ${fmtHora(conflict.hora)} (${conflict.cliente||'cita'}, ${conflict.duracion_min||'?'} min)`;
+      }
       const poolStateLabel = isReoffer
         ? '<span class="cal-chip-state" style="background:rgba(217,119,6,0.12);color:#b45309;">Reofrecida</span>'
         : (conflict
           ? '<span class="cal-chip-state" style="background:rgba(154,138,117,0.20);color:rgba(92,58,30,0.85);">Bloqueada</span>'
           : '<span class="cal-chip-state" style="background:rgba(154,152,84,0.15);color:var(--olive-dark);">Disponible</span>');
       const buildMetaRowPool = () => {
-        const parts = [sinFechaPill, cuposPill, modPill, conflictPill].filter(Boolean);
+        const parts = [sinFechaPill, cuposPill, modPill].filter(Boolean);
         return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
       };
       chip.innerHTML =
