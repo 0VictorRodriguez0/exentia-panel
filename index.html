@@ -1199,11 +1199,13 @@
     const chip = document.createElement('div');
     chip.dataset.bookingId = b.id;
     const isMulti = b.cupos_total && b.cupos_total > 1;
+    const modBadge = (b.modalidad && b.modalidad !== 'individual')
+      ? `<span style="display:inline-block;margin-left:4px;font-size:9.5px;background:rgba(180,83,9,0.15);color:#b45309;padding:1px 5px;border-radius:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;">${escapeHtml(b.modalidad)}</span>` : '';
     const sinFechaBadge = (b.sin_fecha || !b.hora)
       ? `<span style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(217,119,6,0.18);color:#b45309;padding:1px 6px;border-radius:8px;">⏳ sin fecha</span>` : '';
     const horaTxt = (b.sin_fecha || !b.hora) ? 'Contactar cliente' : fmtHora(b.hora);
-    const cuposBadge = isMulti ? `<span style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 6px;border-radius:8px;">${b.cupos_tomados||0}/${b.cupos_total}</span>` : '';
-    const personaLine = (isMulti && b.persona_label) ? `<div class="cal-chip-svc" style="font-style:italic;">${escapeHtml(b.persona_label)}</div>` : '';
+    const cuposBadge = isMulti ? `<span title="${b.cupos_tomados||0} de ${b.cupos_total} masajistas asignadas" style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 6px;border-radius:8px;font-weight:700;">👥 ${b.cupos_tomados||0}/${b.cupos_total}</span>` : '';
+    const personaLine = (isMulti && b.persona_label) ? `<div class="cal-chip-svc" style="font-style:italic;font-weight:600;">${escapeHtml(b.persona_label)}</div>` : '';
     const durLine = b.duracion_min ? `<div class="cal-chip-svc">${b.duracion_min} min</div>` : '';
     let extra = '';
     if (item.kind === 'mine') {
@@ -1262,8 +1264,9 @@
     const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const fechaStr = d ? `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}` : '—';
-    const cuposSuffix = isMulti ? ` · ${b.cupos_tomados||0}/${b.cupos_total} cupos` : '';
-    document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}${cuposSuffix}`;
+    const cuposSuffix = isMulti ? ` · 👥 ${b.cupos_tomados||0}/${b.cupos_total} masajistas` : '';
+    const modSuffix = (b.modalidad && b.modalidad !== 'individual') ? ` · ${b.modalidad}` : '';
+    document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}${cuposSuffix}${modSuffix}`;
 
     document.getElementById('cita-cliente').textContent = b.cliente || '—';
     document.getElementById('cita-tel').textContent = b.cliente_telefono || '—';
