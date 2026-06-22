@@ -526,6 +526,51 @@
   .cal-chip-busy:hover { transform: none; box-shadow: none; }
   .cal-chip-busy .cal-chip-time { color: var(--gray-soft); }
 
+  /* ════════ Badges / pills sin emojis ════════ */
+  .chip-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 999px;
+    font: 700 9.5px 'Inter', sans-serif;
+    letter-spacing: 0.4px; text-transform: uppercase;
+    white-space: nowrap; line-height: 1.4;
+  }
+  .chip-pill-warning {
+    background: #fff5e8; color: #b45309;
+    border: 1px solid #f5c896;
+  }
+  .chip-pill-info {
+    background: rgba(154,152,84,0.15); color: var(--olive-dark);
+    border: 1px solid rgba(154,152,84,0.3);
+  }
+  .chip-pill-mode {
+    background: rgba(92,58,30,0.08); color: var(--brown);
+    border: 1px solid rgba(92,58,30,0.18);
+  }
+  .chip-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+  .chip-status-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #b45309; box-shadow: 0 0 0 2px #fff5e8;
+    margin-right: 5px; vertical-align: middle;
+  }
+  .cal-chip-meta {
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap; margin-top: 4px;
+  }
+  .cal-chip-persona {
+    font: 600 11px 'Inter', sans-serif;
+    color: var(--olive-dark); margin-top: 3px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .cal-chip-mine .cal-chip-persona { color: #fff; opacity: 0.95; }
+  .cal-chip-mine .chip-pill-info {
+    background: rgba(255,255,255,0.22); color: #fff;
+    border-color: rgba(255,255,255,0.35);
+  }
+  .cal-chip-mine .chip-pill-mode {
+    background: rgba(255,255,255,0.15); color: #fff;
+    border-color: rgba(255,255,255,0.25);
+  }
+
   /* Modal de detalle de cita */
   .cita-modal {
     position: fixed; inset: 0;
@@ -1104,10 +1149,12 @@
     // Renderizar sección "sin fecha" arriba del calendario
     const noFechaSection = document.createElement('div');
     if (sinFecha.length) {
-      noFechaSection.style.cssText = 'margin:0 0 16px;padding:14px 16px;background:#fff7ec;border:1.5px solid #f5c896;border-radius:12px;';
+      noFechaSection.style.cssText = 'margin:0 0 16px;padding:16px 18px;background:#fff7ec;border:1.5px solid #f5c896;border-radius:12px;';
       const titleEl = document.createElement('div');
-      titleEl.style.cssText = 'font-weight:700;color:#9a4c00;margin-bottom:8px;font-size:14px;';
-      titleEl.textContent = `📋 ${sinFecha.length} cita${sinFecha.length>1?'s':''} pendiente${sinFecha.length>1?'s':''} de fecha — contacta al cliente para cerrar`;
+      titleEl.style.cssText = 'font:700 14px Inter,sans-serif;color:#9a4c00;margin-bottom:10px;display:flex;align-items:center;gap:8px;';
+      titleEl.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#b45309;box-shadow:0 0 0 3px rgba(180,83,9,0.18);"></span>` +
+        `<span><strong>${sinFecha.length}</strong> cita${sinFecha.length>1?'s':''} pendiente${sinFecha.length>1?'s':''} de fecha</span>` +
+        `<span style="color:#a66b1c;font-weight:500;font-size:13px;">— contacta al cliente para confirmar día y hora</span>`;
       noFechaSection.appendChild(titleEl);
       const listEl = document.createElement('div');
       listEl.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
@@ -1164,22 +1211,28 @@
     let futurasSection = null;
     if (futurasFueraSemana.length) {
       futurasSection = document.createElement('div');
-      futurasSection.style.cssText = 'margin:0 0 16px;padding:14px 16px;background:rgba(154,152,84,0.08);border:1.5px solid rgba(154,152,84,0.35);border-radius:12px;';
+      futurasSection.style.cssText = 'margin:0 0 16px;padding:16px 18px;background:rgba(154,152,84,0.08);border:1.5px solid rgba(154,152,84,0.35);border-radius:12px;';
       const titleEl = document.createElement('div');
-      titleEl.style.cssText = 'font-weight:700;color:var(--olive-dark);margin-bottom:8px;font-size:14px;';
-      titleEl.textContent = `📅 ${futurasFueraSemana.length} cita${futurasFueraSemana.length>1?'s':''} fuera de esta semana`;
+      titleEl.style.cssText = 'font:700 14px Inter,sans-serif;color:var(--olive-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;';
+      titleEl.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--olive);box-shadow:0 0 0 3px rgba(154,152,84,0.18);"></span>` +
+        `<span><strong>${futurasFueraSemana.length}</strong> cita${futurasFueraSemana.length>1?'s':''} fuera de esta semana</span>` +
+        `<span style="color:#7d7c3f;font-weight:500;font-size:13px;">— toca una para verla</span>`;
       futurasSection.appendChild(titleEl);
       const listEl = document.createElement('div');
       listEl.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
       futurasFueraSemana.slice(0, 5).forEach(it => {
         const b = it.booking;
         const link = document.createElement('div');
-        link.style.cssText = 'cursor:pointer;padding:8px 10px;background:#fff;border-radius:8px;border:1px solid rgba(154,152,84,0.25);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;';
+        link.style.cssText = 'cursor:pointer;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid rgba(154,152,84,0.25);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:all .15s;';
+        link.addEventListener('mouseenter', () => { link.style.borderColor = 'var(--olive)'; link.style.transform = 'translateX(2px)'; });
+        link.addEventListener('mouseleave', () => { link.style.borderColor = 'rgba(154,152,84,0.25)'; link.style.transform = 'translateX(0)'; });
         const fd = parseDateYMD(it.fecha);
         const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
         const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
         const fechaTxt = fd ? `${dias[fd.getDay()]} ${fd.getDate()} ${meses[fd.getMonth()]}` : it.fecha;
-        link.innerHTML = `<span><strong>${escapeHtml(b.cliente || '—')}</strong> · ${fechaTxt} ${fmtHora(b.hora)}</span><span style="color:var(--olive-dark);font-weight:600;">→ ir</span>`;
+        const isMultiF = b.cupos_total && b.cupos_total > 1;
+        const cuposFTxt = isMultiF ? `<span style="display:inline-block;font-size:10.5px;font-weight:700;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 7px;border-radius:999px;margin-left:6px;letter-spacing:.4px;text-transform:uppercase;">${b.cupos_tomados||0}/${b.cupos_total} masajistas</span>` : '';
+        link.innerHTML = `<span><strong>${escapeHtml(b.cliente || '—')}</strong> · ${fechaTxt} ${fmtHora(b.hora)}${cuposFTxt}</span><span style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);font-weight:600;"><span>Ir</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>`;
         link.addEventListener('click', () => {
           if (fd) { calState.weekStart = startOfWeek(fd); renderCalendar(); setTimeout(() => openCitaModal(b.id, it.kind), 200); }
         });
@@ -1199,32 +1252,60 @@
     const chip = document.createElement('div');
     chip.dataset.bookingId = b.id;
     const isMulti = b.cupos_total && b.cupos_total > 1;
-    const modBadge = (b.modalidad && b.modalidad !== 'individual')
-      ? `<span style="display:inline-block;margin-left:4px;font-size:9.5px;background:rgba(180,83,9,0.15);color:#b45309;padding:1px 5px;border-radius:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;">${escapeHtml(b.modalidad)}</span>` : '';
-    const sinFechaBadge = (b.sin_fecha || !b.hora)
-      ? `<span style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(217,119,6,0.18);color:#b45309;padding:1px 6px;border-radius:8px;">⏳ sin fecha</span>` : '';
-    const horaTxt = (b.sin_fecha || !b.hora) ? 'Contactar cliente' : fmtHora(b.hora);
-    const cuposBadge = isMulti ? `<span title="${b.cupos_tomados||0} de ${b.cupos_total} masajistas asignadas" style="display:inline-block;margin-left:6px;font-size:10.5px;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 6px;border-radius:8px;font-weight:700;">👥 ${b.cupos_tomados||0}/${b.cupos_total}</span>` : '';
-    const personaLine = (isMulti && b.persona_label) ? `<div class="cal-chip-svc" style="font-style:italic;font-weight:600;">${escapeHtml(b.persona_label)}</div>` : '';
-    const durLine = b.duracion_min ? `<div class="cal-chip-svc">${b.duracion_min} min</div>` : '';
-    let extra = '';
+    const sinFecha = b.sin_fecha || !b.hora;
+    // SVG icons inline
+    const iconUsers = '<svg class="chip-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const iconClock = '<svg class="chip-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    const iconCalendar = '<svg class="chip-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+
+    // Modalidad legible: turnos → "Por turnos", simultaneo → "Al mismo tiempo", sucesivo → "Un masajista"
+    const modLabel = ({simultaneo:'Al mismo tiempo', turnos:'Por turnos', sucesivo:'Un masajista', economica:'1 masajista', domicilio:'A domicilio'})[b.modalidad] || b.modalidad;
+    const showModBadge = b.modalidad && b.modalidad !== 'individual';
+
+    // Badges
+    const sinFechaPill = sinFecha
+      ? `<span class="chip-pill chip-pill-warning"><span class="chip-status-dot"></span>Sin fecha</span>` : '';
+    const cuposPill = (() => {
+      if (!isMulti) return '';
+      const tomados = b.cupos_tomados || 0;
+      const falta = b.cupos_total - tomados;
+      const txt = falta === 0 ? 'Completa' : (falta === 1 ? 'Falta 1 masajista' : `Faltan ${falta} masajistas`);
+      return `<span class="chip-pill chip-pill-info" title="${tomados} de ${b.cupos_total} masajistas asignadas">${iconUsers}<span>${txt}</span></span>`;
+    })();
+    const modPill = showModBadge ? `<span class="chip-pill chip-pill-mode">${escapeHtml(modLabel)}</span>` : '';
+
+    const horaTxt = sinFecha ? 'Contactar cliente' : fmtHora(b.hora);
+    const personaLine = (isMulti && b.persona_label)
+      ? `<div class="cal-chip-persona">${escapeHtml(b.persona_label)}</div>` : '';
+    const durBlock = b.duracion_min
+      ? `<div class="cal-chip-svc" style="display:flex;align-items:center;gap:4px;">${iconClock}<span>${b.duracion_min} min</span></div>` : '';
+    const svcBlock = b.servicios_label
+      ? `<div class="cal-chip-svc">${escapeHtml(b.servicios_label)}</div>` : '';
+
+    const buildMetaRow = () => {
+      const parts = [sinFechaPill, cuposPill, modPill].filter(Boolean);
+      return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
+    };
+
     if (item.kind === 'mine') {
       const isReoffer = b.estado_asignacion === 'release_window';
       chip.className = 'cal-chip cal-chip-mine' + (isReoffer ? ' cal-chip-mine-reoffer' : '');
       chip.innerHTML =
-        '<div class="cal-chip-time">' + horaTxt + sinFechaBadge + cuposBadge + (isReoffer ? ' · En cancelación' : '') + '</div>' +
+        '<div class="cal-chip-time">' + horaTxt + (isReoffer ? ' · En cancelación' : '') + '</div>' +
+        buildMetaRow() +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
         personaLine +
-        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : durLine);
+        svcBlock + durBlock;
       chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
     } else if (item.kind === 'pool') {
       const isReoffer = b.estado_asignacion === 'release_window';
       chip.className = 'cal-chip cal-chip-pool' + (isReoffer ? ' cal-chip-pool-claim-window' : '');
       chip.innerHTML =
-        '<div class="cal-chip-time">' + horaTxt + sinFechaBadge + cuposBadge + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
+        '<div class="cal-chip-time">' + horaTxt + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
+        buildMetaRow() +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
         personaLine +
-        (b.servicios_label ? '<div class="cal-chip-svc">' + escapeHtml(b.servicios_label) + '</div>' : durLine);
+        svcBlock + durBlock;
       chip.addEventListener('click', () => openCitaModal(b.id, 'pool'));
     } else { // busy
       chip.className = 'cal-chip cal-chip-busy';
@@ -1264,8 +1345,12 @@
     const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const fechaStr = d ? `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}` : '—';
-    const cuposSuffix = isMulti ? ` · 👥 ${b.cupos_tomados||0}/${b.cupos_total} masajistas` : '';
-    const modSuffix = (b.modalidad && b.modalidad !== 'individual') ? ` · ${b.modalidad}` : '';
+    const modMap = {simultaneo:'Al mismo tiempo', turnos:'Por turnos', sucesivo:'Un solo masajista', economica:'1 masajista', individual:''};
+    const modTxt = modMap[b.modalidad] !== undefined ? modMap[b.modalidad] : (b.modalidad || '');
+    const cuposSuffix = isMulti
+      ? ` · ${b.cupos_tomados||0} de ${b.cupos_total} masajistas`
+      : '';
+    const modSuffix = modTxt ? ` · ${modTxt}` : '';
     document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}${cuposSuffix}${modSuffix}`;
 
     document.getElementById('cita-cliente').textContent = b.cliente || '—';
