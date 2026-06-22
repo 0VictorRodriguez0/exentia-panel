@@ -1048,21 +1048,33 @@
       document.getElementById('cal-refresh').addEventListener('click', () => fetchCitas());
     }
     fetchCitas();
-    // Auto-refresh cada 30s para que aparezcan citas nuevas sin necesidad de recargar
+    // Auto-refresh silencioso cada 60s — no destruye la vista, solo actualiza datos en background
     if (!calState._pollTimer) {
       calState._pollTimer = setInterval(() => {
-        if (!document.hidden && localStorage.getItem(STORAGE_KEY)) fetchCitas();
-      }, 30000);
+        if (!document.hidden && localStorage.getItem(STORAGE_KEY)) fetchCitas({ silent: true });
+      }, 60000);
     }
   }
 
-  async function fetchCitas() {
+  async function fetchCitas(opts) {
+    opts = opts || {};
+    const silent = opts.silent === true;
     const jwt = localStorage.getItem(STORAGE_KEY);
     if (!jwt) return;
     const refresh = document.getElementById('cal-refresh');
     if (refresh) refresh.classList.add('spinning');
     const wrap = document.getElementById('cal-week');
-    wrap.innerHTML = '<div class="cal-loading"><div class="spinner sm"></div><span>Cargando citas...</span></div>';
+    // Solo mostrar el spinner si NO es silencioso (auto-refresh) y no hay nada renderizado aún
+    const hasContent = wrap && wrap.querySelector('.cal-week-grid');
+    if (!silent && !hasContent) {
+      wrap.innerHTML = '<div class="cal-loading"><div class="spinner sm"></div><span>Cargando citas...</span></div>';
+    }
+    // Si hay modal abierto, no refrescar (evita cerrarlo)
+    const modal = document.getElementById('cita-modal');
+    if (silent && modal && modal.style.display !== 'none' && getComputedStyle(modal).display !== 'none') {
+      if (refresh) refresh.classList.remove('spinning');
+      return;
+    }
     try {
       const res = await fetch(CITAS_ENDPOINT, {
         headers: { 'Authorization': 'Bearer ' + jwt }
@@ -1073,7 +1085,9 @@
           logout();
           return;
         }
-        wrap.innerHTML = '<div class="cal-loading"><span>No pudimos cargar tus citas. ' + (txt ? '(' + res.status + ')' : '') + '</span></div>';
+        if (!silent) {
+          wrap.innerHTML = '<div class="cal-loading"><span>No pudimos cargar tus citas. ' + (txt ? '(' + res.status + ')' : '') + '</span></div>';
+        }
         return;
       }
       const data = await res.json();
@@ -1087,7 +1101,10 @@
       renderCalendar();
       handleDeepLink();
     } catch (e) {
-      wrap.innerHTML = '<div class="cal-loading"><span>Error de conexión. Intenta el botón ↻ en un momento.</span></div>';
+      // En silent NO mostramos error — mantiene la vista anterior
+      if (!silent) {
+        wrap.innerHTML = '<div class="cal-loading"><span>Error de conexión. Intenta el botón ↻ en un momento.</span></div>';
+      }
     } finally {
       if (refresh) refresh.classList.remove('spinning');
     }
