@@ -410,7 +410,7 @@
   }
   .cal-week-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 8px;
   }
   .cal-day {
@@ -418,7 +418,9 @@
     border-radius: 10px;
     padding: 10px 8px 8px;
     min-height: 220px;
+    min-width: 0;
     display: flex; flex-direction: column; gap: 6px;
+    overflow: hidden;
   }
   .cal-day.is-today {
     background: rgba(154,152,84,0.10);
