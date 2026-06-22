@@ -504,6 +504,23 @@
     background: #fff;
     border: 1.5px dashed var(--olive);
   }
+  /* Pool con choque horario: marrón claro, opacidad reducida, dashed */
+  .cal-chip-pool-conflict {
+    background: rgba(154,138,117,0.10);
+    border: 1.5px dashed rgba(92,58,30,0.40);
+    color: rgba(92,58,30,0.70);
+    cursor: not-allowed;
+  }
+  .cal-chip-pool-conflict:hover { transform: none; box-shadow: none; }
+  .cal-chip-pool-conflict .cal-chip-time,
+  .cal-chip-pool-conflict .cal-chip-cliente,
+  .cal-chip-pool-conflict .cal-chip-persona,
+  .cal-chip-pool-conflict .cal-chip-svc { color: rgba(92,58,30,0.65); }
+  .chip-pill-conflict {
+    background: rgba(154,138,117,0.18);
+    color: rgba(92,58,30,0.85);
+    border: 1px solid rgba(92,58,30,0.25);
+  }
   .cal-chip-pool-claim-window {
     border-style: solid;
     border-color: #d97706;
@@ -824,6 +841,7 @@
     <div class="cal-legend">
       <span class="cal-legend-item"><span class="cal-chip cal-chip-mine cal-chip-sample"></span>Mía</span>
       <span class="cal-legend-item"><span class="cal-chip cal-chip-pool cal-chip-sample"></span>Pool (disponible)</span>
+      <span class="cal-legend-item"><span class="cal-chip cal-chip-pool cal-chip-pool-conflict cal-chip-sample"></span>Choca con tu horario</span>
       <span class="cal-legend-item"><span class="cal-chip cal-chip-busy cal-chip-sample"></span>Ocupada por otro</span>
     </div>
 
@@ -1327,10 +1345,21 @@
       chip.addEventListener('click', () => openCitaModal(b.id, 'mine'));
     } else if (item.kind === 'pool') {
       const isReoffer = b.estado_asignacion === 'release_window';
-      chip.className = 'cal-chip cal-chip-pool' + (isReoffer ? ' cal-chip-pool-claim-window' : '');
+      // Detectar choque con horario propio
+      const conflict = findTimeConflict(b);
+      const conflictPill = conflict
+        ? `<span class="chip-pill chip-pill-conflict" title="Choca con tu cita de las ${fmtHora(conflict.hora)} (${(conflict.cliente||'cita')}, ${conflict.duracion_min||'?'} min)">Choca con tu horario</span>`
+        : '';
+      const extraClass = isReoffer ? ' cal-chip-pool-claim-window' : (conflict ? ' cal-chip-pool-conflict' : '');
+      chip.className = 'cal-chip cal-chip-pool' + extraClass;
+      // Inyectar conflictPill al meta-row reconstruido
+      const buildMetaRowPool = () => {
+        const parts = [sinFechaPill, cuposPill, modPill, conflictPill].filter(Boolean);
+        return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
+      };
       chip.innerHTML =
         '<div class="cal-chip-time">' + horaTxt + (isReoffer ? ' · Re-ofrecida' : '') + '</div>' +
-        buildMetaRow() +
+        buildMetaRowPool() +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
         personaLine +
         svcBlock + durBlock;
