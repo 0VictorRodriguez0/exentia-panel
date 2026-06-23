@@ -729,9 +729,44 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px 16px;
+  }
+  /* Nuevas secciones con título */
+  .cita-modal-section {
     padding: 14px 0;
     border-top: 1px dashed rgba(154,152,84,0.30);
+  }
+  .cita-modal-section:last-of-type {
     border-bottom: 1px dashed rgba(154,152,84,0.30);
+  }
+  .cita-modal-section-title {
+    font: 800 11px 'Inter', sans-serif;
+    color: var(--olive-dark);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cita-modal-section-title::before {
+    content: ''; display: inline-block;
+    width: 4px; height: 14px; border-radius: 2px;
+    background: var(--olive);
+  }
+  /* Cobro: layout estilo recibo */
+  .cita-modal-precio-grid {
+    display: flex; flex-direction: column; gap: 6px;
+    background: #fdfbf4; border: 1px solid rgba(154,152,84,0.25);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .cita-precio-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--brown);
+  }
+  .cita-precio-row.cita-precio-total {
+    font: 800 16px 'Inter', sans-serif;
+    color: var(--olive-dark);
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1.5px solid rgba(154,152,84,0.35);
   }
   .cita-modal-label {
     font: 700 10px 'Lato', sans-serif;
@@ -953,18 +988,60 @@
     <div class="cita-modal-badge" id="cita-badge">—</div>
     <h2 class="cita-modal-title" id="cita-title">—</h2>
     <p class="cita-modal-when" id="cita-when">—</p>
-    <div class="cita-modal-grid">
-      <div><div class="cita-modal-label">Cliente</div><div class="cita-modal-val" id="cita-cliente">—</div></div>
-      <div><div class="cita-modal-label">Teléfono</div><div class="cita-modal-val" id="cita-tel">—</div></div>
-      <div><div class="cita-modal-label">Duración</div><div class="cita-modal-val" id="cita-dur">—</div></div>
-      <div><div class="cita-modal-label">Precio</div><div class="cita-modal-val" id="cita-precio">—</div></div>
-      <div><div class="cita-modal-label">Zona</div><div class="cita-modal-val" id="cita-zona">—</div></div>
-      <div><div class="cita-modal-label">Preferencia</div><div class="cita-modal-val" id="cita-pref">—</div></div>
+    <!-- Sección 1: Contacto del cliente -->
+    <div class="cita-modal-section" id="cita-sec-contacto">
+      <div class="cita-modal-section-title">Datos del cliente</div>
+      <div class="cita-modal-grid">
+        <div><div class="cita-modal-label">Cliente</div><div class="cita-modal-val" id="cita-cliente">—</div></div>
+        <div><div class="cita-modal-label">Teléfono</div><div class="cita-modal-val" id="cita-tel">—</div></div>
+        <div><div class="cita-modal-label">Email</div><div class="cita-modal-val" id="cita-email">—</div></div>
+        <div><div class="cita-modal-label">Preferencia</div><div class="cita-modal-val" id="cita-pref">—</div></div>
+      </div>
     </div>
-    <div class="cita-modal-services" id="cita-services-wrap">
-      <div class="cita-modal-label">Servicios</div>
+
+    <!-- Sección 2: Servicios -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Servicios contratados</div>
       <div id="cita-services">—</div>
     </div>
+
+    <!-- Sección 3: Pago -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Cobro</div>
+      <div class="cita-modal-precio-grid">
+        <div class="cita-precio-row"><span>Servicios</span><span id="cita-precio-svc">—</span></div>
+        <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
+        <div class="cita-precio-row cita-precio-total"><span>TOTAL A COBRAR</span><span id="cita-precio-total">—</span></div>
+      </div>
+    </div>
+
+    <!-- Sección 4: Lugar -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Lugar de la cita</div>
+      <div class="cita-modal-grid">
+        <div><div class="cita-modal-label">Modalidad</div><div class="cita-modal-val" id="cita-modalidad">—</div></div>
+        <div><div class="cita-modal-label">Duración total</div><div class="cita-modal-val" id="cita-dur">—</div></div>
+      </div>
+      <div id="cita-direccion-wrap" style="display:none;margin-top:10px;">
+        <div class="cita-modal-label">Dirección</div>
+        <div class="cita-modal-val" id="cita-direccion">—</div>
+      </div>
+      <div id="cita-zona-wrap" style="margin-top:10px;">
+        <div class="cita-modal-label">Zona</div>
+        <div class="cita-modal-val" id="cita-zona">—</div>
+      </div>
+    </div>
+
+    <!-- Sección 5: Notas -->
+    <div class="cita-modal-section" id="cita-notas-wrap" style="display:none">
+      <div class="cita-modal-section-title">Notas del cliente</div>
+      <div class="cita-modal-val" id="cita-notas-cliente" style="white-space:pre-wrap;font-style:italic;">—</div>
+    </div>
+    <div class="cita-modal-section" id="cita-notas-int-wrap" style="display:none">
+      <div class="cita-modal-section-title">Notas internas (equipo)</div>
+      <div class="cita-modal-val" id="cita-notas-internas" style="white-space:pre-wrap;font-style:italic;color:#9a4c00;">—</div>
+    </div>
+
     <div class="cita-modal-actions" id="cita-actions"></div>
     <p class="cita-modal-note" id="cita-note"></p>
   </div>
@@ -1474,8 +1551,14 @@
     const horaTxt = sinFecha ? 'Contactar cliente' : fmtHora(b.hora);
     const personaLine = (isMulti && b.persona_label)
       ? `<div class="cal-chip-persona">${escapeHtml(b.persona_label)}</div>` : '';
-    const durBlock = b.duracion_min
-      ? `<div class="cal-chip-svc" style="display:flex;align-items:center;gap:4px;">${iconClock}<span>${b.duracion_min} min</span></div>` : '';
+    // Total a cobrar = servicios + traslado
+    const precioTotalChip = (Number(b.precio_total) || 0) + (Number(b.costo_traslado) || 0);
+    const durPrecioBlock = (b.duracion_min || precioTotalChip > 0)
+      ? `<div class="cal-chip-svc" style="display:flex;align-items:center;gap:6px;justify-content:space-between;margin-top:3px;">`
+        + (b.duracion_min ? `<span style="display:inline-flex;align-items:center;gap:3px;">${iconClock}${b.duracion_min} min</span>` : '<span></span>')
+        + (precioTotalChip > 0 ? `<span style="font-weight:800;color:var(--olive-dark);">$${precioTotalChip.toLocaleString('es-MX')}</span>` : '')
+        + '</div>' : '';
+    const durBlock = durPrecioBlock;
     const svcBlock = b.servicios_label
       ? `<div class="cal-chip-svc">${escapeHtml(b.servicios_label)}</div>` : '';
 
@@ -1572,26 +1655,77 @@
     const modSuffix = modTxt ? ` · ${modTxt}` : '';
     document.getElementById('cita-when').textContent = `${fechaStr} · ${fmtHora(b.hora)}${cuposSuffix}${modSuffix}`;
 
+    // ─── Sección 1: Datos del cliente ───
+    const telRaw = (b.cliente_telefono || '').toString();
+    const telDigits = telRaw.replace(/[^\d]/g, '');
     document.getElementById('cita-cliente').textContent = b.cliente || '—';
-    document.getElementById('cita-tel').textContent = b.cliente_telefono || '—';
-    document.getElementById('cita-dur').textContent = b.duracion_min ? (b.duracion_min + ' min') : '—';
-    document.getElementById('cita-precio').textContent = b.precio_mxn ? ('$' + Number(b.precio_mxn).toLocaleString('es-MX')) : '—';
-    const zonaTxt = b.zona || '—';
-    const mapsLink = b.direccion_maps_url
-      ? ` · <a href="${escapeHtml(b.direccion_maps_url)}" target="_blank" rel="noopener" style="color:var(--olive-dark);text-decoration:underline;">Maps ↗</a>`
-      : '';
-    const zonaEl = document.getElementById('cita-zona');
-    zonaEl.innerHTML = escapeHtml(zonaTxt) + mapsLink;
-    document.getElementById('cita-pref').textContent = b.preferencia_sexo || 'Indistinto';
+    const telEl = document.getElementById('cita-tel');
+    telEl.innerHTML = telRaw
+      ? `<a href="https://wa.me/${telDigits}" target="_blank" rel="noopener" style="color:var(--brown);text-decoration:none;border-bottom:1px dashed var(--olive);">${escapeHtml(telRaw)} <span style="font-size:10px;color:var(--olive-dark);">WhatsApp ↗</span></a>`
+      : '—';
+    document.getElementById('cita-email').textContent = b.cliente_email || '—';
+    const prefMap = { 'F': 'Mujer masajista', 'M': 'Hombre masajista', 'I': 'Indistinto', 'femenino':'Mujer masajista', 'masculino':'Hombre masajista' };
+    document.getElementById('cita-pref').textContent = prefMap[b.preferencia_sexo] || prefMap[String(b.preferencia_sexo).toLowerCase()] || 'Indistinto';
 
+    // ─── Sección 2: Servicios ───
     const services = Array.isArray(b.servicios) ? b.servicios : [];
     const svcEl = document.getElementById('cita-services');
     if (services.length) {
-      svcEl.innerHTML = services.map(s =>
-        `<div>• ${escapeHtml(s.name || s.slug || '—')}${s.duracion_min ? ' · ' + s.duracion_min + ' min' : ''}${s.precio_mxn ? ' · $' + Number(s.precio_mxn).toLocaleString('es-MX') : ''}</div>`
-      ).join('');
+      svcEl.innerHTML = services.map(s => {
+        const name = escapeHtml(String(s.name || s.slug || '—').split(' · ')[0].trim());
+        const dur = s.duracion_min ? `<span style="color:var(--gray-soft);">${s.duracion_min} min</span>` : '';
+        const precio = s.precio_mxn ? `<span style="color:var(--olive-dark);font-weight:700;">$${Number(s.precio_mxn).toLocaleString('es-MX')}</span>` : '';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;background:#fdfbf4;border-radius:8px;margin-bottom:6px;border:1px solid rgba(154,152,84,0.18);"><span style="font-weight:600;">${name}</span><span style="display:flex;gap:10px;align-items:center;">${dur}${precio ? ' · ' + precio : ''}</span></div>`;
+      }).join('');
     } else {
       svcEl.textContent = '—';
+    }
+
+    // ─── Sección 3: Cobro ───
+    const precioSvc = b.precio_total != null ? b.precio_total : (b.precio_mxn || null);
+    const costoTraslado = b.costo_traslado || null;
+    document.getElementById('cita-precio-svc').textContent = precioSvc != null ? '$' + Number(precioSvc).toLocaleString('es-MX') : '—';
+    const traslRow = document.getElementById('cita-precio-trasl-row');
+    if (costoTraslado && Number(costoTraslado) > 0) {
+      document.getElementById('cita-precio-trasl').textContent = '$' + Number(costoTraslado).toLocaleString('es-MX');
+      traslRow.style.display = '';
+    } else {
+      traslRow.style.display = 'none';
+    }
+    const totalFinal = (Number(precioSvc) || 0) + (Number(costoTraslado) || 0);
+    document.getElementById('cita-precio-total').textContent = totalFinal > 0 ? '$' + totalFinal.toLocaleString('es-MX') : '—';
+
+    // ─── Sección 4: Lugar ───
+    document.getElementById('cita-modalidad').textContent = modTxt || 'Individual';
+    document.getElementById('cita-dur').textContent = b.duracion_min ? (b.duracion_min + ' min') : '—';
+    const direccionWrap = document.getElementById('cita-direccion-wrap');
+    if (b.direccion_libre || b.direccion_maps_url) {
+      direccionWrap.style.display = '';
+      const direccionEl = document.getElementById('cita-direccion');
+      const dirTxt = escapeHtml(b.direccion_libre || '');
+      const mapsLink = b.direccion_maps_url
+        ? `<br><a href="${escapeHtml(b.direccion_maps_url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);text-decoration:underline;margin-top:4px;font-weight:600;">Abrir en Google Maps ↗</a>`
+        : '';
+      direccionEl.innerHTML = (dirTxt || '(sin dirección)') + mapsLink;
+    } else {
+      direccionWrap.style.display = 'none';
+    }
+    document.getElementById('cita-zona').textContent = b.zona || '—';
+
+    // ─── Sección 5: Notas ───
+    const notasCliWrap = document.getElementById('cita-notas-wrap');
+    if (b.notas_cliente && b.notas_cliente.trim()) {
+      notasCliWrap.style.display = '';
+      document.getElementById('cita-notas-cliente').textContent = b.notas_cliente;
+    } else {
+      notasCliWrap.style.display = 'none';
+    }
+    const notasIntWrap = document.getElementById('cita-notas-int-wrap');
+    if (b.notas_internas && b.notas_internas.trim()) {
+      notasIntWrap.style.display = '';
+      document.getElementById('cita-notas-internas').textContent = b.notas_internas;
+    } else {
+      notasIntWrap.style.display = 'none';
     }
 
     // Acciones según tipo
