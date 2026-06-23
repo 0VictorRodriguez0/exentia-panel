@@ -1344,35 +1344,53 @@
 
     let futurasSection = null;
     if (futurasFueraSemana.length) {
-      futurasSection = document.createElement('div');
-      futurasSection.style.cssText = 'margin:0 0 16px;padding:16px 18px;background:rgba(154,152,84,0.08);border:1.5px solid rgba(154,152,84,0.35);border-radius:12px;';
-      const titleEl = document.createElement('div');
-      titleEl.style.cssText = 'font:700 14px Inter,sans-serif;color:var(--olive-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;';
-      titleEl.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--olive);box-shadow:0 0 0 3px rgba(154,152,84,0.18);"></span>` +
-        `<span><strong>${futurasFueraSemana.length}</strong> cita${futurasFueraSemana.length>1?'s':''} fuera de esta semana</span>` +
-        `<span style="color:#7d7c3f;font-weight:500;font-size:13px;">— toca una para verla</span>`;
-      futurasSection.appendChild(titleEl);
-      const listEl = document.createElement('div');
-      listEl.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
-      futurasFueraSemana.slice(0, 5).forEach(it => {
-        const b = it.booking;
-        const link = document.createElement('div');
-        link.style.cssText = 'cursor:pointer;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid rgba(154,152,84,0.25);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:all .15s;';
-        link.addEventListener('mouseenter', () => { link.style.borderColor = 'var(--olive)'; link.style.transform = 'translateX(2px)'; });
-        link.addEventListener('mouseleave', () => { link.style.borderColor = 'rgba(154,152,84,0.25)'; link.style.transform = 'translateX(0)'; });
+      // Agrupar por semana
+      const semanas = {};
+      const diasShort = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const mesesShort = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      futurasFueraSemana.forEach(it => {
         const fd = parseDateYMD(it.fecha);
-        const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-        const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-        const fechaTxt = fd ? `${dias[fd.getDay()]} ${fd.getDate()} ${meses[fd.getMonth()]}` : it.fecha;
-        const isMultiF = b.cupos_total && b.cupos_total > 1;
-        const cuposFTxt = isMultiF ? `<span style="display:inline-block;font-size:10.5px;font-weight:700;background:rgba(154,152,84,0.18);color:var(--olive-dark);padding:1px 7px;border-radius:999px;margin-left:6px;letter-spacing:.4px;text-transform:uppercase;">${b.cupos_tomados||0}/${b.cupos_total} masajistas</span>` : '';
-        link.innerHTML = `<span><strong>${escapeHtml(b.cliente || '—')}</strong> · ${fechaTxt} ${fmtHora(b.hora)}${cuposFTxt}</span><span style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);font-weight:600;"><span>Ir</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>`;
-        link.addEventListener('click', () => {
-          if (fd) { calState.weekStart = startOfWeek(fd); renderCalendar(); setTimeout(() => openCitaModal(b.id, it.kind), 200); }
-        });
-        listEl.appendChild(link);
+        if (!fd) return;
+        const wkStart = startOfWeek(fd);
+        const key = wkStart.toISOString().slice(0,10);
+        if (!semanas[key]) semanas[key] = { wkStart, dias: {}, total: 0, fd: fd };
+        semanas[key].total++;
+        const dKey = it.fecha;
+        if (!semanas[key].dias[dKey]) semanas[key].dias[dKey] = 0;
+        semanas[key].dias[dKey]++;
+        // Guardar la primera cita más cercana para deep-link
+        if (!semanas[key].firstItem) semanas[key].firstItem = it;
       });
-      futurasSection.appendChild(listEl);
+      const semanasArr = Object.values(semanas).sort((a,b)=>a.wkStart-b.wkStart);
+
+      futurasSection = document.createElement('div');
+      futurasSection.style.cssText = 'margin:0 0 14px;padding:10px 14px;background:rgba(154,152,84,0.06);border:1px solid rgba(154,152,84,0.25);border-radius:10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;font-size:12.5px;';
+      const headerEl = document.createElement('span');
+      headerEl.style.cssText = 'font:700 11px Inter,sans-serif;color:var(--olive-dark);letter-spacing:0.6px;text-transform:uppercase;margin-right:6px;padding-right:10px;border-right:1px solid rgba(154,152,84,0.25);flex-shrink:0;';
+      headerEl.textContent = `Próximas (${futurasFueraSemana.length})`;
+      futurasSection.appendChild(headerEl);
+
+      semanasArr.slice(0, 8).forEach(s => {
+        const endDate = addDays(s.wkStart, 6);
+        const range = `${s.wkStart.getDate()} ${mesesShort[s.wkStart.getMonth()]} – ${endDate.getDate()} ${mesesShort[endDate.getMonth()]}`;
+        const chip = document.createElement('span');
+        chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#fff;border:1px solid rgba(154,152,84,0.35);color:var(--brown);cursor:pointer;transition:all .12s;font-size:12px;';
+        chip.title = `Semana ${range} · ${s.total} cita${s.total>1?'s':''}`;
+        chip.innerHTML = `<span>${range}</span><span style="font-weight:800;color:var(--olive-dark);background:rgba(154,152,84,0.18);padding:1px 7px;border-radius:999px;font-size:11px;">${s.total}</span>`;
+        chip.addEventListener('mouseenter', () => { chip.style.borderColor = 'var(--olive)'; chip.style.background = 'rgba(154,152,84,0.10)'; });
+        chip.addEventListener('mouseleave', () => { chip.style.borderColor = 'rgba(154,152,84,0.35)'; chip.style.background = '#fff'; });
+        chip.addEventListener('click', () => {
+          calState.weekStart = s.wkStart;
+          renderCalendar();
+        });
+        futurasSection.appendChild(chip);
+      });
+      if (semanasArr.length > 8) {
+        const more = document.createElement('span');
+        more.style.cssText = 'font-size:11.5px;color:var(--gray-soft);font-style:italic;';
+        more.textContent = `+ ${semanasArr.length - 8} semanas más`;
+        futurasSection.appendChild(more);
+      }
     }
 
     wrap.innerHTML = '';
