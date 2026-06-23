@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --olive: #9a9854;
@@ -904,6 +905,7 @@
       <button class="cal-nav-btn" id="cal-next" title="Semana siguiente">›</button>
       <button class="cal-today-btn" id="cal-today">Hoy</button>
       <div class="cal-spacer"></div>
+      <span id="cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-right:8px;transition:background .25s;"></span>
       <button class="cal-refresh" id="cal-refresh" title="Refrescar">↻</button>
     </div>
 
@@ -1155,12 +1157,54 @@
       document.getElementById('cal-refresh').addEventListener('click', () => fetchCitas());
     }
     fetchCitas();
-    // Auto-refresh silencioso cada 60s — no destruye la vista, solo actualiza datos en background
+    // Suscripción Realtime de Supabase: push instantáneo cuando hay cambios en bookings o slots
+    subscribeRealtime();
+    // Fallback polling cada 3 min (por si la WebSocket se cae) — totalmente silencioso
     if (!calState._pollTimer) {
       calState._pollTimer = setInterval(() => {
         if (!document.hidden && localStorage.getItem(STORAGE_KEY)) fetchCitas({ silent: true });
-      }, 60000);
+      }, 180000);
     }
+  }
+
+  // ─── Supabase Realtime ─────────────────────────────────────────────
+  const SUPABASE_URL = 'https://fneppfjeywhayknrgahe.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuZXBwZmpleXdoYXlrbnJnYWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjMzMTQsImV4cCI6MjA3NTQzOTMxNH0.DuSL3Dv44AtASDam5uL1NJecy141rT5NFaYNRtPcnvw';
+
+  function subscribeRealtime() {
+    if (calState._realtimeClient || !window.supabase) return;
+    try {
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      calState._realtimeClient = client;
+      let pendingRefresh = null;
+      const debouncedRefresh = () => {
+        if (pendingRefresh) return;
+        pendingRefresh = setTimeout(() => {
+          pendingRefresh = null;
+          if (localStorage.getItem(STORAGE_KEY)) fetchCitas({ silent: true });
+        }, 400);
+      };
+      client
+        .channel('exentia-panel-changes')
+        .on('postgres_changes',
+            { event: '*', schema: 'exentia', table: 'booking_slots' },
+            (payload) => { debouncedRefresh(); })
+        .on('postgres_changes',
+            { event: '*', schema: 'exentia', table: 'bookings' },
+            (payload) => { debouncedRefresh(); })
+        .subscribe((status) => {
+          const dot = document.getElementById('cal-realtime-dot');
+          if (dot) {
+            if (status === 'SUBSCRIBED') {
+              dot.style.background = '#3fb950';
+              dot.title = 'Conectado en vivo. Cambios aparecen al instante.';
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+              dot.style.background = '#c8a04f';
+              dot.title = 'Conexión en vivo desconectada. Usando refresh cada 3 min.';
+            }
+          }
+        });
+    } catch (e) { console.warn('realtime init failed:', e); }
   }
 
   async function fetchCitas(opts) {
