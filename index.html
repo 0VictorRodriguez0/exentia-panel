@@ -1759,7 +1759,7 @@
     const direccionEl = document.getElementById('cita-direccion');
     if (b.tipo_cita === 'sucursal') {
       direccionWrap.style.display = '';
-      const sucursalMaps = 'https://www.google.com/maps/search/?api=1&query=Plaza+Hive+Av+Huayacan+Cancun';
+      const sucursalMaps = 'https://www.google.com/maps?cid=13591666129042613786';
       direccionEl.innerHTML = 'Plaza Hive — Av. Huayacán, Cancún' +
         `<br><a href="${sucursalMaps}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);text-decoration:underline;margin-top:4px;font-weight:600;">Abrir en Google Maps ↗</a>`;
     } else if (b.direccion_libre || b.direccion_maps_url) {
