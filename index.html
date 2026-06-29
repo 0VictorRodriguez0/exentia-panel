@@ -573,6 +573,10 @@
   .cal-chip-pool-conflict .cal-chip-cliente,
   .cal-chip-pool-conflict .cal-chip-persona,
   .cal-chip-pool-conflict .cal-chip-svc { color: rgba(92,58,30,0.65); }
+  .cal-chip-pool-conflict .chip-pill-tipo-domicilio,
+  .cal-chip-pool-conflict .chip-pill-tipo-sucursal {
+    opacity: 0.6;
+  }
   .chip-pill-conflict {
     background: rgba(154,138,117,0.18);
     color: rgba(92,58,30,0.85);
@@ -647,6 +651,35 @@
   .chip-pill-mode {
     background: rgba(92,58,30,0.08); color: var(--brown);
     border: 1px solid rgba(92,58,30,0.18);
+  }
+  .chip-pill-tipo-domicilio {
+    background: #fff5e8; color: #b45309;
+    border: 1px solid #f5c896;
+  }
+  .chip-pill-tipo-sucursal {
+    background: rgba(243,228,199,0.55); color: var(--brown);
+    border: 1px solid rgba(154,152,84,0.35);
+  }
+  .cal-chip-mine .chip-pill-tipo-domicilio,
+  .cal-chip-mine .chip-pill-tipo-sucursal {
+    background: rgba(255,255,255,0.18); color: #fff;
+    border-color: rgba(255,255,255,0.32);
+  }
+  .cita-tipo-badge {
+    display: inline-block;
+    font: 700 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin: 0 0 12px 8px;
+  }
+  .cita-tipo-badge.is-domicilio {
+    background: #fff5e8; color: #b45309;
+    border: 1px solid #f5c896;
+  }
+  .cita-tipo-badge.is-sucursal {
+    background: rgba(243,228,199,0.55); color: var(--brown);
+    border: 1px solid rgba(154,152,84,0.35);
   }
   .chip-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
   .chip-status-dot {
@@ -1547,6 +1580,11 @@
       return `<span class="chip-pill chip-pill-info" title="${title}">${iconUsers}<span>${txt}</span></span>`;
     })();
     const modPill = showModBadge ? `<span class="chip-pill chip-pill-mode">${escapeHtml(modLabel)}</span>` : '';
+    const tipoPill = b.tipo_cita === 'domicilio'
+      ? `<span class="chip-pill chip-pill-tipo-domicilio">Domicilio</span>`
+      : (b.tipo_cita === 'sucursal'
+        ? `<span class="chip-pill chip-pill-tipo-sucursal">Sucursal</span>`
+        : '');
 
     const horaTxt = sinFecha ? 'Contactar cliente' : fmtHora(b.hora);
     const personaLine = (isMulti && b.persona_label)
@@ -1563,7 +1601,7 @@
       ? `<div class="cal-chip-svc">${escapeHtml(b.servicios_label)}</div>` : '';
 
     const buildMetaRow = () => {
-      const parts = [sinFechaPill, cuposPill, modPill].filter(Boolean);
+      const parts = [sinFechaPill, cuposPill, modPill, tipoPill].filter(Boolean);
       return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
     };
 
@@ -1596,7 +1634,7 @@
           ? '<span class="cal-chip-state" style="background:rgba(154,138,117,0.20);color:rgba(92,58,30,0.85);">Bloqueada</span>'
           : '<span class="cal-chip-state" style="background:rgba(154,152,84,0.15);color:var(--olive-dark);">Disponible</span>');
       const buildMetaRowPool = () => {
-        const parts = [sinFechaPill, cuposPill, modPill].filter(Boolean);
+        const parts = [sinFechaPill, cuposPill, modPill, tipoPill].filter(Boolean);
         return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
       };
       chip.innerHTML =
@@ -1638,6 +1676,25 @@
     badge.textContent = finalKind === 'mine'
       ? (isReoffer ? 'Mía · re-ofrecida' : 'Mía')
       : (isReoffer ? 'Re-ofrecida en el pool' : 'En el pool');
+
+    // Badge de tipo_cita (Domicilio / Sucursal) al lado del badge principal
+    let tipoBadgeEl = document.getElementById('cita-tipo-badge');
+    if (!tipoBadgeEl) {
+      tipoBadgeEl = document.createElement('span');
+      tipoBadgeEl.id = 'cita-tipo-badge';
+      badge.parentNode.insertBefore(tipoBadgeEl, badge.nextSibling);
+    }
+    if (b.tipo_cita === 'domicilio') {
+      tipoBadgeEl.className = 'cita-tipo-badge is-domicilio';
+      tipoBadgeEl.textContent = 'Domicilio';
+      tipoBadgeEl.style.display = '';
+    } else if (b.tipo_cita === 'sucursal') {
+      tipoBadgeEl.className = 'cita-tipo-badge is-sucursal';
+      tipoBadgeEl.textContent = 'Sucursal';
+      tipoBadgeEl.style.display = '';
+    } else {
+      tipoBadgeEl.style.display = 'none';
+    }
 
     const isMulti = b.cupos_total && b.cupos_total > 1;
     const titleSuffix = isMulti && b.persona_label ? ` · ${b.persona_label}` : '';
@@ -1699,14 +1756,22 @@
     document.getElementById('cita-modalidad').textContent = modTxt || 'Individual';
     document.getElementById('cita-dur').textContent = b.duracion_min ? (b.duracion_min + ' min') : '—';
     const direccionWrap = document.getElementById('cita-direccion-wrap');
-    if (b.direccion_libre || b.direccion_maps_url) {
+    const direccionEl = document.getElementById('cita-direccion');
+    if (b.tipo_cita === 'sucursal') {
       direccionWrap.style.display = '';
-      const direccionEl = document.getElementById('cita-direccion');
+      const sucursalMaps = 'https://www.google.com/maps/search/?api=1&query=Plaza+Hive+Av+Huayacan+Cancun';
+      direccionEl.innerHTML = 'Plaza Hive — Av. Huayacán, Cancún' +
+        `<br><a href="${sucursalMaps}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);text-decoration:underline;margin-top:4px;font-weight:600;">Abrir en Google Maps ↗</a>`;
+    } else if (b.direccion_libre || b.direccion_maps_url) {
+      direccionWrap.style.display = '';
       const dirTxt = escapeHtml(b.direccion_libre || '');
       const mapsLink = b.direccion_maps_url
         ? `<br><a href="${escapeHtml(b.direccion_maps_url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:var(--olive-dark);text-decoration:underline;margin-top:4px;font-weight:600;">Abrir en Google Maps ↗</a>`
         : '';
       direccionEl.innerHTML = (dirTxt || '(sin dirección)') + mapsLink;
+    } else if (b.tipo_cita === 'domicilio') {
+      direccionWrap.style.display = '';
+      direccionEl.innerHTML = '<span style="color:var(--gray-soft);font-style:italic;">(sin dirección registrada)</span>';
     } else {
       direccionWrap.style.display = 'none';
     }
