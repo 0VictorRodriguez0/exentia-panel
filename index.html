@@ -709,6 +709,47 @@
     border-color: rgba(255,255,255,0.25);
   }
 
+  /* ── View-as banner + select ── */
+  .view-as-banner {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, #fff7ec 0%, #fce5be 100%);
+    border: 1.5px solid #d4a05c;
+    color: #6b4517;
+    padding: 12px 18px; border-radius: 12px;
+    margin-bottom: 14px;
+    font: 13.5px/1.45 'Inter', sans-serif;
+    box-shadow: 0 2px 8px rgba(212,160,92,0.15);
+    flex-wrap: wrap;
+  }
+  .view-as-banner-text { flex: 1 1 auto; min-width: 260px; }
+  .view-as-banner-text strong { color: #5c3a0d; font-weight: 700; }
+  .view-as-banner-btn {
+    background: var(--brown); color: var(--off-white);
+    border: none; border-radius: 8px;
+    padding: 8px 14px; cursor: pointer;
+    font: 600 12.5px 'Inter', sans-serif;
+    transition: background .15s; flex: 0 0 auto;
+  }
+  .view-as-banner-btn:hover { background: #4a2e15; }
+  .cal-view-as-select {
+    background: #fffefa;
+    color: var(--brown);
+    border: 1.5px solid rgba(154,138,117,0.32);
+    border-radius: 8px;
+    padding: 7px 30px 7px 12px;
+    font: 13px 'Inter', sans-serif;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237d7c3f' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .cal-view-as-select:focus { border-color: var(--olive); }
+  .cal-view-as-select:hover { border-color: var(--olive-light); }
+
   /* ── Admin panel — mosaico de mini calendarios ── */
   .admin-grid {
     display: grid;
@@ -1216,6 +1257,12 @@
     </div>
   </div>
   <div class="panel-wrap panel-wrap-cal">
+    <div id="view-as-banner" class="view-as-banner" style="display:none">
+      <div class="view-as-banner-text">
+        <strong>Vista de prueba:</strong> estás viendo como <span id="view-as-banner-name">—</span> (solo lectura, no puedes tomar ni cancelar citas).
+      </div>
+      <button type="button" class="view-as-banner-btn" onclick="exitViewAs()">Volver a vista admin</button>
+    </div>
     <div class="panel-header cal-header">
       <h1>Hola, <em><span id="h-name">—</span></em></h1>
       <p class="cal-subtitle">Tus citas y las disponibles en el pool de masajistas.</p>
@@ -1290,7 +1337,11 @@
       <button class="cal-nav-btn" id="admin-cal-next" title="Semana siguiente">›</button>
       <button class="cal-today-btn" id="admin-cal-today">Hoy</button>
       <div class="cal-spacer"></div>
-      <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-right:8px;transition:background .25s;"></span>
+      <label for="admin-view-as-select" style="font:11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-right:6px;">Ver como</label>
+      <select id="admin-view-as-select" class="cal-view-as-select" title="Ver el panel como uno de los masajistas (solo lectura)">
+        <option value="">— Selecciona masajista —</option>
+      </select>
+      <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-left:12px;margin-right:8px;transition:background .25s;"></span>
       <button class="cal-refresh" id="admin-cal-refresh" title="Refrescar">↻</button>
     </div>
     <div id="admin-grid" class="admin-grid">
@@ -1374,6 +1425,7 @@
   const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
   const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
+  const ADMIN_VIEW_AS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-view-as';
   const ADMIN_USERNAME = 'exentiaadmin';
   const STORAGE_KEY = 'exentia_panel_jwt';
   const OTP_PENDING_KEY = 'exentia_otp_pending';
@@ -1456,6 +1508,9 @@
     document.getElementById('view-login').style.display = 'none';
     const adminView = document.getElementById('view-admin');
     if (adminView) adminView.style.display = 'none';
+    // Si veníamos de view-as, limpiar banner — este es login normal de masajista
+    const vab = document.getElementById('view-as-banner');
+    if (vab) vab.style.display = 'none';
     const v = document.getElementById('view-panel');
     v.style.display = 'flex';
     document.getElementById('t-name').textContent = payload.name || '—';
@@ -1598,6 +1653,7 @@
       html.push(renderTherapistCard(t, miasT, weekStart));
     });
     grid.innerHTML = html.join('');
+    populateViewAsDropdown();
   }
 
   function _avatarInitials(nombre) {
@@ -1685,6 +1741,80 @@
     openCitaModal(slotId, entry.kind, { readOnly: true, terapeuta_id: entry.terapeuta_id });
   }
   window.openAdminCitaModal = openAdminCitaModal;
+
+  // ─── Modo "Ver como" (admin impersonando un masajista, solo lectura) ────
+  const viewAsState = { active: false, terapeutaId: null, terapeutaNombre: null };
+
+  function populateViewAsDropdown() {
+    const sel = document.getElementById('admin-view-as-select');
+    if (!sel || !adminState.data) return;
+    const terapeutas = adminState.data.terapeutas || [];
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Selecciona masajista —</option>'
+      + terapeutas.map(t => '<option value="' + t.id + '" data-name="' + escapeHtml(t.nombre) + '">' + escapeHtml(t.nombre) + '</option>').join('');
+    if (current && terapeutas.find(t => t.id === current)) sel.value = current;
+    if (!sel._bound) {
+      sel.addEventListener('change', function(){
+        const id = sel.value;
+        if (!id) return;
+        const t = (adminState.data.terapeutas || []).find(x => x.id === id);
+        if (t) enterViewAs(t.id, t.nombre);
+      });
+      sel._bound = true;
+    }
+  }
+
+  function enterViewAs(terapeutaId, terapeutaNombre) {
+    viewAsState.active = true;
+    viewAsState.terapeutaId = terapeutaId;
+    viewAsState.terapeutaNombre = terapeutaNombre;
+
+    // Esconder admin, mostrar panel masajista
+    document.getElementById('view-admin').style.display = 'none';
+    const v = document.getElementById('view-panel');
+    v.style.display = 'flex';
+
+    // Banner de modo prueba
+    const banner = document.getElementById('view-as-banner');
+    if (banner) {
+      banner.style.display = 'flex';
+      document.getElementById('view-as-banner-name').textContent = terapeutaNombre || '—';
+    }
+
+    // Topbar: mostrar nombre + role
+    document.getElementById('t-name').textContent = terapeutaNombre || '—';
+    document.getElementById('t-role').textContent = 'masajista (vista de prueba)';
+    document.getElementById('h-name').textContent = (terapeutaNombre || '—').split(' ')[0];
+
+    // Reset state del calendario para evitar mezclar con datos previos
+    calState.bookingsById = {};
+    if (typeof initCalendar === 'function') initCalendar();
+  }
+
+  function exitViewAs() {
+    viewAsState.active = false;
+    viewAsState.terapeutaId = null;
+    viewAsState.terapeutaNombre = null;
+    // Ocultar banner + restaurar select
+    const banner = document.getElementById('view-as-banner');
+    if (banner) banner.style.display = 'none';
+    const sel = document.getElementById('admin-view-as-select');
+    if (sel) sel.value = '';
+    // Cerrar modal si abierto
+    closeCitaModal();
+    // Volver a vista admin
+    if (adminState.payload) {
+      showAdminPanel(adminState.payload);
+    } else {
+      // Fallback: re-leer payload del JWT
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      if (jwt) {
+        const p = decodeJWT(jwt);
+        if (p && p.role === 'admin') showAdminPanel(p);
+      }
+    }
+  }
+  window.exitViewAs = exitViewAs;
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
@@ -1851,12 +1981,17 @@
       return;
     }
     try {
-      const res = await fetch(CITAS_ENDPOINT, {
+      // Si el admin está en modo "view-as" (impersonando un masajista), usa el endpoint específico
+      const endpoint = (viewAsState.active && viewAsState.terapeutaId)
+        ? (ADMIN_VIEW_AS_ENDPOINT + '?as=' + encodeURIComponent(viewAsState.terapeutaId))
+        : CITAS_ENDPOINT;
+      const res = await fetch(endpoint, {
         headers: { 'Authorization': 'Bearer ' + jwt }
       });
       if (!res.ok) {
         const txt = await res.text().catch(() => '');
         if (res.status === 401) {
+          if (viewAsState.active) { exitViewAs(); return; }
           logout();
           return;
         }
@@ -2179,7 +2314,7 @@
   // ─── Modal de detalle de cita ───────────────────────────────────────────
   function openCitaModal(bookingId, kind, opts) {
     opts = opts || {};
-    const readOnly = !!opts.readOnly;
+    const readOnly = !!opts.readOnly || viewAsState.active;
     const ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
     if (!ref) return;
     const b = ref.booking;
