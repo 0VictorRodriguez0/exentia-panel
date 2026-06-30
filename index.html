@@ -9,6 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- intl-tel-input v23: bandera + código de país en el input del SMS fallback (mismo CDN que el cliente exentia-pagina.html) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/css/intlTelInput.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/js/intlTelInput.min.js"></script>
 <style>
   :root {
     --olive: #9a9854;
@@ -706,6 +709,133 @@
     border-color: rgba(255,255,255,0.25);
   }
 
+  /* ── Admin panel — mosaico de mini calendarios ── */
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 18px;
+    margin-top: 6px;
+  }
+  .admin-grid .therapist-card.full-width { grid-column: 1 / -1; }
+  .admin-empty {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 60px 20px; color: var(--brown); opacity: 0.7;
+    font: 14px 'Inter', sans-serif;
+  }
+  .therapist-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.07);
+    border-top: 4px solid var(--olive);
+    display: flex; flex-direction: column;
+  }
+  .therapist-card.pool-card {
+    border-top-color: var(--olive-light);
+    border-top-style: dashed;
+    background: linear-gradient(180deg, #fbf7eb 0%, #ffffff 60%);
+  }
+  .therapist-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 12px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(154,138,117,0.18);
+  }
+  .therapist-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--olive); color: var(--off-white);
+    font: 700 15px 'Lato', sans-serif;
+    letter-spacing: 0.5px;
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+  }
+  .therapist-card.pool-card .therapist-avatar {
+    background: rgba(154,152,84,0.18); color: var(--olive-dark);
+    border: 1.5px dashed var(--olive);
+  }
+  .therapist-card-name {
+    font: 600 16px 'Inter', sans-serif;
+    color: var(--brown);
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .therapist-card-count {
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    background: rgba(154,152,84,0.12);
+    padding: 5px 9px; border-radius: 999px;
+    flex: 0 0 auto;
+  }
+  /* Mini calendario reusa la grilla pero compactada */
+  .cal-week-grid-mini {
+    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px;
+  }
+  .cal-week-grid-mini .cal-day {
+    background: #fbf9f1;
+    border-radius: 7px;
+    padding: 6px 4px 4px;
+    min-height: 130px;
+    font-size: 10.5px;
+  }
+  .cal-week-grid-mini .cal-day .cal-day-head {
+    padding: 0 0 4px;
+    font-size: 9.5px;
+    letter-spacing: 0.4px;
+  }
+  .cal-week-grid-mini .cal-day .cal-day-num {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .cal-week-grid-mini .cal-day-list {
+    gap: 4px;
+  }
+  .cal-week-grid-mini .cal-chip {
+    padding: 5px 6px;
+    border-radius: 6px;
+    gap: 2px;
+  }
+  .cal-week-grid-mini .cal-chip-time { font-size: 11px; }
+  .cal-week-grid-mini .cal-chip-cliente { font-size: 10.5px; }
+  .cal-week-grid-mini .cal-chip-svc { font-size: 9.5px; }
+  .cal-week-grid-mini .cal-chip-state {
+    font-size: 8.5px;
+    padding: 2px 4px;
+  }
+  .cal-week-grid-mini .cal-chip-meta,
+  .cal-week-grid-mini .cal-chip-persona { display: none; }
+  /* Pool card sin grid de 7 — lista vertical compacta */
+  .pool-card-list {
+    display: grid; gap: 6px;
+    max-height: 260px; overflow-y: auto;
+  }
+  .pool-card-list .cal-chip {
+    flex-direction: row; align-items: center;
+    padding: 7px 9px; gap: 8px;
+  }
+  .pool-card-list .cal-chip-time {
+    flex: 0 0 auto; font-size: 12px;
+    border-right: 1px solid rgba(154,138,117,0.25);
+    padding-right: 8px;
+  }
+  .pool-card-list .cal-chip-cliente,
+  .pool-card-list .cal-chip-svc { flex: 1 1 auto; font-size: 11.5px; }
+  .pool-card-list .cal-chip-state { flex: 0 0 auto; font-size: 9.5px; }
+  .pool-card-list .cal-chip-meta { display: none; }
+  /* Login: admin password form se ve igual que email-form */
+  #admin-password-form { display: flex; flex-direction: column; gap: 10px; }
+  #admin-password-input {
+    width: 100%; padding: 13px 14px; font-size: 14.5px;
+    border: 1.5px solid rgba(154,138,117,0.32); border-radius: 8px;
+    background: #fffefa; color: var(--brown); font-family: 'Inter', sans-serif;
+    box-sizing: border-box; outline: none; transition: border-color .15s;
+  }
+  #admin-password-input:focus { border-color: var(--olive); }
+  @media (max-width: 600px) {
+    .admin-grid { grid-template-columns: 1fr; gap: 12px; }
+    .cal-week-grid-mini .cal-day { min-height: 100px; }
+  }
+
   /* Modal de detalle de cita */
   .cita-modal {
     position: fixed; inset: 0;
@@ -893,6 +1023,114 @@
     .cal-toolbar { flex-wrap: wrap; }
     .cal-range { width: 100%; order: -1; }
   }
+
+  /* ============ intl-tel-input dentro del SMS fallback del login (#code-sms-box) ============
+     Replica el scope del simulador post-pago del cliente (#pg-callme-box en exentia-pagina.html).
+     Paleta olive/cream/brown, dropdown abre HACIA ARRIBA porque el bloque vive al final del
+     login-card y queremos evitar clip al fondo de la viewport en mobile. */
+  #code-sms-box .iti { width: 100%; display: block; position: relative; flex: 1 1 160px; min-width: 0; }
+  #code-sms-box .iti input[type="tel"].iti__tel-input,
+  #code-sms-box #code-sms-phone {
+    width: 100% !important;
+    padding: 10px 12px 10px 90px !important;
+    border: 1px solid #d8cfb8;
+    border-radius: 6px;
+    font: 500 14px 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+  #code-sms-box .iti input[type="tel"].iti__tel-input:focus {
+    outline: none; border-color: var(--olive, #9a9854);
+  }
+  #code-sms-box .iti__country-container {
+    position: absolute !important;
+    top: 0 !important; bottom: 0 !important; left: 0 !important;
+    height: auto !important;
+    z-index: 2;
+    padding: 1px;
+  }
+  #code-sms-box .iti__selected-country {
+    height: 100%;
+    background: transparent;
+    border: none;
+    padding: 0 10px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #code-sms-box .iti__selected-country:hover,
+  #code-sms-box .iti__selected-country:focus,
+  #code-sms-box .iti__selected-country[aria-expanded="true"] { background: rgba(154,152,84,0.10); }
+  #code-sms-box .iti__selected-dial-code { color: var(--brown, #5c3a1e); font-weight: 500; margin-left: 4px; }
+  #code-sms-box .iti__arrow { border-top-color: var(--olive-dark, #7d7c3f); margin-left: 4px; }
+  #code-sms-box .iti__arrow--up { border-bottom-color: var(--olive-dark, #7d7c3f); }
+  /* Dropdown HACIA ARRIBA: el code-sms-box vive en login-card que sí scrollea, pero el
+     fallback queda visualmente al fondo y abrir abajo recorta en mobile landscape. */
+  #code-sms-box .iti__dropdown-content {
+    position: absolute !important;
+    bottom: 100% !important;
+    top: auto !important;
+    left: 0 !important;
+    width: 320px !important;
+    min-width: 280px !important;
+    max-width: 90vw;
+    background: #fff !important;
+    border: 1px solid rgba(154,152,84,0.30) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 -12px 32px -8px rgba(74,53,32,0.20) !important;
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+    z-index: 1000 !important;
+    max-height: min(320px, 40vh) !important;
+    overflow-y: auto !important;
+  }
+  #code-sms-box .iti__dropdown-content:has(.iti__country-list.iti__hide) { display: none !important; }
+  #code-sms-box .iti__dropdown-content .iti__country-list {
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+  }
+  #code-sms-box .iti__country {
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px;
+    cursor: pointer;
+  }
+  #code-sms-box .iti__country:hover { background: rgba(154,152,84,0.10) !important; }
+  #code-sms-box .iti__country.iti__highlight,
+  #code-sms-box .iti__country.iti__active { background: rgba(154,152,84,0.18) !important; }
+  #code-sms-box .iti__country-name { color: var(--brown, #5c3a1e); font-weight: 500; }
+  #code-sms-box .iti__dial-code { color: var(--gray-soft, #9a8d75); margin-left: auto; font-size: 13px; }
+  #code-sms-box .iti__flag-box { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; }
+  #code-sms-box .iti__divider { border-top: 1px solid rgba(154,152,84,0.18); margin: 4px 0; }
+  #code-sms-box .iti__search-input {
+    border: 1px solid rgba(154,152,84,0.22) !important;
+    background: var(--off-white, #fdfbf4);
+    padding: 10px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin: 8px 8px 6px 8px !important;
+    width: calc(100% - 16px) !important;
+    box-sizing: border-box;
+  }
+  #code-sms-box .iti__search-input:focus { outline: none; border-color: var(--olive, #9a9854); }
+  #code-sms-box .iti__a11y-text {
+    position: absolute !important;
+    width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (max-width: 520px) {
+    #code-sms-box .iti { width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -934,8 +1172,24 @@
       <div class="code-actions">
         <button type="button" class="code-link" id="code-resend" disabled>Reenviar código</button>
         <span class="code-sep">·</span>
+        <button type="button" class="code-link" id="code-sms">Enviarme el código por SMS</button>
+        <span class="code-sep">·</span>
         <button type="button" class="code-link" onclick="resetToEmail()">Cambiar correo</button>
       </div>
+      <div id="code-sms-box" style="display:none; margin-top:12px; padding:12px; background:#fafaf6; border:1px dashed var(--olive,#9a9854); border-radius:8px;">
+        <label for="code-sms-phone" style="display:block;font-size:12.5px;color:var(--brown,#5c3a1e);margin-bottom:6px;">Tu WhatsApp / teléfono para recibir el SMS</label>
+        <div style="display:flex; gap:8px; align-items:stretch; flex-wrap:wrap;">
+          <input type="tel" id="code-sms-phone" inputmode="tel" autocomplete="tel" placeholder="998 123 4567">
+          <button type="button" id="code-sms-send" style="background:var(--olive,#9a9854);color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font:600 13px 'Inter',sans-serif;flex:0 0 auto;">Enviar SMS</button>
+        </div>
+        <div id="code-sms-error" style="display:none;margin-top:8px;font-size:12px;color:#b53b3b;"></div>
+      </div>
+    </div>
+    <div id="admin-password-form" class="magic-form" style="display:none">
+      <label for="admin-password-input" class="magic-label">Acceso de administrador</label>
+      <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="current-password">
+      <button type="button" id="admin-password-submit" class="magic-btn">Entrar como admin</button>
+      <button type="button" class="code-link" onclick="resetToEmail()" style="margin-top:8px;">Cambiar usuario</button>
     </div>
     <div class="separator"><span>o</span></div>
     <div id="google-btn-wrap">
@@ -1013,6 +1267,38 @@
   </div>
 </div>
 
+<!-- ── PANEL ADMIN (mosaico de calendarios) ── -->
+<div id="view-admin" style="display:none; flex:1; flex-direction:column;">
+  <div class="topbar">
+    <div class="topbar-brand">exentia <span class="sub">VISTA ADMINISTRADOR</span></div>
+    <div class="topbar-user">
+      <div>
+        <div class="topbar-user-name">Administrador</div>
+        <div class="topbar-user-role">Acceso total — solo lectura</div>
+      </div>
+      <button class="topbar-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="panel-wrap panel-wrap-cal">
+    <div class="panel-header cal-header">
+      <h1>Vista del <em>administrador</em></h1>
+      <p class="cal-subtitle">Todos los calendarios de masajistas + el pool de citas disponibles.</p>
+    </div>
+    <div class="cal-toolbar">
+      <button class="cal-nav-btn" id="admin-cal-prev" title="Semana anterior">‹</button>
+      <div class="cal-range" id="admin-cal-range">—</div>
+      <button class="cal-nav-btn" id="admin-cal-next" title="Semana siguiente">›</button>
+      <button class="cal-today-btn" id="admin-cal-today">Hoy</button>
+      <div class="cal-spacer"></div>
+      <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-right:8px;transition:background .25s;"></span>
+      <button class="cal-refresh" id="admin-cal-refresh" title="Refrescar">↻</button>
+    </div>
+    <div id="admin-grid" class="admin-grid">
+      <div class="admin-empty"><div class="spinner sm"></div><span>Cargando vista de administrador...</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── MODAL detalle de cita ── -->
 <div id="cita-modal" class="cita-modal" style="display:none">
   <div class="cita-modal-backdrop" onclick="closeCitaModal()"></div>
@@ -1086,6 +1372,9 @@
   const AUTH_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-google-login';
   const OTP_REQUEST_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-request';
   const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
+  const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
+  const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
+  const ADMIN_USERNAME = 'exentiaadmin';
   const STORAGE_KEY = 'exentia_panel_jwt';
   const OTP_PENDING_KEY = 'exentia_otp_pending';
   const GSI_TIMEOUT_MS = 12000; // si GSI no carga en 12s asumimos error de red
@@ -1126,6 +1415,8 @@
 
   function showLogin(errorMsg) {
     document.getElementById('view-panel').style.display = 'none';
+    const adminView = document.getElementById('view-admin');
+    if (adminView) adminView.style.display = 'none';
     document.getElementById('view-login').style.display = 'flex';
     document.getElementById('login-inflight').classList.remove('show');
 
@@ -1163,6 +1454,8 @@
 
   function showPanel(payload) {
     document.getElementById('view-login').style.display = 'none';
+    const adminView = document.getElementById('view-admin');
+    if (adminView) adminView.style.display = 'none';
     const v = document.getElementById('view-panel');
     v.style.display = 'flex';
     document.getElementById('t-name').textContent = payload.name || '—';
@@ -1171,6 +1464,227 @@
     hideBootLoader();
     initCalendar();
   }
+
+  // ─── Vista admin (mosaico de mini calendarios) ──────────────────────────
+  const adminState = {
+    payload: null,
+    weekStart: null,
+    data: null,            // último response del endpoint admin
+    bookingsById: {},      // {slot_id: {kind, booking, terapeuta_id}}
+    realtimeChannel: null,
+    pollTimer: null,
+    refreshTimer: null
+  };
+
+  function showAdminPanel(payload) {
+    document.getElementById('view-login').style.display = 'none';
+    document.getElementById('view-panel').style.display = 'none';
+    const v = document.getElementById('view-admin');
+    v.style.display = 'flex';
+    hideBootLoader();
+    adminState.payload = payload;
+    adminState.weekStart = startOfWeek(new Date());
+    bindAdminToolbar();
+    fetchAdminCitas();
+    subscribeAdminRealtime();
+    if (adminState.pollTimer) clearInterval(adminState.pollTimer);
+    adminState.pollTimer = setInterval(() => fetchAdminCitas({ silent: true }), 180000);
+  }
+
+  function bindAdminToolbar() {
+    const prev = document.getElementById('admin-cal-prev');
+    const next = document.getElementById('admin-cal-next');
+    const today = document.getElementById('admin-cal-today');
+    const refresh = document.getElementById('admin-cal-refresh');
+    if (prev && !prev._bound) { prev.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, -7); renderAdminCalendars(); }); prev._bound = true; }
+    if (next && !next._bound) { next.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, 7); renderAdminCalendars(); }); next._bound = true; }
+    if (today && !today._bound) { today.addEventListener('click', () => { adminState.weekStart = startOfWeek(new Date()); renderAdminCalendars(); }); today._bound = true; }
+    if (refresh && !refresh._bound) { refresh.addEventListener('click', () => fetchAdminCitas()); refresh._bound = true; }
+  }
+
+  async function fetchAdminCitas(opts) {
+    opts = opts || {};
+    const grid = document.getElementById('admin-grid');
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { showLogin(); return; }
+    if (!opts.silent) {
+      grid.innerHTML = '<div class="admin-empty"><div class="spinner sm"></div><span>Cargando vista de administrador...</span></div>';
+    }
+    try {
+      const res = await fetch(ADMIN_CITAS_ENDPOINT, {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(STORAGE_KEY);
+        showLogin('Tu sesión expiró. Vuelve a iniciar como admin.');
+        return;
+      }
+      const data = await res.json();
+      if (!data || !data.ok) {
+        grid.innerHTML = '<div class="admin-empty"><span>No pudimos cargar los datos. Intenta refrescar.</span></div>';
+        return;
+      }
+      adminState.data = data;
+      // Index bookings
+      adminState.bookingsById = {};
+      (data.mias || []).forEach(b => { adminState.bookingsById[b.slot_id || b.id] = { kind: 'mine', booking: b, terapeuta_id: b.terapeuta_id }; });
+      (data.pool || []).forEach(b => { adminState.bookingsById[b.slot_id || b.id] = { kind: 'pool', booking: b }; });
+      renderAdminCalendars();
+    } catch (err) {
+      grid.innerHTML = '<div class="admin-empty"><span>Error de conexión. Reintentaremos solos en unos segundos.</span></div>';
+    }
+  }
+
+  function debouncedAdminRefresh() {
+    if (adminState.refreshTimer) clearTimeout(adminState.refreshTimer);
+    adminState.refreshTimer = setTimeout(() => fetchAdminCitas({ silent: true }), 400);
+  }
+
+  function subscribeAdminRealtime() {
+    if (!window.supabase || !window.supabase.createClient) return;
+    if (adminState.realtimeChannel) return;
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      adminState.realtimeChannel = sb.channel('exentia-admin-changes')
+        .on('postgres_changes', { event: '*', schema: 'exentia', table: 'booking_slots' }, () => debouncedAdminRefresh())
+        .on('postgres_changes', { event: '*', schema: 'exentia', table: 'bookings' }, () => debouncedAdminRefresh())
+        .subscribe(status => {
+          const dot = document.getElementById('admin-cal-realtime-dot');
+          if (!dot) return;
+          if (status === 'SUBSCRIBED') { dot.style.background = '#34a853'; dot.title = 'Conexión en vivo activa'; }
+          else { dot.style.background = '#c8a04f'; dot.title = 'Esperando conexión en vivo…'; }
+        });
+    } catch (_) {}
+  }
+
+  function renderAdminCalendars() {
+    const data = adminState.data;
+    if (!data) return;
+    const grid = document.getElementById('admin-grid');
+    const rangeEl = document.getElementById('admin-cal-range');
+    if (rangeEl) rangeEl.textContent = fmtRange(adminState.weekStart);
+
+    const weekStart = adminState.weekStart;
+    const weekEnd = addDays(weekStart, 7);
+    const terapeutas = data.terapeutas || [];
+    const allMias = data.mias || [];
+    const pool = data.pool || [];
+
+    // Indexar mias por terapeuta_id
+    const miasByTerapeuta = {};
+    terapeutas.forEach(t => miasByTerapeuta[t.id] = []);
+    allMias.forEach(m => {
+      if (!m.terapeuta_id) return;
+      if (!miasByTerapeuta[m.terapeuta_id]) miasByTerapeuta[m.terapeuta_id] = [];
+      miasByTerapeuta[m.terapeuta_id].push(m);
+    });
+
+    // Filtrar pool/mias por semana visible
+    function inWeek(slot) {
+      if (!slot.fecha) return false;
+      const d = parseDateYMD(slot.fecha);
+      return d >= weekStart && d < weekEnd;
+    }
+    const poolWeek = pool.filter(inWeek);
+
+    // Construir cards
+    const html = [];
+    // Card del pool (ancho completo)
+    html.push(renderPoolCard(poolWeek));
+    // Una card por terapeuta
+    terapeutas.forEach(t => {
+      const miasT = (miasByTerapeuta[t.id] || []).filter(inWeek);
+      html.push(renderTherapistCard(t, miasT, weekStart));
+    });
+    grid.innerHTML = html.join('');
+  }
+
+  function _avatarInitials(nombre) {
+    const parts = (nombre || '').split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function renderPoolCard(slots) {
+    const count = slots.length;
+    const inner = count === 0
+      ? '<div class="admin-empty" style="padding:20px 10px;font-size:12.5px;">Sin citas en pool esta semana.</div>'
+      : slots.slice(0, 30).map(s => renderAdminChip(s, 'pool')).join('');
+    return '<div class="therapist-card pool-card full-width">'
+      + '<div class="therapist-card-header">'
+      +   '<div class="therapist-avatar">P</div>'
+      +   '<div class="therapist-card-name">Pool de citas disponibles</div>'
+      +   '<div class="therapist-card-count">' + count + ' esta semana</div>'
+      + '</div>'
+      + '<div class="pool-card-list">' + inner + '</div>'
+      + '</div>';
+  }
+
+  function renderTherapistCard(t, mias, weekStart) {
+    const count = mias.length;
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i);
+      days.push(d);
+    }
+    const today = new Date();
+    const grid = days.map(d => {
+      const dayItems = mias.filter(m => {
+        const md = parseDateYMD(m.fecha);
+        return md && isSameDay(md, d);
+      }).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+      const dayHead = '<div class="cal-day-head"><span class="cal-day-num">' + d.getDate() + '</span> <span class="cal-day-name">' + ['lun','mar','mié','jue','vie','sáb','dom'][((d.getDay() + 6) % 7)] + '</span></div>';
+      const itemsHtml = dayItems.length
+        ? '<div class="cal-day-list">' + dayItems.map(s => renderAdminChip(s, 'mine')).join('') + '</div>'
+        : '';
+      const classes = ['cal-day'];
+      if (isSameDay(d, today)) classes.push('is-today');
+      else if (d < today && !isSameDay(d, today)) classes.push('is-past');
+      return '<div class="' + classes.join(' ') + '">' + dayHead + itemsHtml + '</div>';
+    }).join('');
+
+    return '<div class="therapist-card">'
+      + '<div class="therapist-card-header">'
+      +   '<div class="therapist-avatar">' + _avatarInitials(t.nombre) + '</div>'
+      +   '<div class="therapist-card-name">' + escapeHtml(t.nombre || '—') + '</div>'
+      +   '<div class="therapist-card-count">' + count + ' citas</div>'
+      + '</div>'
+      + '<div class="cal-week-grid cal-week-grid-mini">' + grid + '</div>'
+      + '</div>';
+  }
+
+  function renderAdminChip(slot, kind) {
+    const isMine = kind === 'mine';
+    const cls = isMine ? 'cal-chip cal-chip-mine' : 'cal-chip cal-chip-pool';
+    const stateLabel = isMine ? 'Tomada' : 'Disponible';
+    const stateStyle = isMine
+      ? 'background:rgba(255,255,255,0.22);color:#fff;'
+      : 'background:rgba(154,152,84,0.15);color:var(--olive-dark);';
+    const tipoTag = slot.tipo_cita === 'domicilio'
+      ? '<span class="chip-pill chip-pill-tipo-domicilio">Dom</span>'
+      : slot.tipo_cita === 'sucursal'
+      ? '<span class="chip-pill chip-pill-tipo-sucursal">Suc</span>'
+      : '';
+    return '<div class="' + cls + '" data-slot-id="' + (slot.slot_id || slot.id) + '" data-kind="' + kind + '" onclick="openAdminCitaModal(\'' + (slot.slot_id || slot.id) + '\')">'
+      + '<span class="cal-chip-state" style="' + stateStyle + '">' + stateLabel + '</span>'
+      + '<div class="cal-chip-time">' + escapeHtml(fmtHora(slot.hora)) + '</div>'
+      + (tipoTag ? '<div class="cal-chip-meta">' + tipoTag + '</div>' : '')
+      + '<div class="cal-chip-cliente">' + escapeHtml(slot.cliente || '—') + '</div>'
+      + '<div class="cal-chip-svc">' + escapeHtml(slot.servicios_label || '') + '</div>'
+      + '</div>';
+  }
+
+  function openAdminCitaModal(slotId) {
+    const entry = adminState.bookingsById[slotId];
+    if (!entry) return;
+    // Inyectar entry al store fallback que openCitaModal consulta
+    if (!window._modalExtraRef) window._modalExtraRef = {};
+    window._modalExtraRef[slotId] = entry;
+    openCitaModal(slotId, entry.kind, { readOnly: true, terapeuta_id: entry.terapeuta_id });
+  }
+  window.openAdminCitaModal = openAdminCitaModal;
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
@@ -1663,8 +2177,10 @@
   }
 
   // ─── Modal de detalle de cita ───────────────────────────────────────────
-  function openCitaModal(bookingId, kind) {
-    const ref = calState.bookingsById[bookingId];
+  function openCitaModal(bookingId, kind, opts) {
+    opts = opts || {};
+    const readOnly = !!opts.readOnly;
+    const ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
     if (!ref) return;
     const b = ref.booking;
     const isReoffer = b.estado_asignacion === 'release_window';
@@ -1798,6 +2314,22 @@
     const note = document.getElementById('cita-note');
     actions.innerHTML = '';
     note.textContent = '';
+    if (readOnly) {
+      // Modo admin: solo lectura, sin claim/release
+      if (opts.terapeuta_id && adminState.data && adminState.data.terapeutas) {
+        const tInfo = adminState.data.terapeutas.find(t => t.id === opts.terapeuta_id);
+        if (tInfo) note.textContent = 'Asignada a: ' + (tInfo.nombre || '—');
+      } else if (finalKind === 'pool') {
+        note.textContent = 'Cita en el pool — disponible para que cualquier masajista la tome.';
+      }
+      const close = document.createElement('button');
+      close.className = 'cita-btn-secondary';
+      close.textContent = 'Cerrar';
+      close.addEventListener('click', closeCitaModal);
+      actions.appendChild(close);
+      document.getElementById('cita-modal').style.display = 'flex';
+      return;
+    }
     if (finalKind === 'pool') {
       const btn = document.createElement('button');
       btn.className = 'cita-btn-primary';
@@ -2065,6 +2597,16 @@
     document.getElementById('email-input').disabled = false;
     document.getElementById('login-error').style.display = 'none';
     clearCodeInputs();
+    // También resetear el form admin si está visible
+    const admin = document.getElementById('admin-password-form');
+    if (admin) admin.style.display = 'none';
+    const adminInput = document.getElementById('admin-password-input');
+    if (adminInput) { adminInput.value = ''; adminInput.disabled = false; }
+    const adminBtn = document.getElementById('admin-password-submit');
+    if (adminBtn) { adminBtn.disabled = false; adminBtn.textContent = 'Entrar como admin'; }
+    document.getElementById('google-btn-wrap').style.display = '';
+    const sep = document.querySelector('#view-login .separator');
+    if (sep) sep.style.display = '';
   }
 
   function clearCodeInputs() {
@@ -2161,6 +2703,12 @@
     const email = (emailInput.value || '').trim().toLowerCase();
     if (!email) return;
 
+    // Bypass especial: usuario ExentiaAdmin → mostrar form de contraseña admin
+    if (email === ADMIN_USERNAME) {
+      showAdminLoginForm();
+      return;
+    }
+
     emailInput.disabled = true;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
@@ -2171,6 +2719,76 @@
     } else {
       emailInput.disabled = false;
       submitBtn.disabled = false;
+    }
+  }
+
+  function showAdminLoginForm() {
+    document.getElementById('email-form').style.display = 'none';
+    document.getElementById('code-form').style.display = 'none';
+    document.getElementById('google-btn-wrap').style.display = 'none';
+    const sep = document.querySelector('#view-login .separator');
+    if (sep) sep.style.display = 'none';
+    const admin = document.getElementById('admin-password-form');
+    admin.style.display = 'flex';
+    const inp = document.getElementById('admin-password-input');
+    inp.value = '';
+    setTimeout(() => inp.focus(), 50);
+    hideLoginError();
+  }
+
+  function hideLoginError() {
+    const errEl = document.getElementById('login-error');
+    if (errEl) errEl.style.display = 'none';
+  }
+  function showLoginError(msg) {
+    const errEl = document.getElementById('login-error');
+    if (!errEl) return;
+    errEl.textContent = msg || 'Algo salió mal. Intenta de nuevo.';
+    errEl.style.display = 'block';
+  }
+  function showLoginInflight(msg) {
+    const msgEl = document.getElementById('login-inflight-msg');
+    if (msgEl) msgEl.textContent = msg || 'Verificando...';
+    document.getElementById('login-inflight').classList.add('show');
+  }
+  function hideLoginInflight() {
+    document.getElementById('login-inflight').classList.remove('show');
+  }
+
+  async function submitAdminPassword() {
+    const input = document.getElementById('admin-password-input');
+    const btn = document.getElementById('admin-password-submit');
+    const password = (input.value || '').trim();
+    if (!password) {
+      input.focus();
+      return;
+    }
+    hideLoginError();
+    input.disabled = true;
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+    showLoginInflight('Verificando contraseña...');
+    try {
+      const res = await fetch(ADMIN_LOGIN_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.sessionJwt) {
+        throw new Error(data.detail || 'Contraseña incorrecta.');
+      }
+      localStorage.setItem(STORAGE_KEY, data.sessionJwt);
+      try { localStorage.removeItem(OTP_PENDING_KEY); } catch (_) {}
+      hideLoginInflight();
+      init();
+    } catch (err) {
+      hideLoginInflight();
+      showLoginError(err.message || 'No pudimos validar tu contraseña.');
+      input.disabled = false;
+      btn.disabled = false;
+      btn.textContent = 'Entrar como admin';
+      setTimeout(() => input.focus(), 50);
     }
   }
 
@@ -2191,6 +2809,268 @@
       btn.disabled = false;
       btn.textContent = 'Reenviar código';
     }
+  }
+
+  async function requestOTPviaSMS(email) {
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch(OTP_REQUEST_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, via: 'sms' })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok && data.otpJwt) {
+        otpState = {
+          jwt: data.otpJwt,
+          email,
+          expiresAt: Date.now() + (data.expSeconds || OTP_TTL_SECONDS) * 1000
+        };
+        localStorage.setItem(OTP_PENDING_KEY, JSON.stringify(otpState));
+        return { ok: true };
+      }
+      if (data && data.error === 'no_phone_on_contact') {
+        return { ok: false, reason: 'no_phone' };
+      }
+      return { ok: false, reason: 'generic', detail: data.detail };
+    } catch (e) {
+      return { ok: false, reason: 'network' };
+    }
+  }
+
+  // Registry global de instancias intl-tel-input del panel (igual patrón que window._itiInstances del cliente)
+  window._panelItiInstances = window._panelItiInstances || {};
+
+  // Inicializa intl-tel-input en un input del panel. Idempotente (no reinicializa si ya existe).
+  // Espía la lib con setTimeout si todavía no terminó de cargar (script defer).
+  // Fallback graceful: si la lib nunca llega, no rompe nada — el input sigue funcionando como `<input type=tel>` normal
+  // y _panelOtpSmsSend cae al path manual (+52 hardcodeado).
+  function initPanelPhoneValidator(inputId) {
+    var input = document.getElementById(inputId);
+    if (!input) return null;
+    if (window._panelItiInstances[inputId]) return window._panelItiInstances[inputId];
+    if (typeof window.intlTelInput !== 'function') {
+      // Re-intentar hasta 20 veces (3s total) — si la lib no carga, abortar silenciosamente
+      input._itiRetries = (input._itiRetries || 0) + 1;
+      if (input._itiRetries < 20) {
+        setTimeout(function(){ initPanelPhoneValidator(inputId); }, 150);
+      }
+      return null;
+    }
+    try {
+      var iti = window.intlTelInput(input, {
+        initialCountry: 'mx',
+        preferredCountries: ['mx', 'us'],
+        separateDialCode: true,
+        useFullscreenPopup: false,
+        fixDropdownWidth: false,
+        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/js/utils.min.js'
+      });
+      window._panelItiInstances[inputId] = iti;
+
+      // Workaround del bug v23: el dropdown a veces no togglea correctamente con click outside.
+      // Cableamos un toggle manual sobre `.iti__selected-country` con mousedown.
+      setTimeout(function(){
+        var container = input.closest('.iti');
+        if (!container) return;
+        var selBtn = container.querySelector('.iti__selected-country');
+        if (selBtn && !selBtn._toggleWired) {
+          selBtn._toggleWired = true;
+          selBtn.addEventListener('mousedown', function(ev){
+            ev.preventDefault();
+            ev.stopPropagation();
+            var list = container.querySelector('.iti__country-list');
+            if (!list) return;
+            var isOpen = !list.classList.contains('iti__hide');
+            // Cerrar otros dropdowns abiertos
+            document.querySelectorAll('.iti').forEach(function(c){
+              if (c !== container) {
+                c.querySelectorAll('.iti__country-list').forEach(function(l){ l.classList.add('iti__hide'); });
+                var s = c.querySelector('.iti__selected-country');
+                if (s) s.setAttribute('aria-expanded', 'false');
+              }
+            });
+            if (isOpen) {
+              list.classList.add('iti__hide');
+              selBtn.setAttribute('aria-expanded', 'false');
+            } else {
+              list.classList.remove('iti__hide');
+              selBtn.setAttribute('aria-expanded', 'true');
+              var search = container.querySelector('.iti__search-input');
+              if (search) setTimeout(function(){ try { search.focus(); } catch(_){} }, 50);
+            }
+          });
+        }
+      }, 60);
+
+      // Click fuera de cualquier .iti cierra el dropdown abierto. Listener global idempotente.
+      if (!window._panelItiOutsideWired) {
+        window._panelItiOutsideWired = true;
+        document.addEventListener('click', function(ev){
+          document.querySelectorAll('.iti').forEach(function(c){
+            if (!c.contains(ev.target)) {
+              c.querySelectorAll('.iti__country-list').forEach(function(l){ l.classList.add('iti__hide'); });
+              var s = c.querySelector('.iti__selected-country');
+              if (s) s.setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
+      }
+
+      // Click en un país de la lista: aplicar país y cerrar (el plugin a veces falla en cerrar solo).
+      var listContainer = input.closest('.iti').querySelector('.iti__country-list');
+      if (listContainer && !listContainer._countryClickWired) {
+        listContainer._countryClickWired = true;
+        listContainer.addEventListener('click', function(ev){
+          var li = ev.target.closest('.iti__country');
+          if (!li) return;
+          var iso = (li.getAttribute('data-country-code') || '').toLowerCase();
+          if (iso && iti && iti.setCountry) iti.setCountry(iso);
+          var container = input.closest('.iti');
+          if (container) {
+            container.querySelectorAll('.iti__country-list').forEach(function(l){ l.classList.add('iti__hide'); });
+            var s = container.querySelector('.iti__selected-country');
+            if (s) s.setAttribute('aria-expanded', 'false');
+          }
+          try { input.focus(); } catch(_){}
+        });
+      }
+
+      return iti;
+    } catch (e) {
+      // Si falla la inicialización, dejar el input como `type=tel` normal
+      return null;
+    }
+  }
+  window.initPanelPhoneValidator = initPanelPhoneValidator;
+
+  // handleSendSMS ahora SOLO togglea el box; el POST lo dispara _panelOtpSmsSend.
+  function handleSendSMS() {
+    if (!otpState.email) return;
+    const box = document.getElementById('code-sms-box');
+    const phoneInput = document.getElementById('code-sms-phone');
+    const smsErr = document.getElementById('code-sms-error');
+    if (!box || !phoneInput) return;
+    const isOpen = box.style.display !== 'none';
+    if (isOpen) {
+      box.style.display = 'none';
+      // Reset solo a través de la instancia iti si existe, para no romper el wrapper visual
+      try {
+        var _iti = window._panelItiInstances && window._panelItiInstances['code-sms-phone'];
+        if (_iti && _iti.setNumber) _iti.setNumber('');
+        else phoneInput.value = '';
+      } catch(_) { phoneInput.value = ''; }
+      if (smsErr) { smsErr.style.display = 'none'; smsErr.textContent = ''; }
+      return;
+    }
+    box.style.display = 'block';
+    if (smsErr) { smsErr.style.display = 'none'; smsErr.textContent = ''; }
+    // Inicializar intl-tel-input la primera vez que se abre el box (idempotente).
+    try { initPanelPhoneValidator('code-sms-phone'); } catch(_){}
+    // Pre-rellenar con phone guardado en otpState/payload si lo tuviéramos
+    let prefill = '';
+    try {
+      const pendingJwt = otpState && otpState.jwt;
+      if (pendingJwt) {
+        const p = decodeJWT(pendingJwt);
+        if (p && p.phone) prefill = p.phone;
+      }
+    } catch(_){}
+    if (prefill) {
+      var _itiPre = window._panelItiInstances && window._panelItiInstances['code-sms-phone'];
+      if (_itiPre && _itiPre.setNumber) {
+        // setNumber acepta E.164 (+52...) — agregar '+' si viene sin él pero parece E.164
+        var pf = String(prefill).trim();
+        if (!pf.startsWith('+') && /^\d{10,15}$/.test(pf)) pf = '+' + pf;
+        try { _itiPre.setNumber(pf); } catch(_) {
+          const digits = String(prefill).replace(/\D/g, '').replace(/^52/, '');
+          if (digits) phoneInput.value = digits.slice(-10);
+        }
+      } else {
+        const digits = String(prefill).replace(/\D/g, '').replace(/^52/, '');
+        if (digits) phoneInput.value = digits.slice(-10);
+      }
+    }
+    setTimeout(() => { try { phoneInput.focus(); } catch(_){} }, 80);
+  }
+
+  async function _panelOtpSmsSend() {
+    if (!otpState.email) return;
+    const phoneInput = document.getElementById('code-sms-phone');
+    const smsErr = document.getElementById('code-sms-error');
+    const sendBtn = document.getElementById('code-sms-send');
+    const box = document.getElementById('code-sms-box');
+    const errEl = document.getElementById('login-error');
+    if (!phoneInput) return;
+    if (smsErr) { smsErr.style.display = 'none'; smsErr.textContent = ''; }
+
+    // Si intl-tel-input está activo, usar getNumber()/isValidNumber() (formato E.164).
+    // Fallback: digits manuales + asumir MX, igual que la lógica vieja.
+    let phoneForBody = '';
+    const _iti = (window._panelItiInstances && window._panelItiInstances['code-sms-phone']) || null;
+    if (_iti && typeof _iti.getNumber === 'function') {
+      let valid = true;
+      try { if (typeof _iti.isValidNumber === 'function') valid = !!_iti.isValidNumber(); } catch(_) { valid = true; }
+      if (!valid) {
+        if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = 'El número no parece válido para ese país. Revisa el código de país y los dígitos.'; }
+        return;
+      }
+      let e164 = '';
+      try { e164 = _iti.getNumber() || ''; } catch(_) { e164 = ''; }
+      // getNumber devuelve '+5219981234567' — el body del endpoint OTP espera sin '+'
+      phoneForBody = e164.replace(/^\+/, '').replace(/\D/g, '');
+      if (!phoneForBody) {
+        if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = 'Escribe un teléfono válido.'; }
+        return;
+      }
+    } else {
+      // Fallback legacy: la lib intl-tel-input no cargó (CDN caído, offline, etc).
+      const digits = (phoneInput.value || '').replace(/\D/g, '');
+      if (digits.length < 10) {
+        if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = 'Escribe un teléfono válido (mínimo 10 dígitos).'; }
+        return;
+      }
+      const local = digits.length > 10 && digits.startsWith('52') ? digits.slice(2, 12) : digits.slice(-10);
+      phoneForBody = '52' + local; // sin '+'
+    }
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Enviando...'; }
+    try {
+      const res = await fetch(OTP_REQUEST_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: otpState.email, via: 'sms', phone: phoneForBody })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok && data.otpJwt) {
+        otpState = {
+          jwt: data.otpJwt,
+          email: otpState.email,
+          expiresAt: Date.now() + (data.expSeconds || OTP_TTL_SECONDS) * 1000
+        };
+        localStorage.setItem(OTP_PENDING_KEY, JSON.stringify(otpState));
+        clearOtpTimers();
+        clearCodeInputs();
+        startCountdown(otpState.expiresAt);
+        startResendCooldown();
+        if (box) box.style.display = 'none';
+        if (errEl) {
+          errEl.style.color = '';
+          errEl.style.display = 'block';
+          errEl.textContent = 'Te lo mandamos por SMS al +' + phoneForBody.replace(/(\d{2})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+          setTimeout(() => { errEl.style.display = 'none'; errEl.textContent = ''; }, 4000);
+        }
+        const first = document.querySelector('.code-inputs input[data-idx="0"]');
+        if (first) first.focus();
+      } else if (data && (data.error === 'no_phone_provided' || data.error === 'no_phone_on_contact')) {
+        if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = 'No pudimos enviar el SMS a ese número. Revisa y vuelve a intentar.'; }
+      } else {
+        if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = (data && data.detail) || 'No pudimos enviar el SMS. Intenta con el código por correo.'; }
+      }
+    } catch (e) {
+      if (smsErr) { smsErr.style.display = 'block'; smsErr.textContent = 'Error de conexión. Intenta en unos segundos.'; }
+    }
+    setTimeout(() => { if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar SMS'; } }, 1000);
   }
 
   function getEnteredCode() {
@@ -2344,6 +3224,17 @@
     if (emailForm) emailForm.addEventListener('submit', handleEmailSubmit);
     const resendBtn = document.getElementById('code-resend');
     if (resendBtn) resendBtn.addEventListener('click', handleResend);
+    const smsBtn = document.getElementById('code-sms');
+    if (smsBtn) smsBtn.addEventListener('click', handleSendSMS);
+    const smsSendBtn = document.getElementById('code-sms-send');
+    if (smsSendBtn) smsSendBtn.addEventListener('click', _panelOtpSmsSend);
+    const smsPhoneInput = document.getElementById('code-sms-phone');
+    if (smsPhoneInput) smsPhoneInput.addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); _panelOtpSmsSend(); } });
+    // Admin: bind submit del form de contraseña + Enter
+    const adminSubmitBtn = document.getElementById('admin-password-submit');
+    if (adminSubmitBtn) adminSubmitBtn.addEventListener('click', submitAdminPassword);
+    const adminPassInput = document.getElementById('admin-password-input');
+    if (adminPassInput) adminPassInput.addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); submitAdminPassword(); } });
     bindCodeInputs();
 
     const jwt = localStorage.getItem(STORAGE_KEY);
@@ -2362,6 +3253,11 @@
     if (!payload.exp || payload.exp < now) {
       localStorage.removeItem(STORAGE_KEY);
       setTimeout(() => showLogin('Tu sesión expiró. Vuelve a iniciar sesión.'), 220);
+      return;
+    }
+    // Sesión válida — ramifica por rol
+    if (payload.role === 'admin') {
+      setTimeout(() => showAdminPanel(payload), 240);
       return;
     }
     // Defensa contra JWT viejos (versiones anteriores del workflow):
