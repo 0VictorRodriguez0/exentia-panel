@@ -1425,8 +1425,13 @@
   const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
   const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
-  const ADMIN_VIEW_AS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-view-as';
+  const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
   const ADMIN_USERNAME = 'exentiaadmin';
+  const ADMIN_JWT_BACKUP_KEY = 'exentia_panel_admin_jwt_backup';
+  // Allowlist de masajistas que el admin puede impersonar (para pruebas)
+  const ADMIN_VIEW_AS_ALLOWLIST = [
+    { id: 'e77ca4ab-be8e-45aa-b027-7bcf5b01419c', nombre: 'Calendario Dos' }
+  ];
   const STORAGE_KEY = 'exentia_panel_jwt';
   const OTP_PENDING_KEY = 'exentia_otp_pending';
   const GSI_TIMEOUT_MS = 12000; // si GSI no carga en 12s asumimos error de red
@@ -1747,77 +1752,135 @@
 
   function populateViewAsDropdown() {
     const sel = document.getElementById('admin-view-as-select');
-    if (!sel || !adminState.data) return;
-    const terapeutas = adminState.data.terapeutas || [];
+    if (!sel) return;
+    // Solo masajistas del allowlist (para pruebas)
     const current = sel.value;
     sel.innerHTML = '<option value="">— Selecciona masajista —</option>'
-      + terapeutas.map(t => '<option value="' + t.id + '" data-name="' + escapeHtml(t.nombre) + '">' + escapeHtml(t.nombre) + '</option>').join('');
-    if (current && terapeutas.find(t => t.id === current)) sel.value = current;
+      + ADMIN_VIEW_AS_ALLOWLIST.map(t => '<option value="' + t.id + '" data-name="' + escapeHtml(t.nombre) + '">' + escapeHtml(t.nombre) + '</option>').join('');
+    if (current && ADMIN_VIEW_AS_ALLOWLIST.find(t => t.id === current)) sel.value = current;
     if (!sel._bound) {
       sel.addEventListener('change', function(){
         const id = sel.value;
         if (!id) return;
-        const t = (adminState.data.terapeutas || []).find(x => x.id === id);
+        const t = ADMIN_VIEW_AS_ALLOWLIST.find(x => x.id === id);
         if (t) enterViewAs(t.id, t.nombre);
       });
       sel._bound = true;
     }
   }
 
-  function enterViewAs(terapeutaId, terapeutaNombre) {
-    viewAsState.active = true;
-    viewAsState.terapeutaId = terapeutaId;
-    viewAsState.terapeutaNombre = terapeutaNombre;
+  async function enterViewAs(terapeutaId, terapeutaNombre) {
+    const adminJwt = localStorage.getItem(STORAGE_KEY);
+    if (!adminJwt) { showLogin('Sesión expirada.'); return; }
 
-    // Esconder admin, mostrar panel masajista
-    document.getElementById('view-admin').style.display = 'none';
-    const v = document.getElementById('view-panel');
-    v.style.display = 'flex';
+    // Mostrar boot loader mientras pedimos el JWT impersonado
+    showBootLoader('Entrando como ' + terapeutaNombre + '...');
+    try {
+      const res = await fetch(ADMIN_IMPERSONATE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + adminJwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ terapeuta_id: terapeutaId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.sessionJwt) {
+        hideBootLoader();
+        alert('No se pudo impersonar: ' + (data.detail || data.error || 'error'));
+        const sel = document.getElementById('admin-view-as-select');
+        if (sel) sel.value = '';
+        return;
+      }
 
-    // Banner de modo prueba
-    const banner = document.getElementById('view-as-banner');
-    if (banner) {
-      banner.style.display = 'flex';
-      document.getElementById('view-as-banner-name').textContent = terapeutaNombre || '—';
+      // Backup del JWT admin y swap por el impersonado
+      localStorage.setItem(ADMIN_JWT_BACKUP_KEY, adminJwt);
+      localStorage.setItem(STORAGE_KEY, data.sessionJwt);
+
+      // Marca estado de view-as (para banner)
+      viewAsState.active = true;
+      viewAsState.terapeutaId = terapeutaId;
+      viewAsState.terapeutaNombre = terapeutaNombre;
+
+      // Cerrar realtime subscription admin
+      try {
+        if (adminState.realtimeChannel) {
+          adminState.realtimeChannel.unsubscribe && adminState.realtimeChannel.unsubscribe();
+          adminState.realtimeChannel = null;
+        }
+        if (adminState.pollTimer) { clearInterval(adminState.pollTimer); adminState.pollTimer = null; }
+      } catch (_) {}
+
+      // Esconder admin
+      document.getElementById('view-admin').style.display = 'none';
+
+      // Banner de modo prueba
+      const banner = document.getElementById('view-as-banner');
+      if (banner) {
+        banner.style.display = 'flex';
+        document.getElementById('view-as-banner-name').textContent = terapeutaNombre || '—';
+      }
+
+      // Entrar al panel del masajista (con el JWT impersonado funciona todo igual)
+      const payload = decodeJWT(data.sessionJwt);
+      if (payload) {
+        setTimeout(() => showPanel(payload), 220);
+      } else {
+        hideBootLoader();
+        alert('JWT impersonado inválido.');
+      }
+    } catch (err) {
+      hideBootLoader();
+      alert('Error de conexión al impersonar: ' + err.message);
     }
-
-    // Topbar: mostrar nombre + role
-    document.getElementById('t-name').textContent = terapeutaNombre || '—';
-    document.getElementById('t-role').textContent = 'masajista (vista de prueba)';
-    document.getElementById('h-name').textContent = (terapeutaNombre || '—').split(' ')[0];
-
-    // Reset state del calendario para evitar mezclar con datos previos
-    calState.bookingsById = {};
-    if (typeof initCalendar === 'function') initCalendar();
   }
 
-  function exitViewAs() {
+  async function exitViewAs() {
+    const backup = localStorage.getItem(ADMIN_JWT_BACKUP_KEY);
+    if (!backup) {
+      // Sin backup → logout total
+      logout();
+      return;
+    }
+    showBootLoader('Volviendo a vista admin...');
+    // Restaurar JWT admin
+    localStorage.setItem(STORAGE_KEY, backup);
+    localStorage.removeItem(ADMIN_JWT_BACKUP_KEY);
+
     viewAsState.active = false;
     viewAsState.terapeutaId = null;
     viewAsState.terapeutaNombre = null;
-    // Ocultar banner + restaurar select
+
+    // Ocultar banner + reset select
     const banner = document.getElementById('view-as-banner');
     if (banner) banner.style.display = 'none';
     const sel = document.getElementById('admin-view-as-select');
     if (sel) sel.value = '';
-    // Cerrar modal si abierto
-    closeCitaModal();
-    // Volver a vista admin
-    if (adminState.payload) {
-      showAdminPanel(adminState.payload);
-    } else {
-      // Fallback: re-leer payload del JWT
-      const jwt = localStorage.getItem(STORAGE_KEY);
-      if (jwt) {
-        const p = decodeJWT(jwt);
-        if (p && p.role === 'admin') showAdminPanel(p);
+
+    // Cerrar modal + desuscribir realtime del masajista
+    try { closeCitaModal(); } catch (_) {}
+    try {
+      if (calState._realtimeClient && calState._realtimeChannel) {
+        calState._realtimeChannel.unsubscribe && calState._realtimeChannel.unsubscribe();
       }
+    } catch (_) {}
+
+    // Volver a la vista admin
+    const adminPayload = decodeJWT(backup);
+    if (adminPayload && adminPayload.role === 'admin') {
+      setTimeout(() => showAdminPanel(adminPayload), 220);
+    } else {
+      logout();
     }
   }
   window.exitViewAs = exitViewAs;
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ADMIN_JWT_BACKUP_KEY);
+    viewAsState.active = false;
+    viewAsState.terapeutaId = null;
+    viewAsState.terapeutaNombre = null;
     showBootLoader('Cerrando sesión...');
     setTimeout(() => showLogin(), 250);
   }
@@ -1981,11 +2044,7 @@
       return;
     }
     try {
-      // Si el admin está en modo "view-as" (impersonando un masajista), usa el endpoint específico
-      const endpoint = (viewAsState.active && viewAsState.terapeutaId)
-        ? (ADMIN_VIEW_AS_ENDPOINT + '?as=' + encodeURIComponent(viewAsState.terapeutaId))
-        : CITAS_ENDPOINT;
-      const res = await fetch(endpoint, {
+      const res = await fetch(CITAS_ENDPOINT, {
         headers: { 'Authorization': 'Bearer ' + jwt }
       });
       if (!res.ok) {
@@ -2314,7 +2373,7 @@
   // ─── Modal de detalle de cita ───────────────────────────────────────────
   function openCitaModal(bookingId, kind, opts) {
     opts = opts || {};
-    const readOnly = !!opts.readOnly || viewAsState.active;
+    const readOnly = !!opts.readOnly;
     const ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
     if (!ref) return;
     const b = ref.booking;
