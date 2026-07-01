@@ -2963,6 +2963,7 @@
     btn.textContent = 'Verificando...';
     showLoginInflight('Verificando contraseña...');
     try {
+      // Paso 1: validar contraseña y obtener JWT admin
       const res = await fetch(ADMIN_LOGIN_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2972,8 +2973,29 @@
       if (!res.ok || !data.sessionJwt) {
         throw new Error(data.detail || 'Contraseña incorrecta.');
       }
-      localStorage.setItem(STORAGE_KEY, data.sessionJwt);
+      const adminJwt = data.sessionJwt;
+
+      // Paso 2: usar ese JWT admin para pedir el JWT impersonado del masajista de pruebas
+      showLoginInflight('Entrando al panel...');
+      const defaultTerapeuta = ADMIN_VIEW_AS_ALLOWLIST[0];  // Calendario Dos por ahora
+      const impRes = await fetch(ADMIN_IMPERSONATE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + adminJwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ terapeuta_id: defaultTerapeuta.id })
+      });
+      const impData = await impRes.json().catch(() => ({}));
+      if (!impRes.ok || !impData.sessionJwt) {
+        throw new Error(impData.detail || 'No pudimos abrir la sesión del masajista de pruebas.');
+      }
+
+      // Guardar el JWT masajista como sesión principal — init() lo tratará como login normal
+      localStorage.setItem(STORAGE_KEY, impData.sessionJwt);
       try { localStorage.removeItem(OTP_PENDING_KEY); } catch (_) {}
+      try { localStorage.removeItem(ADMIN_JWT_BACKUP_KEY); } catch (_) {}
+
       hideLoginInflight();
       init();
     } catch (err) {
