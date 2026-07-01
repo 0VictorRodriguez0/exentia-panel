@@ -1015,6 +1015,23 @@
     background: #f7f5ee; color: var(--brown);
   }
   .cita-btn-secondary:hover { background: #eee9d9; }
+  .cita-btn-success {
+    background: #2e7d32; color: #fff;
+  }
+  .cita-btn-success:hover { background: #256428; }
+  .cita-btn-success:disabled {
+    background: rgba(46,125,50,0.35); color: rgba(255,255,255,.8);
+    cursor: not-allowed;
+  }
+  .cita-servicio-done {
+    display: inline-flex; align-items: center;
+    padding: 10px 16px; border-radius: 8px;
+    background: rgba(46,125,50,0.12); color: #1d6b2f;
+    font: 600 13px 'Inter', sans-serif;
+  }
+  .cita-servicio-done::before {
+    content: '✓'; margin-right: 6px; font-weight: 700;
+  }
   .cita-modal-note {
     color: var(--gray-soft);
     font-size: 11.5px;
@@ -1889,6 +1906,7 @@
   const CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-citas';
   const CLAIM_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-claim';
   const RELEASE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-release';
+  const SLOT_STATUS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-slot-status';
   const RELEASE_MIN_HOURS = 2;   // mismo valor que la RPC
 
   const calState = {
@@ -2316,9 +2334,16 @@
     if (item.kind === 'mine') {
       const isReoffer = b.estado_asignacion === 'release_window';
       chip.className = 'cal-chip cal-chip-mine' + (isReoffer ? ' cal-chip-mine-reoffer' : '');
-      const stateLabel = isReoffer
-        ? '<span class="cal-chip-state" style="background:rgba(255,247,236,0.85);color:#b45309;">Liberándose</span>'
-        : '<span class="cal-chip-state" style="background:rgba(255,255,255,0.22);color:#fff;">Asignada</span>';
+      let stateLabel;
+      if (b.servicio_terminado_at) {
+        stateLabel = '<span class="cal-chip-state" style="background:rgba(255,255,255,0.85);color:var(--olive-dark);">Finalizada</span>';
+      } else if (b.servicio_iniciado_at) {
+        stateLabel = '<span class="cal-chip-state" style="background:#d3f0d3;color:#1d6b2f;">En curso</span>';
+      } else if (isReoffer) {
+        stateLabel = '<span class="cal-chip-state" style="background:rgba(255,247,236,0.85);color:#b45309;">Liberándose</span>';
+      } else {
+        stateLabel = '<span class="cal-chip-state" style="background:rgba(255,255,255,0.22);color:#fff;">Asignada</span>';
+      }
       chip.innerHTML =
         stateLabel +
         '<div class="cal-chip-time">' + horaTxt + '</div>' +
@@ -2562,32 +2587,115 @@
       close.addEventListener('click', closeCitaModal);
       actions.appendChild(close);
 
-      const cancel = document.createElement('button');
-      cancel.className = 'cita-btn-primary';
-      cancel.textContent = 'Cancelar cita';
-      cancel.dataset.bookingId = b.id;
+      const started = !!b.servicio_iniciado_at;
+      const finished = !!b.servicio_terminado_at;
 
-      // Calcular horas hasta la cita
-      const hoursLeft = hoursUntilCita(b.fecha, b.hora);
-      if (hoursLeft === null) {
-        cancel.disabled = true;
-        note.textContent = 'No se puede determinar la hora exacta de la cita.';
-      } else if (hoursLeft < RELEASE_MIN_HOURS) {
-        cancel.disabled = true;
-        if (hoursLeft <= 0) {
-          note.textContent = 'La cita ya pasó o está en curso. No se puede liberar.';
-        } else {
-          const mins = Math.round(hoursLeft * 60);
-          note.textContent = `Solo se puede cancelar con más de ${RELEASE_MIN_HOURS}h de anticipación (faltan ${mins} min).`;
-        }
+      if (finished) {
+        // ── Servicio completado: sin acciones, solo confirmación ──
+        const doneBadge = document.createElement('span');
+        doneBadge.className = 'cita-servicio-done';
+        doneBadge.textContent = 'Servicio finalizado';
+        actions.appendChild(doneBadge);
+        note.textContent = 'Servicio completado ' + fmtHoraCorta(b.servicio_iniciado_at) + ' – ' + fmtHoraCorta(b.servicio_terminado_at) + '. Buen trabajo.';
+      } else if (started) {
+        // ── En curso: solo se puede terminar ──
+        const finish = document.createElement('button');
+        finish.className = 'cita-btn-success';
+        finish.textContent = 'Terminar servicio';
+        finish.addEventListener('click', () => slotServiceAction(b, 'finish', finish));
+        actions.appendChild(finish);
+        note.textContent = 'Servicio en curso desde las ' + fmtHoraCorta(b.servicio_iniciado_at) + '. Al terminar, márcalo aquí.';
       } else {
-        cancel.addEventListener('click', () => releaseBooking(b, cancel));
-        note.textContent = 'Al cancelar, la cita queda disponible para otros masajistas. Si nadie la toma antes de la hora de la cita, se te reasigna automáticamente.';
+        // ── Aún no inicia: puede iniciar servicio o cancelar la cita ──
+        const start = document.createElement('button');
+        start.className = 'cita-btn-success';
+        start.textContent = 'Iniciar servicio';
+        start.addEventListener('click', () => slotServiceAction(b, 'start', start));
+        actions.appendChild(start);
+
+        const cancel = document.createElement('button');
+        cancel.className = 'cita-btn-primary';
+        cancel.textContent = 'Cancelar cita';
+        cancel.dataset.bookingId = b.id;
+
+        // Calcular horas hasta la cita
+        const hoursLeft = hoursUntilCita(b.fecha, b.hora);
+        if (hoursLeft === null) {
+          cancel.disabled = true;
+          note.textContent = 'No se puede determinar la hora exacta de la cita.';
+        } else if (hoursLeft < RELEASE_MIN_HOURS) {
+          cancel.disabled = true;
+          if (hoursLeft <= 0) {
+            note.textContent = 'Cuando llegues con el cliente, marca "Iniciar servicio".';
+          } else {
+            const mins = Math.round(hoursLeft * 60);
+            note.textContent = `Solo se puede cancelar con más de ${RELEASE_MIN_HOURS}h de anticipación (faltan ${mins} min). Cuando llegues con el cliente, marca "Iniciar servicio".`;
+          }
+        } else {
+          cancel.addEventListener('click', () => releaseBooking(b, cancel));
+          note.textContent = 'Al llegar con el cliente marca "Iniciar servicio". Si cancelas, la cita queda disponible para otros masajistas.';
+        }
+        actions.appendChild(cancel);
       }
-      actions.appendChild(cancel);
     }
 
     document.getElementById('cita-modal').style.display = 'flex';
+  }
+
+  // ─── Ciclo de vida del servicio (iniciar / terminar) ────────────────────
+  function fmtHoraCorta(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    if (isNaN(d)) return '—';
+    let h = d.getHours(), m = d.getMinutes();
+    const ampm = h >= 12 ? 'pm' : 'am';
+    h = ((h + 11) % 12) + 1;
+    return h + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+  }
+
+  async function slotServiceAction(booking, action, btn) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { logout(); return; }
+    const verbo = action === 'start' ? 'iniciar' : 'terminar';
+    const cliente = booking.cliente || 'este cliente';
+    if (!confirm('¿Confirmas que quieres ' + verbo + ' el servicio de ' + cliente + '?')) return;
+
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = action === 'start' ? 'Iniciando...' : 'Terminando...';
+    try {
+      const res = await fetch(SLOT_STATUS_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + jwt,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ slotId: booking.slot_id || booking.id, action })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        // Actualizar el booking en memoria para que el modal re-renderice al instante
+        booking.servicio_iniciado_at = data.servicio_iniciado_at || booking.servicio_iniciado_at;
+        booking.servicio_terminado_at = data.servicio_terminado_at || booking.servicio_terminado_at;
+        openCitaModal(booking.id, 'mine'); // re-render del modal con el nuevo estado
+        fetchCitas({ silent: true });      // refresca chips en background
+      } else {
+        const msgs = {
+          not_owner: 'Esta cita no está asignada a ti.',
+          invalid_state: 'La cita no está en un estado válido para esto.',
+          already_started: 'El servicio ya estaba iniciado.',
+          already_finished: 'El servicio ya estaba terminado.',
+          not_started: 'Primero marca "Iniciar servicio".'
+        };
+        alert(msgs[data.status] || data.detail || 'No se pudo completar la acción. Intenta de nuevo.');
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    } catch (err) {
+      alert('Error de conexión. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = original;
+    }
   }
 
   // ─── Helper: horas hasta la cita ───────────────────────────────────────
