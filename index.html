@@ -1227,9 +1227,9 @@
       </div>
     </div>
     <div id="admin-password-form" class="magic-form" style="display:none">
-      <label for="admin-password-input" class="magic-label">Acceso de administrador</label>
+      <label for="admin-password-input" class="magic-label">Acceso de masajista</label>
       <input id="admin-password-input" type="password" placeholder="Contraseña" autocomplete="current-password">
-      <button type="button" id="admin-password-submit" class="magic-btn">Entrar como admin</button>
+      <button type="button" id="admin-password-submit" class="magic-btn">Entrar como masajista</button>
       <button type="button" class="code-link" onclick="resetToEmail()" style="margin-top:8px;">Cambiar usuario</button>
     </div>
     <div class="separator"><span>o</span></div>
@@ -3003,7 +3003,7 @@
       showLoginError(err.message || 'No pudimos validar tu contraseña.');
       input.disabled = false;
       btn.disabled = false;
-      btn.textContent = 'Entrar como admin';
+      btn.textContent = 'Entrar como masajista';
       setTimeout(() => input.focus(), 50);
     }
   }
