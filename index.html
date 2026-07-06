@@ -1091,6 +1091,85 @@
     background: rgba(46,125,50,0.35); color: rgba(255,255,255,.8);
     cursor: not-allowed;
   }
+  .cita-btn-danger {
+    background: #b53b3b; color: #fff;
+  }
+  .cita-btn-danger:hover { background: #942e2e; }
+  .cita-btn-danger:disabled {
+    background: rgba(181,59,59,0.35); color: rgba(255,255,255,.8);
+    cursor: not-allowed;
+  }
+
+  /* Sub-modal reagendar (admin) */
+  .admin-reschedule-body {
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 4px 2px;
+  }
+  .admin-reschedule-scope {
+    display: flex; gap: 8px;
+    border: 1.5px solid rgba(154,138,117,0.25);
+    border-radius: 10px;
+    padding: 6px;
+    background: #fafaf3;
+  }
+  .admin-reschedule-scope button {
+    flex: 1;
+    padding: 10px 14px;
+    background: transparent;
+    color: var(--brown);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font: 600 12.5px 'Inter', sans-serif;
+    text-align: left;
+    transition: background .15s, color .15s;
+  }
+  .admin-reschedule-scope button.active {
+    background: var(--olive);
+    color: #fff;
+  }
+  .admin-reschedule-scope button small {
+    display: block;
+    font: 400 11px 'Inter', sans-serif;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .admin-reschedule-row {
+    display: flex; gap: 10px;
+  }
+  .admin-reschedule-row > label {
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--olive-dark);
+  }
+  .admin-reschedule-row input {
+    padding: 10px 12px;
+    border: 1.5px solid rgba(154,138,117,0.32);
+    border-radius: 8px;
+    background: #fffefa;
+    color: var(--brown);
+    font: 14px 'Inter', sans-serif;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .admin-reschedule-row input:focus { border-color: var(--olive); }
+  .admin-reschedule-msg {
+    font: 12.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    padding: 8px 12px;
+    background: #fafaf3;
+    border-radius: 8px;
+    border-left: 3px solid var(--olive-light);
+  }
+  .admin-reschedule-msg.error {
+    color: #942e2e;
+    background: rgba(181,59,59,0.08);
+    border-left-color: #b53b3b;
+  }
   .cita-servicio-done {
     display: inline-flex; align-items: center;
     padding: 10px 16px; border-radius: 8px;
@@ -1571,6 +1650,46 @@
   </div>
 </div>
 
+<!-- ── SUB-MODAL: Reagendar (solo admin) ── -->
+<div id="admin-reschedule-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeAdminRescheduleModal()"></div>
+  <div class="cita-modal-box" style="max-width:520px;">
+    <button class="cita-modal-close" onclick="closeAdminRescheduleModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge">Reagendar cita</div>
+    <h2 class="cita-modal-title" id="admin-resch-title">Nueva fecha y hora</h2>
+    <p class="cita-modal-when" id="admin-resch-when">—</p>
+    <div class="admin-reschedule-body">
+      <div class="admin-reschedule-scope" id="admin-resch-scope" role="tablist">
+        <button type="button" class="active" data-scope="booking">
+          Toda la cita
+          <small>Mueve todos los cupos (individual y grupal)</small>
+        </button>
+        <button type="button" data-scope="slot">
+          Solo este cupo
+          <small>Solo mueve al masajista/servicio actual</small>
+        </button>
+      </div>
+      <div class="admin-reschedule-row">
+        <label>
+          Fecha
+          <input type="date" id="admin-resch-fecha">
+        </label>
+        <label>
+          Hora
+          <input type="time" id="admin-resch-hora" step="900">
+        </label>
+      </div>
+      <div class="admin-reschedule-msg" id="admin-resch-msg">
+        Nueva ubicación temporal — el sistema recalcula los cupos automáticamente conservando la separación entre servicios.
+      </div>
+    </div>
+    <div class="cita-modal-actions">
+      <button class="cita-btn-secondary" onclick="closeAdminRescheduleModal()">Cancelar</button>
+      <button class="cita-btn-primary" id="admin-resch-submit" onclick="submitAdminReschedule()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // ── Config ──
   const GOOGLE_CLIENT_ID = '223783119059-nnt368qs43fmhd72uo93v9jh91r89clp.apps.googleusercontent.com';
@@ -1578,6 +1697,7 @@
   const OTP_REQUEST_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-request';
   const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
   const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
+  const ADMIN_ACTIONS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-actions';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
   const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
   const ADMIN_USERNAMES = ['exentiamasajista', 'exentiaadmin'];
@@ -1932,7 +2052,7 @@
     // Inyectar entry al store fallback que openCitaModal consulta
     if (!window._modalExtraRef) window._modalExtraRef = {};
     window._modalExtraRef[slotId] = entry;
-    openCitaModal(slotId, entry.kind, { readOnly: true, terapeuta_id: entry.terapeuta_id });
+    openCitaModal(slotId, entry.kind, { adminMode: true, terapeuta_id: entry.terapeuta_id });
   }
   window.openAdminCitaModal = openAdminCitaModal;
 
@@ -2570,7 +2690,8 @@
   // ─── Modal de detalle de cita ───────────────────────────────────────────
   function openCitaModal(bookingId, kind, opts) {
     opts = opts || {};
-    const readOnly = !!opts.readOnly;
+    const adminMode = !!opts.adminMode;
+    const readOnly = !!opts.readOnly || adminMode;  // admin no ve botones de tomar/liberar del flujo masajista
     const ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
     if (!ref) return;
     const b = ref.booking;
@@ -2706,18 +2827,33 @@
     actions.innerHTML = '';
     note.textContent = '';
     if (readOnly) {
-      // Modo admin: solo lectura, sin claim/release
+      // Info de asignación
       if (opts.terapeuta_id && adminState.data && adminState.data.terapeutas) {
         const tInfo = adminState.data.terapeutas.find(t => t.id === opts.terapeuta_id);
         if (tInfo) note.textContent = 'Asignada a: ' + (tInfo.nombre || '—');
       } else if (finalKind === 'pool') {
-        note.textContent = 'Cita en el pool — disponible para que cualquier masajista la tome.';
+        note.textContent = 'Cita en el pool — cualquier masajista puede tomarla.';
       }
       const close = document.createElement('button');
       close.className = 'cita-btn-secondary';
       close.textContent = 'Cerrar';
       close.addEventListener('click', closeCitaModal);
       actions.appendChild(close);
+
+      // En modo admin agregar botones de acción (Cambiar horario / Eliminar)
+      if (adminMode) {
+        const reschedule = document.createElement('button');
+        reschedule.className = 'cita-btn-primary';
+        reschedule.textContent = 'Cambiar horario';
+        reschedule.addEventListener('click', () => openAdminRescheduleModal(b, opts.terapeuta_id));
+        actions.appendChild(reschedule);
+
+        const del = document.createElement('button');
+        del.className = 'cita-btn-danger';
+        del.textContent = 'Eliminar cita';
+        del.addEventListener('click', () => adminDeleteBooking(b));
+        actions.appendChild(del);
+      }
       document.getElementById('cita-modal').style.display = 'flex';
       return;
     }
@@ -2997,6 +3133,161 @@
   }
   // expongo al onclick inline del backdrop/cerrar
   window.closeCitaModal = closeCitaModal;
+
+  // ── Admin actions: reagendar / eliminar ──
+  let _adminReschedule = { booking: null, terapeuta_id: null, scope: 'booking' };
+
+  function closeAdminRescheduleModal() {
+    document.getElementById('admin-reschedule-modal').style.display = 'none';
+  }
+  window.closeAdminRescheduleModal = closeAdminRescheduleModal;
+
+  function openAdminRescheduleModal(booking, terapeutaId) {
+    if (!booking) return;
+    _adminReschedule.booking = booking;
+    _adminReschedule.terapeuta_id = terapeutaId || null;
+    _adminReschedule.scope = 'booking';
+
+    const modal = document.getElementById('admin-reschedule-modal');
+    const cliente = (booking.cliente || booking.cliente_nombre || 'Cliente').trim();
+    const fecha = (booking.fecha || '').slice(0, 10);
+    const hora = (booking.hora || '').slice(0, 5);
+    document.getElementById('admin-resch-title').textContent = 'Reagendar cita — ' + cliente;
+    const humanDate = fecha ? formatHumanDate(fecha) : '';
+    document.getElementById('admin-resch-when').textContent = humanDate + (hora ? ' · ' + hora : '');
+
+    document.getElementById('admin-resch-fecha').value = fecha;
+    document.getElementById('admin-resch-hora').value = hora;
+
+    // Scope tabs
+    const scopeWrap = document.getElementById('admin-resch-scope');
+    scopeWrap.querySelectorAll('button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.scope === 'booking');
+      btn.onclick = () => {
+        scopeWrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _adminReschedule.scope = btn.dataset.scope;
+      };
+    });
+
+    // Reset mensaje
+    const msg = document.getElementById('admin-resch-msg');
+    msg.classList.remove('error');
+    msg.textContent = 'Nueva ubicación temporal — el sistema recalcula los cupos automáticamente conservando la separación entre servicios.';
+
+    // Habilitar botón
+    const submit = document.getElementById('admin-resch-submit');
+    submit.disabled = false;
+    submit.textContent = 'Guardar cambios';
+
+    modal.style.display = 'flex';
+  }
+  window.openAdminRescheduleModal = openAdminRescheduleModal;
+
+  function formatHumanDate(iso) {
+    try {
+      const [y, m, d] = iso.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+      return `${dias[dt.getDay()]} ${dt.getDate()} ${meses[dt.getMonth()]}`;
+    } catch (e) { return iso; }
+  }
+
+  async function submitAdminReschedule() {
+    const b = _adminReschedule.booking;
+    if (!b) return;
+    const fecha = document.getElementById('admin-resch-fecha').value;
+    const hora = document.getElementById('admin-resch-hora').value;
+    const scope = _adminReschedule.scope;
+    const msg = document.getElementById('admin-resch-msg');
+    const submit = document.getElementById('admin-resch-submit');
+
+    msg.classList.remove('error');
+    if (!fecha || !hora) {
+      msg.classList.add('error');
+      msg.textContent = 'Debes elegir fecha y hora antes de guardar.';
+      return;
+    }
+
+    const hhmm = hora.length === 5 ? hora + ':00' : hora;
+    submit.disabled = true;
+    submit.textContent = 'Guardando…';
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    let payload;
+    if (scope === 'slot') {
+      const slotId = b.slot_id || b.id;
+      payload = { action: 'reschedule_slot', slot_id: slotId, fecha, hora: hhmm };
+    } else {
+      const bookingId = b.booking_id || b.id;
+      payload = { action: 'reschedule_booking', booking_id: bookingId, fecha, hora: hhmm };
+    }
+
+    try {
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error((data && (data.error || data.message)) || 'No se pudo reagendar la cita.');
+      }
+      const status = data.result && data.result.status;
+      if (status === 'overlap') {
+        throw new Error('Ese horario choca con otra cita del mismo masajista.');
+      }
+      if (status === 'not_found') {
+        throw new Error('La cita ya no existe.');
+      }
+      closeAdminRescheduleModal();
+      closeCitaModal();
+      showToast('Cita reagendada correctamente.', 'ok');
+      if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+    } catch (err) {
+      msg.classList.add('error');
+      msg.textContent = err.message || 'Error al reagendar.';
+      submit.disabled = false;
+      submit.textContent = 'Guardar cambios';
+    }
+  }
+  window.submitAdminReschedule = submitAdminReschedule;
+
+  async function adminDeleteBooking(booking) {
+    if (!booking) return;
+    const bookingId = booking.booking_id || booking.id;
+    if (!bookingId) { showToast('No se encontró el ID de la cita.', 'warn'); return; }
+    const cliente = (booking.cliente || booking.cliente_nombre || 'esta cita').trim();
+
+    // Doble confirmación
+    if (!window.confirm(`¿Eliminar la cita de ${cliente}?\n\nSe borrarán todos los cupos y notificaciones asociados. Esta acción no se puede deshacer.`)) return;
+    if (!window.confirm('Confirmación final: ¿estás seguro de eliminar esta cita?')) return;
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    try {
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ action: 'delete_booking', booking_id: bookingId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error((data && (data.error || data.message)) || 'No se pudo eliminar la cita.');
+      }
+      const status = data.result && data.result.status;
+      if (status === 'not_found') {
+        showToast('La cita ya no existía.', 'warn');
+      } else {
+        showToast('Cita eliminada.', 'ok');
+      }
+      closeCitaModal();
+      if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+    } catch (err) {
+      showToast(err.message || 'Error al eliminar la cita.', 'err');
+    }
+  }
+  window.adminDeleteBooking = adminDeleteBooking;
 
   let _gsiReady = false;
   let _pendingRender = false;
