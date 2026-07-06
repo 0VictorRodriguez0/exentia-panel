@@ -976,6 +976,142 @@
     .stats-inputs label { flex: 1 1 45%; }
   }
 
+  /* ── Tab Masajistas ── */
+  .terapeutas-toolbar {
+    display: flex; align-items: center; gap: 16px;
+    margin: 10px 0 18px;
+  }
+  .terapeutas-filter {
+    display: flex; align-items: center; gap: 8px;
+    font: 12.5px 'Inter', sans-serif;
+    color: var(--olive-dark);
+    cursor: pointer;
+  }
+  .terapeutas-filter input { accent-color: var(--olive); }
+  .terapeutas-list {
+    display: grid; gap: 12px;
+  }
+  .terapeuta-card {
+    background: #fff; border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
+    display: grid; gap: 14px;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    border-left: 4px solid var(--olive);
+  }
+  .terapeuta-card.is-inactive {
+    border-left-color: rgba(154,138,117,0.25);
+    opacity: 0.6;
+  }
+  .terapeuta-card .terapeuta-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--olive); color: var(--off-white);
+    font: 700 16px 'Lato', sans-serif;
+    display: grid; place-items: center;
+  }
+  .terapeuta-card.is-inactive .terapeuta-avatar {
+    background: rgba(154,138,117,0.35);
+  }
+  .terapeuta-info { min-width: 0; }
+  .terapeuta-info-name {
+    font: 600 15px 'Inter', sans-serif;
+    color: var(--brown);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .terapeuta-info-meta {
+    font: 12px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    margin-top: 3px;
+    display: flex; flex-wrap: wrap; gap: 4px 12px;
+  }
+  .terapeuta-info-meta span::before { content: '·'; margin-right: 6px; opacity: 0.6; }
+  .terapeuta-info-meta span:first-child::before { content: ''; margin-right: 0; }
+  .terapeuta-badge-sexo {
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(154,152,84,0.15); color: var(--olive-dark);
+    font: 600 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .terapeuta-badge-sexo.na {
+    background: rgba(200,160,79,0.18); color: #7a5b1e;
+  }
+  .terapeuta-count {
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--olive-dark);
+    background: rgba(154,152,84,0.12);
+    padding: 6px 10px; border-radius: 999px;
+    text-align: center; min-width: 80px;
+  }
+  .terapeuta-count small { display: block; font-weight: 400; font-size: 10px; opacity: 0.85; }
+  .terapeuta-actions {
+    display: flex; gap: 6px;
+  }
+  .terapeuta-actions button {
+    padding: 7px 12px; border-radius: 8px;
+    background: transparent; color: var(--olive-dark);
+    border: 1.5px solid rgba(154,138,117,0.28);
+    cursor: pointer;
+    font: 600 11.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .terapeuta-actions button:hover {
+    background: var(--olive); color: #fff; border-color: var(--olive);
+  }
+  .terapeuta-form { display: flex; flex-direction: column; gap: 12px; }
+  .terapeuta-form label {
+    display: flex; flex-direction: column; gap: 4px;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+  }
+  .terapeuta-form label small {
+    display: inline; font: 400 10.5px 'Inter', sans-serif;
+    text-transform: none; letter-spacing: 0; color: var(--gray-soft);
+    margin-left: 4px;
+  }
+  .terapeuta-form input,
+  .terapeuta-form select {
+    padding: 10px 12px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 14px 'Inter', sans-serif;
+    outline: none; transition: border-color .15s;
+  }
+  .terapeuta-form input:focus,
+  .terapeuta-form select:focus { border-color: var(--olive); }
+  .terapeuta-form-checkbox {
+    flex-direction: row !important; align-items: center; gap: 10px !important;
+    text-transform: none !important; font: 13px 'Inter', sans-serif !important;
+    color: var(--brown) !important; letter-spacing: 0 !important;
+    padding: 6px 0;
+  }
+  .terapeuta-form-checkbox input { accent-color: var(--olive); width: 18px; height: 18px; }
+  .terapeuta-form-msg {
+    font: 12.5px 'Inter', sans-serif;
+    padding: 8px 12px; border-radius: 8px;
+    display: none;
+  }
+  .terapeuta-form-msg.show { display: block; }
+  .terapeuta-form-msg.error {
+    background: rgba(181,59,59,0.08);
+    color: #942e2e;
+    border-left: 3px solid #b53b3b;
+  }
+  @media (max-width: 700px) {
+    .terapeuta-card {
+      grid-template-columns: auto 1fr;
+      grid-template-areas: 'avatar info' 'count actions';
+      gap: 10px;
+    }
+    .terapeuta-card .terapeuta-avatar { grid-area: avatar; }
+    .terapeuta-info { grid-area: info; }
+    .terapeuta-count { grid-area: count; justify-self: start; }
+    .terapeuta-actions { grid-area: actions; justify-self: end; }
+  }
+
   /* ── Admin panel — cada masajista fila completa, días amplios ── */
   .admin-grid {
     display: flex; flex-direction: column;
@@ -1834,11 +1970,57 @@
         <h1>Equipo de <em>masajistas</em></h1>
         <p class="cal-subtitle">Alta, edición, sexo y activación de terapeutas.</p>
       </div>
-      <div class="admin-placeholder">
-        <div class="admin-placeholder-title">Próximamente — Fase 5</div>
-        <div class="admin-placeholder-msg">Tabla con nombre, email, sexo, actividad, y botones para dar de alta o editar.</div>
+      <div class="terapeutas-toolbar">
+        <button class="cita-btn-primary" id="btn-add-terapeuta">+ Agregar masajista</button>
+        <label class="terapeutas-filter">
+          <input type="checkbox" id="terapeutas-show-inactive"> Mostrar inactivas
+        </label>
+      </div>
+      <div class="terapeutas-list" id="terapeutas-list">
+        <div class="stats-loading"><div class="spinner sm"></div><span>Cargando equipo…</span></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Alta/Edición de masajista ── -->
+<div id="terapeuta-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeTerapeutaModal()"></div>
+  <div class="cita-modal-box" style="max-width:520px;">
+    <button class="cita-modal-close" onclick="closeTerapeutaModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge" id="terapeuta-modal-badge">Nueva masajista</div>
+    <h2 class="cita-modal-title" id="terapeuta-modal-title">Agregar masajista</h2>
+    <form class="terapeuta-form" onsubmit="submitTerapeuta(event)">
+      <label>
+        <span>Nombre completo</span>
+        <input type="text" id="ter-nombre" required autocomplete="name">
+      </label>
+      <label>
+        <span>Email <small>(login del panel)</small></span>
+        <input type="email" id="ter-email" required autocomplete="email">
+      </label>
+      <label>
+        <span>Teléfono</span>
+        <input type="tel" id="ter-telefono" autocomplete="tel">
+      </label>
+      <label>
+        <span>Sexo</span>
+        <select id="ter-sexo">
+          <option value="">— Sin especificar —</option>
+          <option value="femenino">Femenino</option>
+          <option value="masculino">Masculino</option>
+        </select>
+      </label>
+      <label class="terapeuta-form-checkbox">
+        <input type="checkbox" id="ter-activo" checked>
+        <span>Activa en el equipo</span>
+      </label>
+      <div class="terapeuta-form-msg" id="ter-msg"></div>
+      <div class="cita-modal-actions">
+        <button type="button" class="cita-btn-secondary" onclick="closeTerapeutaModal()">Cancelar</button>
+        <button type="submit" class="cita-btn-primary" id="ter-submit">Guardar</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -2091,6 +2273,8 @@
         // Ya se inicializa en showAdminPanel, no re-hacer nada
       } else if (name === 'resumen') {
         initStatsTab();
+      } else if (name === 'masajistas') {
+        initTerapeutasTab();
       }
     }
   }
@@ -2398,6 +2582,177 @@
       }
     };
   }
+
+  // ── Tab Masajistas ──
+  const terapeutasState = {
+    list: [],
+    showInactive: false,
+    loading: false,
+  };
+
+  function initTerapeutasTab() {
+    const btnAdd = document.getElementById('btn-add-terapeuta');
+    if (btnAdd && !btnAdd._bound) {
+      btnAdd.addEventListener('click', () => openTerapeutaModal(null));
+      btnAdd._bound = true;
+    }
+    const chk = document.getElementById('terapeutas-show-inactive');
+    if (chk && !chk._bound) {
+      chk.addEventListener('change', () => {
+        terapeutasState.showInactive = chk.checked;
+        renderTerapeutasList();
+      });
+      chk._bound = true;
+    }
+    loadTerapeutas();
+  }
+
+  async function loadTerapeutas() {
+    if (terapeutasState.loading) return;
+    terapeutasState.loading = true;
+    const cont = document.getElementById('terapeutas-list');
+    try {
+      const url = SUPABASE_URL + '/rest/v1/exentia_terapeutas_admin?select=*';
+      const res = await fetch(url, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Accept': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('bad response');
+      terapeutasState.list = data;
+      renderTerapeutasList();
+    } catch (err) {
+      cont.innerHTML = '<div class="stats-loading" style="color:#942e2e">No se pudo cargar el equipo. Intenta refrescar.</div>';
+      console.error('terapeutas', err);
+    } finally {
+      terapeutasState.loading = false;
+    }
+  }
+
+  function citasDelMesPorTerapeuta(terapeutaId) {
+    if (!adminState.data || !adminState.data.mias) return 0;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return adminState.data.mias.filter(m => {
+      if (m.terapeuta_id !== terapeutaId) return false;
+      const d = parseDateYMD(m.fecha);
+      return d && d >= monthStart && d < monthEnd;
+    }).length;
+  }
+
+  function renderTerapeutasList() {
+    const cont = document.getElementById('terapeutas-list');
+    let list = terapeutasState.list;
+    if (!terapeutasState.showInactive) list = list.filter(t => t.activo);
+    if (!list.length) {
+      cont.innerHTML = '<div class="stats-loading">Sin masajistas para mostrar.</div>';
+      return;
+    }
+    cont.innerHTML = list.map(t => {
+      const initials = _avatarInitials(t.nombre);
+      const meta = [];
+      if (t.email) meta.push(`<span>${escapeHtml(t.email)}</span>`);
+      if (t.telefono) meta.push(`<span>${escapeHtml(t.telefono)}</span>`);
+      if (!t.activo) meta.push('<span style="color:#942e2e;font-weight:600">Inactiva</span>');
+      const sexoBadge = t.sexo
+        ? `<span class="terapeuta-badge-sexo">${escapeHtml(t.sexo)}</span>`
+        : '<span class="terapeuta-badge-sexo na">sin sexo</span>';
+      meta.push(sexoBadge);
+      const citasMes = citasDelMesPorTerapeuta(t.id);
+      return `<div class="terapeuta-card ${t.activo ? '' : 'is-inactive'}">
+        <div class="terapeuta-avatar">${initials}</div>
+        <div class="terapeuta-info">
+          <div class="terapeuta-info-name">${escapeHtml(t.nombre || '—')}</div>
+          <div class="terapeuta-info-meta">${meta.join('')}</div>
+        </div>
+        <div class="terapeuta-count">${citasMes}<small>este mes</small></div>
+        <div class="terapeuta-actions">
+          <button type="button" onclick='editTerapeuta(${JSON.stringify(t.id)})'>Editar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openTerapeutaModal(t) {
+    const isEdit = !!t;
+    document.getElementById('terapeuta-modal-badge').textContent = isEdit ? 'Editar masajista' : 'Nueva masajista';
+    document.getElementById('terapeuta-modal-title').textContent = isEdit ? (t.nombre || 'Sin nombre') : 'Agregar masajista';
+    document.getElementById('ter-nombre').value = t ? (t.nombre || '') : '';
+    document.getElementById('ter-email').value = t ? (t.email || '') : '';
+    document.getElementById('ter-telefono').value = t ? (t.telefono || '') : '';
+    document.getElementById('ter-sexo').value = t ? (t.sexo || '') : '';
+    document.getElementById('ter-activo').checked = t ? !!t.activo : true;
+    const msg = document.getElementById('ter-msg');
+    msg.className = 'terapeuta-form-msg';
+    msg.textContent = '';
+    const submit = document.getElementById('ter-submit');
+    submit.disabled = false;
+    submit.textContent = isEdit ? 'Guardar cambios' : 'Crear masajista';
+    document.getElementById('terapeuta-modal').dataset.editId = t ? t.id : '';
+    document.getElementById('terapeuta-modal').style.display = 'flex';
+  }
+  window.openTerapeutaModal = openTerapeutaModal;
+
+  function editTerapeuta(id) {
+    const t = terapeutasState.list.find(x => x.id === id);
+    if (!t) return;
+    openTerapeutaModal(t);
+  }
+  window.editTerapeuta = editTerapeuta;
+
+  function closeTerapeutaModal() {
+    document.getElementById('terapeuta-modal').style.display = 'none';
+  }
+  window.closeTerapeutaModal = closeTerapeutaModal;
+
+  async function submitTerapeuta(e) {
+    e.preventDefault();
+    const editId = document.getElementById('terapeuta-modal').dataset.editId || null;
+    const nombre = document.getElementById('ter-nombre').value.trim();
+    const email = document.getElementById('ter-email').value.trim().toLowerCase();
+    const telefono = document.getElementById('ter-telefono').value.trim();
+    const sexo = document.getElementById('ter-sexo').value.trim().toLowerCase();
+    const activo = document.getElementById('ter-activo').checked;
+    const msg = document.getElementById('ter-msg');
+    const submit = document.getElementById('ter-submit');
+    msg.className = 'terapeuta-form-msg';
+
+    if (!nombre) { msg.className = 'terapeuta-form-msg show error'; msg.textContent = 'Falta el nombre.'; return; }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { msg.className = 'terapeuta-form-msg show error'; msg.textContent = 'Email no válido.'; return; }
+
+    submit.disabled = true;
+    submit.textContent = 'Guardando…';
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    try {
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({
+          action: 'upsert_terapeuta',
+          id: editId || null,
+          nombre, email, telefono, sexo, activo
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false || (data.result && data.result.status === 'error')) {
+        throw new Error((data.result && data.result.error) || data.error || 'No se pudo guardar.');
+      }
+      closeTerapeutaModal();
+      showToast(editId ? 'Masajista actualizada.' : 'Masajista agregada.', 'ok');
+      loadTerapeutas();
+    } catch (err) {
+      msg.className = 'terapeuta-form-msg show error';
+      msg.textContent = err.message || 'Error al guardar.';
+      submit.disabled = false;
+      submit.textContent = editId ? 'Guardar cambios' : 'Crear masajista';
+    }
+  }
+  window.submitTerapeuta = submitTerapeuta;
 
   function showAdminPanel(payload) {
     document.getElementById('view-login').style.display = 'none';
