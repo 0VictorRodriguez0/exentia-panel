@@ -1446,10 +1446,12 @@
         <button class="cal-nav-btn" id="admin-cal-next" title="Semana siguiente">›</button>
         <button class="cal-today-btn" id="admin-cal-today">Hoy</button>
         <div class="cal-spacer"></div>
-        <label for="admin-view-as-select" style="font:11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-right:6px;">Ver como</label>
-        <select id="admin-view-as-select" class="cal-view-as-select" title="Entrar como uno de los masajistas">
-          <option value="">— Selecciona masajista —</option>
-        </select>
+        <div id="admin-view-as-wrap" style="display:none">
+          <label for="admin-view-as-select" style="font:11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-right:6px;">Ver como</label>
+          <select id="admin-view-as-select" class="cal-view-as-select" title="Entrar como uno de los masajistas">
+            <option value="">— Selecciona masajista —</option>
+          </select>
+        </div>
         <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-left:12px;margin-right:8px;transition:background .25s;"></span>
         <button class="cal-refresh" id="admin-cal-refresh" title="Refrescar">↻</button>
       </div>
