@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <!-- intl-tel-input v23: bandera + código de país en el input del SMS fallback (mismo CDN que el cliente exentia-pagina.html) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/css/intlTelInput.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/js/intlTelInput.min.js"></script>
@@ -818,6 +819,163 @@
     line-height: 1.5;
   }
 
+  /* ── Dashboard Resumen ── */
+  .stats-filters {
+    display: flex; flex-direction: column; gap: 14px;
+    background: #fff; border-radius: 14px;
+    padding: 16px 18px; margin: 10px 0 22px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.06);
+  }
+  .stats-presets {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    border-bottom: 1px solid rgba(154,138,117,0.15);
+    padding-bottom: 12px;
+  }
+  .stats-presets button {
+    padding: 7px 13px;
+    background: #fbf9f1; color: var(--brown);
+    border: 1.5px solid transparent; border-radius: 999px;
+    cursor: pointer;
+    font: 600 11.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .stats-presets button:hover { background: rgba(154,152,84,0.14); }
+  .stats-presets button.active {
+    background: var(--olive); color: #fff; border-color: var(--olive);
+  }
+  .stats-inputs {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: end;
+  }
+  .stats-inputs label {
+    display: flex; flex-direction: column; gap: 4px;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    flex: 1 1 140px; min-width: 140px;
+  }
+  .stats-inputs input,
+  .stats-inputs select {
+    padding: 9px 11px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 13.5px 'Inter', sans-serif;
+    outline: none; transition: border-color .15s;
+  }
+  .stats-inputs input:focus,
+  .stats-inputs select:focus { border-color: var(--olive); }
+  .stats-inputs .cal-refresh {
+    align-self: end;
+    height: 38px;
+  }
+
+  .stats-kpi-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 22px;
+  }
+  .stats-loading {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 30px 12px; color: var(--brown); opacity: 0.75;
+    font: 13px 'Inter', sans-serif;
+  }
+  .stats-kpi {
+    background: #fff; border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
+    border-left: 4px solid var(--olive);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stats-kpi.kpi-secondary { border-left-color: var(--olive-light); }
+  .stats-kpi.kpi-warn { border-left-color: #c8a04f; }
+  .stats-kpi-label {
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+  }
+  .stats-kpi-value {
+    font: 700 26px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    letter-spacing: -0.3px;
+    line-height: 1.15;
+  }
+  .stats-kpi-sub {
+    font: 12px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+
+  .stats-charts-grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats-charts-grid .stats-chart-wide { grid-column: 1 / -1; }
+  .stats-chart-card {
+    background: #fff; border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.07);
+    display: flex; flex-direction: column;
+    min-width: 0;
+  }
+  .stats-chart-title {
+    font: 600 13px 'Inter', sans-serif;
+    color: var(--brown);
+    margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+  .stats-chart-title small {
+    font: 400 11px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    text-transform: none; letter-spacing: 0;
+  }
+  .stats-chart-wrap {
+    position: relative;
+    height: 240px;
+    width: 100%;
+  }
+  .stats-chart-wrap.stats-chart-donut { height: 220px; }
+  .stats-chart-wide .stats-chart-wrap { height: 260px; }
+
+  .stats-list {
+    display: flex; flex-direction: column; gap: 8px;
+    font: 13px 'Inter', sans-serif;
+    max-height: 260px; overflow-y: auto;
+  }
+  .stats-list-h {
+    flex-direction: row; flex-wrap: wrap; gap: 10px;
+    max-height: none;
+  }
+  .stats-list-item {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #fbf9f1; border-radius: 8px;
+  }
+  .stats-list-h .stats-list-item {
+    flex: 1 1 220px; min-width: 220px;
+  }
+  .stats-list-item-name {
+    color: var(--brown);
+    font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    min-width: 0; flex: 1;
+  }
+  .stats-list-item-val {
+    font: 700 13px 'Cormorant Garamond', serif;
+    color: var(--olive-dark);
+    flex: 0 0 auto;
+  }
+  .stats-list-empty {
+    padding: 22px 10px;
+    text-align: center;
+    color: var(--gray-soft);
+    font: 12.5px 'Inter', sans-serif;
+  }
+  @media (max-width: 900px) {
+    .stats-charts-grid { grid-template-columns: 1fr; }
+    .stats-inputs label { flex: 1 1 45%; }
+  }
+
   /* ── Admin panel — cada masajista fila completa, días amplios ── */
   .admin-grid {
     display: flex; flex-direction: column;
@@ -1545,9 +1703,70 @@
         <h1>Resumen del <em>negocio</em></h1>
         <p class="cal-subtitle">Ventas, citas y KPIs con filtros por fecha, tipo y masajista.</p>
       </div>
-      <div class="admin-placeholder">
-        <div class="admin-placeholder-title">Próximamente — Fase 2</div>
-        <div class="admin-placeholder-msg">Dashboard con KPIs, filtros y gráficas.</div>
+
+      <!-- Filtros -->
+      <div class="stats-filters">
+        <div class="stats-presets" id="stats-presets" role="tablist">
+          <button type="button" class="active" data-preset="mes">Este mes</button>
+          <button type="button" data-preset="semana">Esta semana</button>
+          <button type="button" data-preset="hoy">Hoy</button>
+          <button type="button" data-preset="mes_ant">Mes anterior</button>
+          <button type="button" data-preset="custom">Personalizado</button>
+        </div>
+        <div class="stats-inputs">
+          <label>
+            <span>Desde</span>
+            <input type="date" id="stats-desde">
+          </label>
+          <label>
+            <span>Hasta</span>
+            <input type="date" id="stats-hasta">
+          </label>
+          <label>
+            <span>Tipo</span>
+            <select id="stats-tipo">
+              <option value="">Todos</option>
+              <option value="sucursal">Sucursal</option>
+              <option value="domicilio">Domicilio</option>
+            </select>
+          </label>
+          <label>
+            <span>Masajista</span>
+            <select id="stats-terapeuta">
+              <option value="">Todas</option>
+            </select>
+          </label>
+          <button class="cal-refresh" id="stats-refresh" title="Refrescar">↻</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="stats-kpi-grid" id="stats-kpi-grid">
+        <div class="stats-loading"><div class="spinner sm"></div><span>Cargando resumen…</span></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="stats-charts-grid">
+        <div class="stats-chart-card stats-chart-wide">
+          <div class="stats-chart-title">Ventas por día <small>(reservadas · MXN)</small></div>
+          <div class="stats-chart-wrap"><canvas id="chart-ventas-dia"></canvas></div>
+        </div>
+        <div class="stats-chart-card stats-chart-wide">
+          <div class="stats-chart-title">Citas por día</div>
+          <div class="stats-chart-wrap"><canvas id="chart-citas-dia"></canvas></div>
+        </div>
+        <div class="stats-chart-card">
+          <div class="stats-chart-title">Sucursal vs Domicilio</div>
+          <div class="stats-chart-wrap stats-chart-donut"><canvas id="chart-tipo"></canvas></div>
+        </div>
+        <div class="stats-chart-card">
+          <div class="stats-chart-title">Top servicios</div>
+          <div id="stats-top-servicios" class="stats-list">—</div>
+        </div>
+        <div class="stats-chart-card stats-chart-wide">
+          <div class="stats-chart-title">Citas por masajista</div>
+          <div id="stats-por-masajista" class="stats-list stats-list-h">—</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1738,6 +1957,7 @@
   const OTP_VERIFY_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-otp-verify';
   const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
   const ADMIN_ACTIONS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-actions';
+  const ADMIN_STATS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-stats';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
   const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
   const ADMIN_USERNAMES = ['exentiamasajista', 'exentiaadmin'];
@@ -1869,8 +2089,9 @@
       adminState.tabsLoaded[name] = true;
       if (name === 'calendarios') {
         // Ya se inicializa en showAdminPanel, no re-hacer nada
+      } else if (name === 'resumen') {
+        initStatsTab();
       }
-      // Los otros tabs son placeholders en F1; se cablearán en F2-F5
     }
   }
 
@@ -1880,6 +2101,302 @@
       btn.addEventListener('click', () => switchAdminTab(btn.dataset.tab));
       btn._bound = true;
     });
+  }
+
+  // ── Dashboard Resumen ──
+  const statsState = {
+    charts: {},
+    filters: { desde: null, hasta: null, tipo: '', terapeuta: '', preset: 'mes' },
+    loading: false,
+  };
+
+  function initStatsTab() {
+    // Rellenar dropdown de terapeutas con la data ya cargada
+    const sel = document.getElementById('stats-terapeuta');
+    if (sel && adminState.data && adminState.data.terapeutas) {
+      sel.innerHTML = '<option value="">Todas</option>' + adminState.data.terapeutas
+        .map(t => `<option value="${t.id}">${escapeHtml(t.nombre || '—')}</option>`).join('');
+    }
+    // Presets
+    document.querySelectorAll('#stats-presets button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#stats-presets button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        statsState.filters.preset = btn.dataset.preset;
+        applyStatsPreset(btn.dataset.preset);
+        loadStats();
+      });
+    });
+    // Inputs cambian → preset custom + recarga
+    ['stats-desde','stats-hasta','stats-tipo','stats-terapeuta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', () => {
+        if (id === 'stats-desde' || id === 'stats-hasta') {
+          document.querySelectorAll('#stats-presets button').forEach(b => b.classList.toggle('active', b.dataset.preset === 'custom'));
+          statsState.filters.preset = 'custom';
+        }
+        loadStats();
+      });
+    });
+    const refresh = document.getElementById('stats-refresh');
+    if (refresh) refresh.addEventListener('click', () => loadStats());
+    applyStatsPreset('mes');
+    loadStats();
+  }
+
+  function applyStatsPreset(preset) {
+    const today = new Date();
+    let desde, hasta;
+    if (preset === 'hoy') {
+      desde = hasta = today;
+    } else if (preset === 'semana') {
+      desde = startOfWeek(today);
+      hasta = addDays(desde, 6);
+    } else if (preset === 'mes') {
+      desde = new Date(today.getFullYear(), today.getMonth(), 1);
+      hasta = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    } else if (preset === 'mes_ant') {
+      desde = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      hasta = new Date(today.getFullYear(), today.getMonth(), 0);
+    } else {
+      return; // custom: no tocar
+    }
+    document.getElementById('stats-desde').value = ymd(desde);
+    document.getElementById('stats-hasta').value = ymd(hasta);
+  }
+
+  function ymd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  async function loadStats() {
+    if (statsState.loading) return;
+    statsState.loading = true;
+    const grid = document.getElementById('stats-kpi-grid');
+    grid.innerHTML = '<div class="stats-loading"><div class="spinner sm"></div><span>Cargando resumen…</span></div>';
+
+    const desde = document.getElementById('stats-desde').value;
+    const hasta = document.getElementById('stats-hasta').value;
+    const tipo = document.getElementById('stats-tipo').value;
+    const terapeuta = document.getElementById('stats-terapeuta').value;
+    statsState.filters = { ...statsState.filters, desde, hasta, tipo, terapeuta };
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    const params = new URLSearchParams();
+    if (desde) params.set('desde', desde);
+    if (hasta) params.set('hasta', hasta);
+    if (tipo) params.set('tipo', tipo);
+    if (terapeuta) params.set('terapeuta', terapeuta);
+    try {
+      const res = await fetch(ADMIN_STATS_ENDPOINT + '?' + params.toString(), {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || 'stats');
+      renderStats(data.stats || {});
+    } catch (err) {
+      grid.innerHTML = '<div class="stats-loading" style="color:#942e2e">No se pudo cargar el resumen. Intenta refrescar.</div>';
+      console.error('stats', err);
+    } finally {
+      statsState.loading = false;
+    }
+  }
+
+  function fmtMoney(n) {
+    return '$' + Math.round(n || 0).toLocaleString('es-MX');
+  }
+
+  function renderStats(s) {
+    const grid = document.getElementById('stats-kpi-grid');
+    const ventasRes = s.ventas_reservadas || s.ventas_total || 0;
+    const ventasCob = s.ventas_cobradas || s.ventas_pagos || 0;
+    const total = s.total_citas || 0;
+    const completadas = s.completadas || 0;
+    const canceladas = s.canceladas || 0;
+    const ticket = s.ticket_promedio || 0;
+    const porTipo = s.por_tipo || {};
+    const domicilio = porTipo.domicilio || 0;
+    const sucursal = porTipo.sucursal || 0;
+    const totalTipo = domicilio + sucursal;
+    const pctDomicilio = totalTipo ? Math.round(100 * domicilio / totalTipo) : 0;
+
+    grid.innerHTML = [
+      kpiCard('Ventas reservadas', fmtMoney(ventasRes), 'suma del precio de citas del periodo', 'primary'),
+      kpiCard('Ventas cobradas', fmtMoney(ventasCob), 'pagos registrados', 'secondary'),
+      kpiCard('Citas totales', total, `${completadas} completadas`, 'primary'),
+      kpiCard('Canceladas', canceladas, total ? `${Math.round(100*canceladas/total)}% del periodo` : '—', 'warn'),
+      kpiCard('Ticket promedio', fmtMoney(ticket), 'por cita del periodo', 'secondary'),
+      kpiCard('% Domicilio', `${pctDomicilio}%`, `${domicilio} domicilio · ${sucursal} sucursal`, 'secondary'),
+    ].join('');
+
+    renderChartCitasDia(s.citas_por_dia || []);
+    renderChartVentasDia(s.ventas_por_dia || []);
+    renderChartTipo(sucursal, domicilio);
+    renderTopServicios(s.top_servicios || []);
+    renderPorMasajista(s.por_masajista || []);
+  }
+
+  function kpiCard(label, value, sub, variant) {
+    return `<div class="stats-kpi kpi-${variant}">
+      <div class="stats-kpi-label">${escapeHtml(label)}</div>
+      <div class="stats-kpi-value">${value}</div>
+      <div class="stats-kpi-sub">${escapeHtml(sub || '')}</div>
+    </div>`;
+  }
+
+  function destroyChart(key) {
+    if (statsState.charts[key]) {
+      statsState.charts[key].destroy();
+      delete statsState.charts[key];
+    }
+  }
+
+  const CHART_COLORS = {
+    olive: '#9a9854',
+    oliveDark: '#7a7841',
+    oliveLight: '#c8c68a',
+    cream: '#e8dfc0',
+    brown: '#5c3a1e',
+    warn: '#c8a04f',
+    grid: 'rgba(154,138,117,0.15)',
+    text: '#5c3a1e',
+  };
+
+  function chartDayLabels(series) {
+    return series.map(x => {
+      const d = parseDateYMD(x.fecha);
+      if (!d) return x.fecha;
+      return `${d.getDate()}/${d.getMonth()+1}`;
+    });
+  }
+
+  function renderChartCitasDia(series) {
+    const ctx = document.getElementById('chart-citas-dia');
+    if (!ctx || !window.Chart) return;
+    destroyChart('citas');
+    statsState.charts.citas = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chartDayLabels(series),
+        datasets: [{
+          label: 'Citas',
+          data: series.map(x => x.citas || 0),
+          backgroundColor: CHART_COLORS.olive,
+          borderRadius: 4,
+          maxBarThickness: 22,
+        }]
+      },
+      options: chartBaseOptions()
+    });
+  }
+
+  function renderChartVentasDia(series) {
+    const ctx = document.getElementById('chart-ventas-dia');
+    if (!ctx || !window.Chart) return;
+    destroyChart('ventas');
+    statsState.charts.ventas = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartDayLabels(series),
+        datasets: [{
+          label: 'Ventas',
+          data: series.map(x => Number(x.ventas || 0)),
+          borderColor: CHART_COLORS.oliveDark,
+          backgroundColor: 'rgba(154,152,84,0.15)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+        }]
+      },
+      options: chartBaseOptions({
+        yTickCallback: v => '$' + Number(v).toLocaleString('es-MX')
+      })
+    });
+  }
+
+  function renderChartTipo(sucursal, domicilio) {
+    const ctx = document.getElementById('chart-tipo');
+    if (!ctx || !window.Chart) return;
+    destroyChart('tipo');
+    statsState.charts.tipo = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Sucursal', 'Domicilio'],
+        datasets: [{
+          data: [sucursal, domicilio],
+          backgroundColor: [CHART_COLORS.olive, CHART_COLORS.warn],
+          borderWidth: 2, borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 }, color: CHART_COLORS.text, boxWidth: 10, padding: 12 } },
+          tooltip: { callbacks: { label: c => `${c.label}: ${c.parsed} cita${c.parsed === 1 ? '' : 's'}` } }
+        }
+      }
+    });
+  }
+
+  function renderTopServicios(items) {
+    const cont = document.getElementById('stats-top-servicios');
+    if (!items.length) { cont.innerHTML = '<div class="stats-list-empty">Sin datos en este periodo.</div>'; return; }
+    cont.innerHTML = items.slice(0, 10).map(x => `
+      <div class="stats-list-item">
+        <span class="stats-list-item-name">${escapeHtml(x.nombre || x.servicio || '—')}</span>
+        <span class="stats-list-item-val">${x.cantidad || x.total || 0}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderPorMasajista(items) {
+    const cont = document.getElementById('stats-por-masajista');
+    if (!items.length) { cont.innerHTML = '<div class="stats-list-empty">Sin citas asignadas a masajistas en este periodo.</div>'; return; }
+    cont.innerHTML = items.map(x => `
+      <div class="stats-list-item">
+        <span class="stats-list-item-name">${escapeHtml(x.nombre || '—')}</span>
+        <span class="stats-list-item-val">${x.citas || x.cantidad || 0} cita${(x.citas || x.cantidad || 0) === 1 ? '' : 's'}</span>
+      </div>
+    `).join('');
+  }
+
+  function chartBaseOptions(opts) {
+    opts = opts || {};
+    return {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: CHART_COLORS.brown,
+          padding: 10, titleFont: { family: 'Inter', size: 12 },
+          bodyFont: { family: 'Inter', size: 12 },
+          callbacks: opts.yTickCallback ? {
+            label: c => c.dataset.label + ': ' + opts.yTickCallback(c.parsed.y)
+          } : undefined
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
+        },
+        y: {
+          grid: { color: CHART_COLORS.grid, drawBorder: false },
+          ticks: {
+            color: CHART_COLORS.text, font: { family: 'Inter', size: 11 },
+            callback: opts.yTickCallback || undefined,
+          },
+          beginAtZero: true
+        }
+      }
+    };
   }
 
   function showAdminPanel(payload) {
