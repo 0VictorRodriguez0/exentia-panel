@@ -1443,7 +1443,8 @@
   const ADMIN_LOGIN_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-login';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
   const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
-  const ADMIN_USERNAME = 'exentiamasajista';
+  const ADMIN_USERNAMES = ['exentiamasajista', 'exentiaadmin'];
+  let _loginContext = { mode: null };  // 'masajista' | 'admin' — capturado por username escrito
   const ADMIN_JWT_BACKUP_KEY = 'exentia_panel_admin_jwt_backup';
   // Allowlist de masajistas que el admin puede impersonar (para pruebas)
   const ADMIN_VIEW_AS_ALLOWLIST = [
@@ -2905,7 +2906,8 @@
     const adminInput = document.getElementById('admin-password-input');
     if (adminInput) { adminInput.value = ''; adminInput.disabled = false; }
     const adminBtn = document.getElementById('admin-password-submit');
-    if (adminBtn) { adminBtn.disabled = false; adminBtn.textContent = 'Entrar como admin'; }
+    if (adminBtn) { adminBtn.disabled = false; adminBtn.textContent = 'Entrar como masajista'; }
+    _loginContext.mode = null;
     document.getElementById('google-btn-wrap').style.display = '';
     const sep = document.querySelector('#view-login .separator');
     if (sep) sep.style.display = '';
@@ -3005,9 +3007,10 @@
     const email = (emailInput.value || '').trim().toLowerCase();
     if (!email) return;
 
-    // Bypass especial: usuario ExentiaAdmin → mostrar form de contraseña admin
-    if (email === ADMIN_USERNAME) {
-      showAdminLoginForm();
+    // Bypass especial: usuarios ExentiaMasajista o ExentiaAdmin → mostrar form de contraseña
+    if (ADMIN_USERNAMES.includes(email)) {
+      _loginContext.mode = (email === 'exentiaadmin') ? 'admin' : 'masajista';
+      showAdminLoginForm(_loginContext.mode);
       return;
     }
 
@@ -3024,7 +3027,7 @@
     }
   }
 
-  function showAdminLoginForm() {
+  function showAdminLoginForm(mode) {
     document.getElementById('email-form').style.display = 'none';
     document.getElementById('code-form').style.display = 'none';
     document.getElementById('google-btn-wrap').style.display = 'none';
@@ -3034,6 +3037,16 @@
     admin.style.display = 'flex';
     const inp = document.getElementById('admin-password-input');
     inp.value = '';
+    // Actualiza label del botón según modo
+    const btn = document.getElementById('admin-password-submit');
+    if (btn) {
+      btn.textContent = mode === 'admin' ? 'Entrar como administradora' : 'Entrar como masajista';
+    }
+    // Actualiza label del input
+    const lbl = admin.querySelector('label[for="admin-password-input"]');
+    if (lbl) {
+      lbl.textContent = mode === 'admin' ? 'Acceso de administradora' : 'Acceso de masajista';
+    }
     setTimeout(() => inp.focus(), 50);
     hideLoginError();
   }
@@ -3071,7 +3084,7 @@
     btn.textContent = 'Verificando...';
     showLoginInflight('Verificando contraseña...');
     try {
-      // Paso 1: validar contraseña y obtener JWT admin
+      // Paso 1: validar contraseña
       const res = await fetch(ADMIN_LOGIN_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -3082,10 +3095,25 @@
         throw new Error(data.detail || 'Contraseña incorrecta.');
       }
       const adminJwt = data.sessionJwt;
+      // El backend devuelve mode='masajista' o 'admin' según la contraseña que se usó.
+      // El username del input es solo un hint; la fuente de verdad es data.mode.
+      const mode = data.mode || _loginContext.mode || 'masajista';
 
-      // Paso 2: usar ese JWT admin para pedir el JWT impersonado del masajista de pruebas
+      if (mode === 'admin') {
+        // Rama admin: guarda el JWT admin como sesión principal.
+        // init() detectará role:'admin' y llamará showAdminPanel() con las pestañas.
+        showLoginInflight('Entrando al panel de administradora...');
+        localStorage.setItem(STORAGE_KEY, adminJwt);
+        try { localStorage.removeItem(OTP_PENDING_KEY); } catch (_) {}
+        try { localStorage.removeItem(ADMIN_JWT_BACKUP_KEY); } catch (_) {}
+        hideLoginInflight();
+        init();
+        return;
+      }
+
+      // Rama masajista (comportamiento actual): impersona automáticamente al masajista de pruebas
       showLoginInflight('Entrando al panel...');
-      const defaultTerapeuta = ADMIN_VIEW_AS_ALLOWLIST[0];  // Calendario Dos por ahora
+      const defaultTerapeuta = ADMIN_VIEW_AS_ALLOWLIST[0];  // Calendario Dos
       const impRes = await fetch(ADMIN_IMPERSONATE_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -3098,8 +3126,6 @@
       if (!impRes.ok || !impData.sessionJwt) {
         throw new Error(impData.detail || 'No pudimos abrir la sesión del masajista de pruebas.');
       }
-
-      // Guardar el JWT masajista como sesión principal — init() lo tratará como login normal
       localStorage.setItem(STORAGE_KEY, impData.sessionJwt);
       try { localStorage.removeItem(OTP_PENDING_KEY); } catch (_) {}
       try { localStorage.removeItem(ADMIN_JWT_BACKUP_KEY); } catch (_) {}
