@@ -750,6 +750,74 @@
   .cal-view-as-select:focus { border-color: var(--olive); }
   .cal-view-as-select:hover { border-color: var(--olive-light); }
 
+  /* ── Admin panel — tabs ── */
+  .admin-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 32px 0;
+    background: var(--off-white);
+    border-bottom: 1.5px solid rgba(154,138,117,0.14);
+    flex-wrap: wrap;
+  }
+  .admin-tab {
+    background: transparent;
+    color: var(--brown);
+    border: none;
+    padding: 10px 18px 12px;
+    cursor: pointer;
+    font: 700 11.5px 'Lato', sans-serif;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 3px solid transparent;
+    transition: color .15s, border-color .15s, background .15s;
+    position: relative;
+    top: 1px;
+  }
+  .admin-tab:hover {
+    color: var(--olive-dark);
+    background: rgba(154,152,84,0.06);
+  }
+  .admin-tab.active {
+    color: var(--olive-dark);
+    border-bottom-color: var(--olive);
+    background: rgba(154,152,84,0.09);
+  }
+  .admin-tab.active:hover { background: rgba(154,152,84,0.12); }
+  .admin-tab-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    animation: adminTabFade .18s ease-out;
+  }
+  @keyframes adminTabFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .admin-placeholder {
+    background: #fff;
+    border: 1.5px dashed rgba(154,138,117,0.35);
+    border-radius: 14px;
+    padding: 60px 32px;
+    text-align: center;
+    color: var(--brown);
+    margin-top: 8px;
+  }
+  .admin-placeholder-title {
+    font: 700 14px 'Lato', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--olive-dark);
+    margin-bottom: 10px;
+  }
+  .admin-placeholder-msg {
+    font: 14px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
   /* ── Admin panel — mosaico de mini calendarios ── */
   .admin-grid {
     display: grid;
@@ -1334,35 +1402,102 @@
 <!-- ── PANEL ADMIN (mosaico de calendarios) ── -->
 <div id="view-admin" style="display:none; flex:1; flex-direction:column;">
   <div class="topbar">
-    <div class="topbar-brand">exentia <span class="sub">VISTA ADMINISTRADOR</span></div>
+    <div class="topbar-brand">exentia <span class="sub">PANEL DE ADMINISTRACIÓN</span></div>
     <div class="topbar-user">
       <div>
-        <div class="topbar-user-name">Administrador</div>
-        <div class="topbar-user-role">Acceso total — solo lectura</div>
+        <div class="topbar-user-name">Administradora</div>
+        <div class="topbar-user-role">Acceso completo</div>
       </div>
       <button class="topbar-logout" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
-  <div class="panel-wrap panel-wrap-cal">
-    <div class="panel-header cal-header">
-      <h1>Vista del <em>administrador</em></h1>
-      <p class="cal-subtitle">Todos los calendarios de masajistas + el pool de citas disponibles.</p>
+  <nav class="admin-tabs" id="admin-tabs" role="tablist">
+    <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
+    <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
+    <button type="button" class="admin-tab" data-tab="citas"       role="tab">Citas</button>
+    <button type="button" class="admin-tab" data-tab="crear"       role="tab">Crear cita</button>
+    <button type="button" class="admin-tab" data-tab="masajistas"  role="tab">Masajistas</button>
+  </nav>
+
+  <!-- Tab: Resumen -->
+  <div class="admin-tab-panel" id="tab-resumen" style="display:none">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Resumen del <em>negocio</em></h1>
+        <p class="cal-subtitle">Ventas, citas y KPIs con filtros por fecha, tipo y masajista.</p>
+      </div>
+      <div class="admin-placeholder">
+        <div class="admin-placeholder-title">Próximamente — Fase 2</div>
+        <div class="admin-placeholder-msg">Dashboard con KPIs, filtros y gráficas.</div>
+      </div>
     </div>
-    <div class="cal-toolbar">
-      <button class="cal-nav-btn" id="admin-cal-prev" title="Semana anterior">‹</button>
-      <div class="cal-range" id="admin-cal-range">—</div>
-      <button class="cal-nav-btn" id="admin-cal-next" title="Semana siguiente">›</button>
-      <button class="cal-today-btn" id="admin-cal-today">Hoy</button>
-      <div class="cal-spacer"></div>
-      <label for="admin-view-as-select" style="font:11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-right:6px;">Ver como</label>
-      <select id="admin-view-as-select" class="cal-view-as-select" title="Ver el panel como uno de los masajistas (solo lectura)">
-        <option value="">— Selecciona masajista —</option>
-      </select>
-      <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-left:12px;margin-right:8px;transition:background .25s;"></span>
-      <button class="cal-refresh" id="admin-cal-refresh" title="Refrescar">↻</button>
+  </div>
+
+  <!-- Tab: Calendarios -->
+  <div class="admin-tab-panel active" id="tab-calendarios">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Calendarios del <em>equipo</em></h1>
+        <p class="cal-subtitle">Todos los calendarios de masajistas + el pool de citas disponibles.</p>
+      </div>
+      <div class="cal-toolbar">
+        <button class="cal-nav-btn" id="admin-cal-prev" title="Semana anterior">‹</button>
+        <div class="cal-range" id="admin-cal-range">—</div>
+        <button class="cal-nav-btn" id="admin-cal-next" title="Semana siguiente">›</button>
+        <button class="cal-today-btn" id="admin-cal-today">Hoy</button>
+        <div class="cal-spacer"></div>
+        <label for="admin-view-as-select" style="font:11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-right:6px;">Ver como</label>
+        <select id="admin-view-as-select" class="cal-view-as-select" title="Entrar como uno de los masajistas">
+          <option value="">— Selecciona masajista —</option>
+        </select>
+        <span id="admin-cal-realtime-dot" title="Esperando conexión en vivo…" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8a04f;margin-left:12px;margin-right:8px;transition:background .25s;"></span>
+        <button class="cal-refresh" id="admin-cal-refresh" title="Refrescar">↻</button>
+      </div>
+      <div id="admin-grid" class="admin-grid">
+        <div class="admin-empty"><div class="spinner sm"></div><span>Cargando calendarios...</span></div>
+      </div>
     </div>
-    <div id="admin-grid" class="admin-grid">
-      <div class="admin-empty"><div class="spinner sm"></div><span>Cargando vista de administrador...</span></div>
+  </div>
+
+  <!-- Tab: Citas -->
+  <div class="admin-tab-panel" id="tab-citas" style="display:none">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Todas las <em>citas</em></h1>
+        <p class="cal-subtitle">Buscar, filtrar, reagendar, cancelar o eliminar cualquier cita.</p>
+      </div>
+      <div class="admin-placeholder">
+        <div class="admin-placeholder-title">Próximamente — Fase 3</div>
+        <div class="admin-placeholder-msg">Tabla con búsqueda, filtros por estado/tipo/masajista, y acciones (reagendar grupal o individual, cancelar, eliminar).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Crear cita -->
+  <div class="admin-tab-panel" id="tab-crear" style="display:none">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Crear una <em>cita nueva</em></h1>
+        <p class="cal-subtitle">Elige cliente, servicios del catálogo, fecha y masajista.</p>
+      </div>
+      <div class="admin-placeholder">
+        <div class="admin-placeholder-title">Próximamente — Fase 4</div>
+        <div class="admin-placeholder-msg">Wizard con búsqueda de cliente, selector de servicios del catálogo (82 disponibles), fecha/hora y asignación directa.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Masajistas -->
+  <div class="admin-tab-panel" id="tab-masajistas" style="display:none">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Equipo de <em>masajistas</em></h1>
+        <p class="cal-subtitle">Alta, edición, sexo y activación de terapeutas.</p>
+      </div>
+      <div class="admin-placeholder">
+        <div class="admin-placeholder-title">Próximamente — Fase 5</div>
+        <div class="admin-placeholder-msg">Tabla con nombre, email, sexo, actividad, y botones para dar de alta o editar.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1551,8 +1686,39 @@
     bookingsById: {},      // {slot_id: {kind, booking, terapeuta_id}}
     realtimeChannel: null,
     pollTimer: null,
-    refreshTimer: null
+    refreshTimer: null,
+    activeTab: 'calendarios',
+    tabsLoaded: {}         // {tabName: true} — para lazy-load una sola vez
   };
+
+  function switchAdminTab(name) {
+    if (!name) return;
+    adminState.activeTab = name;
+    document.querySelectorAll('#admin-tabs .admin-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === name);
+    });
+    document.querySelectorAll('#view-admin .admin-tab-panel').forEach(p => {
+      const isActive = p.id === 'tab-' + name;
+      p.classList.toggle('active', isActive);
+      p.style.display = isActive ? '' : 'none';
+    });
+    // Lazy-load el contenido del tab la primera vez que se abre
+    if (!adminState.tabsLoaded[name]) {
+      adminState.tabsLoaded[name] = true;
+      if (name === 'calendarios') {
+        // Ya se inicializa en showAdminPanel, no re-hacer nada
+      }
+      // Los otros tabs son placeholders en F1; se cablearán en F2-F5
+    }
+  }
+
+  function bindAdminTabs() {
+    document.querySelectorAll('#admin-tabs .admin-tab').forEach(btn => {
+      if (btn._bound) return;
+      btn.addEventListener('click', () => switchAdminTab(btn.dataset.tab));
+      btn._bound = true;
+    });
+  }
 
   function showAdminPanel(payload) {
     document.getElementById('view-login').style.display = 'none';
@@ -1562,6 +1728,9 @@
     hideBootLoader();
     adminState.payload = payload;
     adminState.weekStart = startOfWeek(new Date());
+    bindAdminTabs();
+    switchAdminTab('calendarios');
+    adminState.tabsLoaded['calendarios'] = true;
     bindAdminToolbar();
     fetchAdminCitas();
     subscribeAdminRealtime();
