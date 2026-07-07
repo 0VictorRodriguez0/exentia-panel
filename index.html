@@ -1763,9 +1763,36 @@
     transition: background .15s, color .15s;
   }
   .pos-quick-dates button.active { background: var(--olive); color: #fff; }
+  .pos-subtitle {
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    margin: 12px 0 6px;
+  }
+  .pos-subtitle:first-of-type { margin-top: 0; }
+  .pos-grupo-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .pos-grupo-row label {
+    display: flex; flex-direction: column; gap: 4px;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    flex: 1 1 160px;
+  }
+  .pos-grupo-row input,
+  .pos-grupo-row select {
+    padding: 9px 11px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 13.5px 'Inter', sans-serif;
+    outline: none;
+  }
   .pos-tipo-toggle {
     display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
+  .pos-personas-toggle { grid-template-columns: 1fr 1fr 1fr; }
   .pos-tipo-toggle button {
     padding: 12px 14px;
     background: #fbf9f1; color: var(--brown);
@@ -2854,6 +2881,37 @@
               <input type="date" id="cc-fecha" required>
               <input type="time" id="cc-hora" step="900" required>
             </div>
+            <div class="pos-subtitle">¿Para cuántas personas?</div>
+            <div class="pos-tipo-toggle pos-personas-toggle" id="cc-personas-toggle">
+              <button type="button" class="active" data-personas="1">
+                <strong>Individual</strong>
+                <small>1 persona</small>
+              </button>
+              <button type="button" data-personas="2">
+                <strong>Pareja</strong>
+                <small>2 personas</small>
+              </button>
+              <button type="button" data-personas="grupo">
+                <strong>Grupo</strong>
+                <small>3 o más</small>
+              </button>
+            </div>
+            <input type="hidden" id="cc-num-personas" value="1">
+            <div class="pos-grupo-row" id="cc-grupo-wrap" style="display:none;">
+              <label>
+                <span>¿Cuántas personas?</span>
+                <input type="number" id="cc-grupo-n" min="3" max="10" value="3">
+              </label>
+              <label id="cc-modalidad-wrap" style="display:none;">
+                <span>¿Cómo se atienden?</span>
+                <select id="cc-modalidad">
+                  <option value="simultaneo">Al mismo tiempo</option>
+                  <option value="sucesivo">Uno después de otro</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="pos-subtitle">¿Dónde se atiende?</div>
             <div class="pos-tipo-toggle" id="cc-tipo-toggle">
               <button type="button" class="active" data-tipo="sucursal">
                 <strong>Sucursal</strong>
@@ -2870,20 +2928,6 @@
               <input type="text" id="cc-direccion" placeholder="Calle, número, colonia, referencias">
             </label>
             <div class="crear-grid crear-grid-3" style="margin-top:12px;">
-              <label>
-                <span>Personas</span>
-                <select id="cc-num-personas" onchange="onNumPersonasChange()">
-                  <option value="1">1 persona</option>
-                  <option value="2">2 personas (pareja)</option>
-                </select>
-              </label>
-              <label id="cc-modalidad-wrap" style="display:none;">
-                <span>¿Cómo se atienden?</span>
-                <select id="cc-modalidad">
-                  <option value="simultaneo">Al mismo tiempo</option>
-                  <option value="sucesivo">Uno después de otro</option>
-                </select>
-              </label>
               <label>
                 <span>Masajista</span>
                 <select id="cc-asignar">
@@ -4160,6 +4204,37 @@
       document.querySelectorAll('#cc-quick-dates button').forEach(b => b.classList.remove('active'));
       updateTicketMeta();
     });
+    // Toggle Individual / Pareja / Grupo
+    document.querySelectorAll('#cc-personas-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#cc-personas-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const v = btn.dataset.personas;
+        const grupoWrap = document.getElementById('cc-grupo-wrap');
+        const grupoN = document.getElementById('cc-grupo-n');
+        const grupoLabel = grupoN.closest('label');
+        if (v === 'grupo') {
+          document.getElementById('cc-num-personas').value = String(parseInt(grupoN.value, 10) || 3);
+          grupoWrap.style.display = 'flex';
+          grupoLabel.style.display = '';
+        } else {
+          document.getElementById('cc-num-personas').value = v;
+          // Pareja también elige modalidad; individual no muestra nada
+          grupoWrap.style.display = v === '2' ? 'flex' : 'none';
+          grupoLabel.style.display = 'none';
+        }
+        onNumPersonasChange();
+        recalcSummary();
+      });
+    });
+    // Número de personas del grupo
+    const grupoN = document.getElementById('cc-grupo-n');
+    if (grupoN) grupoN.addEventListener('change', () => {
+      const n = Math.max(3, Math.min(10, parseInt(grupoN.value, 10) || 3));
+      grupoN.value = n;
+      document.getElementById('cc-num-personas').value = String(n);
+      recalcSummary();
+    });
     // Toggle Sucursal / Domicilio
     document.querySelectorAll('#cc-tipo-toggle button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -4395,7 +4470,11 @@
     document.getElementById('cc-direccion').value = '';
     document.getElementById('cc-notif-cliente').checked = false;
     crearState.cart = [];
-    // Volver a los defaults del POS: sucursal + mañana 10:00
+    // Volver a los defaults del POS: individual + sucursal + mañana 10:00
+    document.getElementById('cc-num-personas').value = '1';
+    document.querySelectorAll('#cc-personas-toggle button').forEach(b => b.classList.toggle('active', b.dataset.personas === '1'));
+    document.getElementById('cc-grupo-wrap').style.display = 'none';
+    onNumPersonasChange();
     document.getElementById('cc-tipo-cita').value = 'sucursal';
     document.querySelectorAll('#cc-tipo-toggle button').forEach(b => b.classList.toggle('active', b.dataset.tipo === 'sucursal'));
     onTipoCitaChange();
