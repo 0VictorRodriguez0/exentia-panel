@@ -1703,6 +1703,151 @@
     .crear-servicio-search { grid-template-columns: 1fr; }
   }
 
+  /* ── Crear cita: layout punto de venta ── */
+  .pos-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
+  }
+  .pos-left {
+    display: flex; flex-direction: column; gap: 14px;
+    min-width: 0;
+  }
+  .pos-step h3 {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pos-step-num {
+    display: inline-grid; place-items: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--olive); color: #fff;
+    font: 700 13px 'Lato', sans-serif;
+    flex: 0 0 auto;
+  }
+  .pos-search {
+    width: 100%; box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  .pos-cat-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 10px;
+  }
+  .pos-cat-chips button {
+    padding: 6px 13px;
+    background: #fbf9f1; color: var(--brown);
+    border: 1.5px solid transparent; border-radius: 999px;
+    cursor: pointer;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    transition: background .15s, color .15s;
+  }
+  .pos-cat-chips button:hover { background: rgba(154,152,84,0.14); }
+  .pos-cat-chips button.active {
+    background: var(--olive); color: #fff;
+  }
+  .pos-when-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .pos-quick-dates {
+    display: inline-flex; gap: 2px;
+    background: #fbf9f1; border-radius: 999px; padding: 2px;
+  }
+  .pos-quick-dates button {
+    padding: 7px 16px;
+    background: transparent; color: var(--brown);
+    border: none; border-radius: 999px;
+    cursor: pointer;
+    font: 600 12px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    transition: background .15s, color .15s;
+  }
+  .pos-quick-dates button.active { background: var(--olive); color: #fff; }
+  .pos-tipo-toggle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .pos-tipo-toggle button {
+    padding: 12px 14px;
+    background: #fbf9f1; color: var(--brown);
+    border: 2px solid transparent; border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    display: flex; flex-direction: column; gap: 2px;
+    transition: border-color .15s, background .15s;
+  }
+  .pos-tipo-toggle button strong { font: 600 14px 'Inter', sans-serif; }
+  .pos-tipo-toggle button small { font: 11.5px 'Inter', sans-serif; color: var(--gray-soft); }
+  .pos-tipo-toggle button:hover { border-color: var(--olive-light); }
+  .pos-tipo-toggle button.active {
+    border-color: var(--olive);
+    background: rgba(154,152,84,0.10);
+  }
+  .pos-tipo-toggle button.active strong { color: var(--olive-dark); }
+
+  .pos-ticket {
+    position: sticky; top: 16px;
+    background: #fff; border-radius: 14px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 6px 24px rgba(92,58,30,0.10);
+    border-top: 5px solid var(--olive);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .pos-ticket-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .pos-ticket-title {
+    font: 700 20px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    letter-spacing: 0.5px;
+  }
+  .pos-ticket-clear {
+    background: transparent; border: none;
+    color: var(--gray-soft); cursor: pointer;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    text-decoration: underline;
+  }
+  .pos-ticket-clear:hover { color: #942e2e; }
+  .pos-ticket-count {
+    font: 11.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .pos-ticket-items {
+    margin-top: 0;
+    max-height: 240px; overflow-y: auto;
+  }
+  .pos-ticket-meta {
+    border-top: 1.5px dashed rgba(154,138,117,0.3);
+    padding-top: 10px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .pos-meta-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font: 12.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .pos-meta-row strong {
+    font: 600 12.5px 'Inter', sans-serif;
+    color: var(--brown);
+    text-align: right;
+    max-width: 60%;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pos-ticket-totales {
+    border-top: 1.5px dashed rgba(154,138,117,0.3);
+    padding-top: 8px;
+  }
+  .pos-ticket-sms { padding: 2px 0 0 !important; }
+  .pos-ticket-submit {
+    width: 100%;
+    padding: 14px !important;
+    font-size: 15px !important;
+  }
+  @media (max-width: 980px) {
+    .pos-layout { grid-template-columns: 1fr; }
+    .pos-ticket { position: static; }
+  }
+
   /* ── Tab Masajistas ── */
   .terapeutas-toolbar {
     display: flex; align-items: center; gap: 16px;
@@ -2682,98 +2827,118 @@
         <p class="cal-subtitle">Sin flujo del cliente — sin pago, sin OAuth, solo los datos que necesita el masajista.</p>
       </div>
 
-      <form class="crear-form" onsubmit="submitCrearCita(event)">
-        <!-- Cliente -->
-        <section class="crear-section">
-          <h3>Cliente</h3>
-          <div class="crear-grid crear-grid-2">
-            <label><span>Nombre completo</span><input type="text" id="cc-cliente-nombre" required></label>
-            <label><span>Teléfono</span><input type="tel" id="cc-cliente-telefono" placeholder="+52 998 XXX XXXX" required></label>
-            <label><span>Email <small>(opcional)</small></span><input type="email" id="cc-cliente-email"></label>
-          </div>
-        </section>
-
-        <!-- Servicios -->
-        <section class="crear-section">
-          <h3>Servicios <small id="cc-servicios-count">0 seleccionados</small></h3>
-          <div class="crear-servicio-search">
-            <input type="search" id="cc-search-svc" placeholder="Buscar por nombre o categoría…">
-            <select id="cc-cat-filter">
+      <form class="crear-form pos-layout" onsubmit="submitCrearCita(event)">
+        <!-- Columna izquierda: pasos 1-2-3 -->
+        <div class="pos-left">
+          <!-- Paso 1: Servicios -->
+          <section class="crear-section pos-step">
+            <h3><span class="pos-step-num">1</span> Elige los servicios</h3>
+            <input type="search" id="cc-search-svc" class="pos-search" placeholder="Buscar servicio…">
+            <div class="pos-cat-chips" id="cc-cat-chips"></div>
+            <select id="cc-cat-filter" style="display:none">
               <option value="">Todas las categorías</option>
             </select>
-          </div>
-          <div class="crear-svc-list" id="cc-svc-list">
-            <div class="stats-loading"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
-          </div>
-          <div class="crear-cart" id="cc-cart">
-            <div class="crear-cart-empty">Aún no has agregado servicios.</div>
-          </div>
-        </section>
+            <div class="crear-svc-list" id="cc-svc-list">
+              <div class="stats-loading"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+            </div>
+          </section>
 
-        <!-- Logística -->
-        <section class="crear-section">
-          <h3>Fecha, hora y lugar</h3>
-          <div class="crear-grid crear-grid-3">
-            <label><span>Fecha</span><input type="date" id="cc-fecha" required></label>
-            <label><span>Hora</span><input type="time" id="cc-hora" step="900" required></label>
-            <label>
-              <span>Modalidad</span>
-              <select id="cc-tipo-cita" onchange="onTipoCitaChange()">
-                <option value="sucursal">Sucursal (Plaza Hive)</option>
-                <option value="domicilio">Domicilio</option>
-              </select>
+          <!-- Paso 2: Cuándo y dónde -->
+          <section class="crear-section pos-step">
+            <h3><span class="pos-step-num">2</span> Cuándo y dónde</h3>
+            <div class="pos-when-row">
+              <div class="pos-quick-dates" id="cc-quick-dates">
+                <button type="button" data-dias="0">Hoy</button>
+                <button type="button" class="active" data-dias="1">Mañana</button>
+              </div>
+              <input type="date" id="cc-fecha" required>
+              <input type="time" id="cc-hora" step="900" required>
+            </div>
+            <div class="pos-tipo-toggle" id="cc-tipo-toggle">
+              <button type="button" class="active" data-tipo="sucursal">
+                <strong>Sucursal</strong>
+                <small>Plaza Hive</small>
+              </button>
+              <button type="button" data-tipo="domicilio">
+                <strong>Domicilio</strong>
+                <small>Con traslado</small>
+              </button>
+            </div>
+            <input type="hidden" id="cc-tipo-cita" value="sucursal">
+            <label id="cc-direccion-wrap" style="display:none;margin-top:10px;">
+              <span>Dirección del domicilio</span>
+              <input type="text" id="cc-direccion" placeholder="Calle, número, colonia, referencias">
             </label>
-          </div>
-          <label id="cc-direccion-wrap" style="display:none;margin-top:12px;">
-            <span>Dirección del domicilio</span>
-            <input type="text" id="cc-direccion" placeholder="Calle, número, colonia, referencias">
-          </label>
-        </section>
+            <div class="crear-grid crear-grid-3" style="margin-top:12px;">
+              <label>
+                <span>Personas</span>
+                <select id="cc-num-personas" onchange="onNumPersonasChange()">
+                  <option value="1">1 persona</option>
+                  <option value="2">2 personas (pareja)</option>
+                </select>
+              </label>
+              <label id="cc-modalidad-wrap" style="display:none;">
+                <span>¿Cómo se atienden?</span>
+                <select id="cc-modalidad">
+                  <option value="simultaneo">Al mismo tiempo</option>
+                  <option value="sucesivo">Uno después de otro</option>
+                </select>
+              </label>
+              <label>
+                <span>Masajista</span>
+                <select id="cc-asignar">
+                  <option value="">Dejar en el pool</option>
+                </select>
+              </label>
+            </div>
+          </section>
 
-        <!-- Personas / asignación -->
-        <section class="crear-section">
-          <h3>Personas y asignación</h3>
-          <div class="crear-grid crear-grid-3">
-            <label>
-              <span>Cantidad de personas</span>
-              <select id="cc-num-personas" onchange="onNumPersonasChange()">
-                <option value="1">1 persona</option>
-                <option value="2">2 personas (pareja)</option>
-              </select>
-            </label>
-            <label id="cc-modalidad-wrap" style="display:none;">
-              <span>Modalidad del grupo</span>
-              <select id="cc-modalidad">
-                <option value="simultaneo">Al mismo tiempo</option>
-                <option value="sucesivo">Uno después de otro</option>
-              </select>
-            </label>
-            <label>
-              <span>Asignar a</span>
-              <select id="cc-asignar">
-                <option value="">Dejar en el pool</option>
-              </select>
-            </label>
-          </div>
-        </section>
-
-        <!-- Resumen -->
-        <section class="crear-section crear-summary" id="cc-summary">
-          <div class="crear-summary-row"><span>Servicios</span><span id="cc-sum-svc">$0</span></div>
-          <div class="crear-summary-row"><span>Traslado</span><span id="cc-sum-traslado">$0</span></div>
-          <div class="crear-summary-row crear-summary-total"><span>TOTAL</span><span id="cc-sum-total">$0</span></div>
-          <label class="crear-form-checkbox">
-            <input type="checkbox" id="cc-notif-cliente">
-            <span>Enviar SMS al cliente confirmando la cita</span>
-          </label>
-        </section>
-
-        <div class="crear-form-msg" id="cc-msg"></div>
-
-        <div class="crear-form-actions">
-          <button type="button" class="cita-btn-secondary" onclick="resetCrearCita()">Limpiar</button>
-          <button type="submit" class="cita-btn-primary" id="cc-submit">Crear cita</button>
+          <!-- Paso 3: Cliente -->
+          <section class="crear-section pos-step">
+            <h3><span class="pos-step-num">3</span> Datos del cliente</h3>
+            <div class="crear-grid crear-grid-3">
+              <label><span>Nombre completo</span><input type="text" id="cc-cliente-nombre" required></label>
+              <label><span>Teléfono</span><input type="tel" id="cc-cliente-telefono" placeholder="+52 998 XXX XXXX" required></label>
+              <label><span>Email <small>(opcional)</small></span><input type="email" id="cc-cliente-email"></label>
+            </div>
+          </section>
         </div>
+
+        <!-- Columna derecha: ticket en vivo -->
+        <aside class="pos-ticket">
+          <div class="pos-ticket-header">
+            <span class="pos-ticket-title">Ticket</span>
+            <button type="button" class="pos-ticket-clear" onclick="resetCrearCita()">Limpiar</button>
+          </div>
+
+          <div class="pos-ticket-count" id="cc-servicios-count">0 seleccionados</div>
+
+          <div class="crear-cart pos-ticket-items" id="cc-cart">
+            <div class="crear-cart-empty">Elige servicios del catálogo.</div>
+          </div>
+
+          <div class="pos-ticket-meta" id="pos-ticket-meta">
+            <div class="pos-meta-row"><span>Fecha</span><strong id="tm-fecha">—</strong></div>
+            <div class="pos-meta-row"><span>Hora</span><strong id="tm-hora">—</strong></div>
+            <div class="pos-meta-row"><span>Lugar</span><strong id="tm-lugar">Sucursal</strong></div>
+            <div class="pos-meta-row"><span>Cliente</span><strong id="tm-cliente">—</strong></div>
+          </div>
+
+          <div class="pos-ticket-totales">
+            <div class="crear-summary-row"><span>Servicios</span><span id="cc-sum-svc">$0</span></div>
+            <div class="crear-summary-row"><span>Traslado</span><span id="cc-sum-traslado">$0</span></div>
+            <div class="crear-summary-row crear-summary-total"><span>TOTAL</span><span id="cc-sum-total">$0</span></div>
+          </div>
+
+          <label class="crear-form-checkbox pos-ticket-sms">
+            <input type="checkbox" id="cc-notif-cliente">
+            <span>Avisar al cliente por SMS</span>
+          </label>
+
+          <div class="crear-form-msg" id="cc-msg"></div>
+
+          <button type="submit" class="cita-btn-primary pos-ticket-submit" id="cc-submit">Crear cita</button>
+        </aside>
       </form>
     </div>
   </div>
@@ -3971,9 +4136,57 @@
     // Search y filtro
     document.getElementById('cc-search-svc').addEventListener('input', renderCatalog);
     document.getElementById('cc-cat-filter').addEventListener('change', renderCatalog);
+    bindPosControls();
     // Cargar catálogo
     await loadCatalog();
     updateCartUI();
+    updateTicketMeta();
+  }
+
+  // Controles del layout punto de venta: fechas rápidas, toggle de lugar, ticket en vivo
+  function bindPosControls() {
+    // Hoy / Mañana
+    document.querySelectorAll('#cc-quick-dates button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dias = parseInt(btn.dataset.dias, 10) || 0;
+        document.getElementById('cc-fecha').value = ymd(addDays(new Date(), dias));
+        document.querySelectorAll('#cc-quick-dates button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateTicketMeta();
+      });
+    });
+    // Fecha manual → desmarca pills
+    document.getElementById('cc-fecha').addEventListener('change', () => {
+      document.querySelectorAll('#cc-quick-dates button').forEach(b => b.classList.remove('active'));
+      updateTicketMeta();
+    });
+    // Toggle Sucursal / Domicilio
+    document.querySelectorAll('#cc-tipo-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#cc-tipo-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('cc-tipo-cita').value = btn.dataset.tipo;
+        onTipoCitaChange();
+        updateTicketMeta();
+      });
+    });
+    // Campos que alimentan el ticket en vivo
+    ['cc-hora', 'cc-cliente-nombre'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', updateTicketMeta);
+    });
+  }
+
+  function updateTicketMeta() {
+    const fecha = document.getElementById('cc-fecha').value;
+    const hora = document.getElementById('cc-hora').value;
+    const tipo = document.getElementById('cc-tipo-cita').value;
+    const cliente = document.getElementById('cc-cliente-nombre').value.trim();
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('tm-fecha', fecha ? formatHumanDate(fecha) : '—');
+    set('tm-hora', hora || '—');
+    set('tm-lugar', tipo === 'domicilio' ? 'Domicilio' : 'Sucursal');
+    set('tm-cliente', cliente || '—');
   }
 
   async function loadCatalog() {
@@ -3996,6 +4209,7 @@
       const catSel = document.getElementById('cc-cat-filter');
       catSel.innerHTML = '<option value="">Todas las categorías</option>' +
         cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+      buildCatChips(cats);
       renderCatalog();
     } catch (err) {
       document.getElementById('cc-svc-list').innerHTML = '<div class="stats-loading" style="color:#942e2e">No se pudo cargar el catálogo.</div>';
@@ -4003,6 +4217,25 @@
     } finally {
       crearState.loading = false;
     }
+  }
+
+  // Chips de categoría (reemplazan visualmente al select oculto)
+  function buildCatChips(cats) {
+    const cont = document.getElementById('cc-cat-chips');
+    if (!cont) return;
+    const sel = document.getElementById('cc-cat-filter');
+    const all = ['', ...cats];
+    cont.innerHTML = all.map(c =>
+      `<button type="button" class="${c === sel.value ? 'active' : ''}" data-cat="${escapeHtml(c)}">${c ? escapeHtml(c) : 'Todas'}</button>`
+    ).join('');
+    cont.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sel.value = btn.dataset.cat;
+        cont.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCatalog();
+      });
+    });
   }
 
   function renderCatalog() {
@@ -4162,8 +4395,16 @@
     document.getElementById('cc-direccion').value = '';
     document.getElementById('cc-notif-cliente').checked = false;
     crearState.cart = [];
+    // Volver a los defaults del POS: sucursal + mañana 10:00
+    document.getElementById('cc-tipo-cita').value = 'sucursal';
+    document.querySelectorAll('#cc-tipo-toggle button').forEach(b => b.classList.toggle('active', b.dataset.tipo === 'sucursal'));
+    onTipoCitaChange();
+    document.getElementById('cc-fecha').value = ymd(addDays(new Date(), 1));
+    document.getElementById('cc-hora').value = '10:00';
+    document.querySelectorAll('#cc-quick-dates button').forEach(b => b.classList.toggle('active', b.dataset.dias === '1'));
     updateCartUI();
     renderCatalog();
+    updateTicketMeta();
     const msg = document.getElementById('cc-msg');
     msg.className = 'crear-form-msg';
     msg.textContent = '';
