@@ -1261,6 +1261,51 @@
     padding: 0 4px;
     line-height: 1;
   }
+  .crear-cart-item-dur {
+    display: flex; align-items: center; gap: 4px;
+    font: 11.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .crear-cart-dur {
+    width: 60px; padding: 4px 6px;
+    border: 1.5px solid rgba(154,138,117,0.25); border-radius: 6px;
+    background: #fffefa; color: var(--brown);
+    font: 12px 'Inter', sans-serif;
+    text-align: center;
+    outline: none; transition: border-color .15s;
+  }
+  .crear-cart-dur:focus { border-color: var(--olive); }
+
+  /* Servicios multi-variante */
+  .crear-svc-multivariant {
+    grid-column: span 1;
+    min-width: 100%;
+  }
+  .crear-svc-variants {
+    display: grid; gap: 4px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(154,138,117,0.15);
+  }
+  .crear-svc-variant {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: #fbf9f1; color: var(--brown);
+    border: 1.5px solid transparent; border-radius: 6px;
+    cursor: pointer;
+    font: 12px 'Inter', sans-serif;
+    text-align: left;
+    transition: border-color .15s, background .15s;
+  }
+  .crear-svc-variant:hover { border-color: var(--olive-light); }
+  .crear-svc-variant.selected {
+    background: rgba(154,152,84,0.16); border-color: var(--olive);
+  }
+  .crear-svc-variant strong {
+    color: var(--olive-dark); font: 700 12px 'Inter', sans-serif;
+  }
 
   .crear-summary {
     background: linear-gradient(180deg, #fbf7eb 0%, #ffffff 60%) !important;
@@ -2779,12 +2824,7 @@
   };
 
   function initStatsTab() {
-    // Rellenar dropdown de terapeutas con la data ya cargada
-    const sel = document.getElementById('stats-terapeuta');
-    if (sel && adminState.data && adminState.data.terapeutas) {
-      sel.innerHTML = '<option value="">Todas</option>' + adminState.data.terapeutas
-        .map(t => `<option value="${t.id}">${escapeHtml(t.nombre || '—')}</option>`).join('');
-    }
+    populateTerapeutaDropdowns();
     // Presets
     document.querySelectorAll('#stats-presets button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3249,12 +3289,7 @@
     const tomorrow = addDays(new Date(), 1);
     document.getElementById('cc-fecha').value = ymd(tomorrow);
     document.getElementById('cc-hora').value = '10:00';
-    // Poblar dropdown de masajistas
-    const sel = document.getElementById('cc-asignar');
-    if (adminState.data && adminState.data.terapeutas) {
-      sel.innerHTML = '<option value="">Dejar en el pool</option>' + adminState.data.terapeutas
-        .map(t => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join('');
-    }
+    populateTerapeutaDropdowns();
     // Search y filtro
     document.getElementById('cc-search-svc').addEventListener('input', renderCatalog);
     document.getElementById('cc-cat-filter').addEventListener('change', renderCatalog);
@@ -3303,31 +3338,60 @@
     if (!list.length) { cont.innerHTML = '<div class="crear-cart-empty" style="grid-column:1/-1">Sin resultados.</div>'; return; }
     cont.innerHTML = list.slice(0, 60).map(s => {
       const variants = extractVariants(s);
-      const primary = variants[0];
-      const key = s.id + ':' + primary.label;
-      const selected = cartIds.has(key);
-      return `<div class="crear-svc-item ${selected ? 'selected' : ''}" onclick='addSvcToCart(${JSON.stringify(s.id)}, ${JSON.stringify(primary.label)})'>
+      const anySelected = variants.some(v => cartIds.has(s.id + ':' + v.vkey));
+      if (variants.length === 1) {
+        const primary = variants[0];
+        return `<div class="crear-svc-item ${anySelected ? 'selected' : ''}" onclick='addSvcToCart(${JSON.stringify(s.id)}, ${JSON.stringify(primary.vkey)})'>
+          <div class="crear-svc-item-name">${escapeHtml(s.nombre)}</div>
+          <div class="crear-svc-item-meta">
+            <span>${escapeHtml(s.categoria || '—')} · ${primary.duracion_min || 60} min</span>
+            <strong>$${(primary.precio_mxn || 0).toLocaleString('es-MX')}</strong>
+          </div>
+        </div>`;
+      }
+      // Multi-variante: card con lista de opciones
+      return `<div class="crear-svc-item crear-svc-multivariant ${anySelected ? 'selected' : ''}">
         <div class="crear-svc-item-name">${escapeHtml(s.nombre)}</div>
         <div class="crear-svc-item-meta">
-          <span>${escapeHtml(s.categoria || '—')} · ${primary.duracion_min || s.duracion_min || 0} min</span>
-          <strong>$${(primary.precio_mxn || s.precio_mxn || 0).toLocaleString('es-MX')}</strong>
+          <span>${escapeHtml(s.categoria || '—')} · ${variants.length} opciones</span>
+        </div>
+        <div class="crear-svc-variants">
+          ${variants.map(v => {
+            const key = s.id + ':' + v.vkey;
+            const sel = cartIds.has(key);
+            return `<button type="button" class="crear-svc-variant ${sel ? 'selected' : ''}" onclick='addSvcToCart(${JSON.stringify(s.id)}, ${JSON.stringify(v.vkey)})'>
+              <span>${escapeHtml(v.label)}</span>
+              <strong>$${(v.precio_mxn || 0).toLocaleString('es-MX')}</strong>
+            </button>`;
+          }).join('')}
         </div>
       </div>`;
     }).join('');
   }
 
   function extractVariants(s) {
-    // Precios jsonb puede traer variantes; formato mixto. Simplificamos al precio base.
-    const p = s.precio_mxn;
-    const d = s.duracion_min;
-    return [{ label: (d ? d + ' min' : 'default'), duracion_min: d, precio_mxn: p }];
+    const base = { label: 'Precio base', duracion_min: s.duracion_min || null, precio_mxn: Number(s.precio_mxn) || 0, vkey: '_base' };
+    const p = s.precios;
+    if (!p || typeof p !== 'object' || Array.isArray(p)) return [base];
+    const keys = Object.keys(p).filter(k => typeof p[k] === 'number' || (typeof p[k] === 'string' && p[k] !== ''));
+    // 'base'/'desde' solos = precio único, no variantes elegibles
+    const soloBase = keys.length <= 1 && (keys[0] === 'base' || keys[0] === 'desde' || !keys.length);
+    if (soloBase) return [base];
+    const nice = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return keys.map(k => ({
+      label: nice(k),
+      duracion_min: s.duracion_min || null,
+      precio_mxn: Number(p[k]) || 0,
+      vkey: k,
+    }));
   }
 
-  function addSvcToCart(id, variantLabel) {
+  function addSvcToCart(id, vkey) {
     const svc = crearState.catalog.find(s => s.id === id);
     if (!svc) return;
-    const variant = extractVariants(svc).find(v => v.label === variantLabel) || extractVariants(svc)[0];
-    const key = id + ':' + variantLabel;
+    const variants = extractVariants(svc);
+    const variant = variants.find(v => v.vkey === vkey) || variants[0];
+    const key = id + ':' + variant.vkey;
     const idx = crearState.cart.findIndex(c => c.__key === key);
     if (idx >= 0) {
       crearState.cart.splice(idx, 1);
@@ -3335,9 +3399,9 @@
       crearState.cart.push({
         __key: key,
         slug: svc.slug,
-        name: svc.nombre,
-        duracion_min: variant.duracion_min || svc.duracion_min,
-        precio_mxn: variant.precio_mxn || svc.precio_mxn,
+        name: svc.nombre + (variant.vkey !== '_base' ? ' — ' + variant.label : ''),
+        duracion_min: variant.duracion_min || 60,   // default cuando la BD no tiene duración
+        precio_mxn: variant.precio_mxn || 0,
         categoria: svc.categoria,
         servicio_id: svc.id,
       });
@@ -3364,10 +3428,26 @@
       cont.innerHTML = crearState.cart.map(c => `
         <div class="crear-cart-item">
           <div class="crear-cart-item-name">${escapeHtml(c.name)}</div>
-          <div class="crear-cart-item-meta">${c.duracion_min || 0} min · $${(c.precio_mxn || 0).toLocaleString('es-MX')}</div>
+          <div class="crear-cart-item-dur">
+            <input type="number" class="crear-cart-dur" min="10" step="5"
+              value="${c.duracion_min || 60}" data-key="${escapeHtml(c.__key)}"> min
+          </div>
+          <div class="crear-cart-item-meta">$${(c.precio_mxn || 0).toLocaleString('es-MX')}</div>
           <button type="button" class="crear-cart-item-remove" onclick='removeFromCart(${JSON.stringify(c.__key)})' title="Quitar">×</button>
         </div>
       `).join('');
+      // Cablar inputs de duración (delegación)
+      if (!cont._durBound) {
+        cont.addEventListener('change', (ev) => {
+          const el = ev.target;
+          if (!el.classList.contains('crear-cart-dur')) return;
+          const key = el.dataset.key;
+          const val = parseInt(el.value, 10) || 60;
+          const item = crearState.cart.find(x => x.__key === key);
+          if (item) { item.duracion_min = val; recalcSummary(); }
+        });
+        cont._durBound = true;
+      }
     }
     recalcSummary();
   }
@@ -3514,12 +3594,7 @@
   function initCitasTab() {
     if (citasState.inited) return;
     citasState.inited = true;
-    // Poblar dropdown de masajistas desde adminState
-    const sel = document.getElementById('citas-terapeuta');
-    if (adminState.data && adminState.data.terapeutas) {
-      sel.innerHTML = '<option value="">Todas</option>' + adminState.data.terapeutas
-        .map(t => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join('');
-    }
+    populateTerapeutaDropdowns();
     // Chips de estado
     document.querySelectorAll('#citas-status-chips button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3824,6 +3899,7 @@
     });
     grid.innerHTML = html.join('');
     populateViewAsDropdown();
+    populateTerapeutaDropdowns();
   }
 
   function _avatarInitials(nombre) {
@@ -3924,6 +4000,22 @@
 
   // ─── Modo "Ver como" (admin impersonando un masajista, solo lectura) ────
   const viewAsState = { active: false, terapeutaId: null, terapeutaNombre: null };
+
+  function populateTerapeutaDropdowns() {
+    const ts = (adminState.data && adminState.data.terapeutas) || [];
+    if (!ts.length) return;
+    const fill = (id, firstLabel) => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const current = sel.value;
+      sel.innerHTML = '<option value="">' + firstLabel + '</option>' +
+        ts.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre || '—') + '</option>').join('');
+      if (current && ts.find(t => t.id === current)) sel.value = current;
+    };
+    fill('stats-terapeuta', 'Todas');
+    fill('citas-terapeuta', 'Todas');
+    fill('cc-asignar', 'Dejar en el pool');
+  }
 
   function populateViewAsDropdown() {
     const sel = document.getElementById('admin-view-as-select');
