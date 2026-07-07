@@ -2619,6 +2619,7 @@
   const ADMIN_ACTIONS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-actions';
   const ADMIN_STATS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-stats';
   const ADMIN_CREATE_CITA_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-create-cita';
+  const ADMIN_DATA_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-data';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
   const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
   const ADMIN_USERNAMES = ['exentiamasajista', 'exentiaadmin'];
@@ -3095,17 +3096,13 @@
     terapeutasState.loading = true;
     const cont = document.getElementById('terapeutas-list');
     try {
-      const url = SUPABASE_URL + '/rest/v1/exentia_terapeutas_admin?select=*';
-      const res = await fetch(url, {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Accept': 'application/json'
-        }
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(ADMIN_DATA_ENDPOINT + '?recurso=terapeutas', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
       });
       const data = await res.json();
-      if (!Array.isArray(data)) throw new Error('bad response');
-      terapeutasState.list = data;
+      if (!res.ok || data.ok === false || !Array.isArray(data.rows)) throw new Error(data.error || 'bad response');
+      terapeutasState.list = data.rows;
       renderTerapeutasList();
     } catch (err) {
       cont.innerHTML = '<div class="stats-loading" style="color:#942e2e">No se pudo cargar el equipo. Intenta refrescar.</div>';
@@ -3550,17 +3547,13 @@
     const tbody = document.getElementById('citas-tbody');
     tbody.innerHTML = '<tr><td colspan="9" class="citas-loading"><div class="spinner sm"></div>Cargando citas…</td></tr>';
     try {
-      const url = SUPABASE_URL + '/rest/v1/exentia_admin_bookings?select=*&limit=500';
-      const res = await fetch(url, {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Accept': 'application/json'
-        }
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(ADMIN_DATA_ENDPOINT + '?recurso=bookings', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
       });
       const data = await res.json();
-      if (!Array.isArray(data)) throw new Error('bad citas');
-      citasState.all = data;
+      if (!res.ok || data.ok === false || !Array.isArray(data.rows)) throw new Error(data.error || 'bad citas');
+      citasState.all = data.rows;
       renderCitasTable();
     } catch (err) {
       tbody.innerHTML = '<tr><td colspan="9" class="citas-loading" style="color:#942e2e">No se pudo cargar. Intenta refrescar.</td></tr>';
