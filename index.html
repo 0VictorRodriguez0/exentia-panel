@@ -1161,6 +1161,155 @@
     #hist-grid { grid-template-columns: repeat(2, 1fr) !important; }
   }
 
+  /* ── Dashboard Resumen (una sola vista) ── */
+  .dash-wrap {
+    display: flex; flex-direction: column;
+    gap: 12px;
+    height: calc(100dvh - 168px);
+    min-height: 600px;
+  }
+  .dash-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    flex: 0 0 auto;
+  }
+  .dash-title h1 {
+    font: 600 26px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+  .dash-title h1 em { color: var(--olive-dark); font-style: italic; }
+  .dash-filters {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .dash-filters input[type="date"],
+  .dash-filters select {
+    padding: 7px 10px;
+    border: 1.5px solid rgba(154,138,117,0.25); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 12.5px 'Inter', sans-serif;
+    outline: none;
+  }
+  .dash-filters input:focus, .dash-filters select:focus { border-color: var(--olive); }
+  .dash-presets { border: none; padding: 0; gap: 4px; }
+  .dash-presets button { padding: 6px 11px; font-size: 10.5px; }
+
+  .dash-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+  .dash-kpi {
+    background: #fff; border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 3px 12px rgba(92,58,30,0.06);
+    display: flex; flex-direction: column; gap: 2px;
+    min-width: 0;
+  }
+  .dash-kpi.kpi-hero {
+    background: var(--olive); color: #fff;
+    box-shadow: 0 5px 16px rgba(122,120,65,0.35);
+  }
+  .dash-kpi-label {
+    font: 600 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dash-kpi.kpi-hero .dash-kpi-label { color: rgba(255,255,255,0.85); }
+  .dash-kpi-value {
+    font: 700 24px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    line-height: 1.1;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+  }
+  .dash-kpi.kpi-hero .dash-kpi-value { color: #fff; }
+  .dash-kpi-sub {
+    font: 11px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dash-kpi.kpi-hero .dash-kpi-sub { color: rgba(255,255,255,0.8); }
+
+  .dash-insights {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    flex: 0 0 auto;
+  }
+  .dash-insights:empty { display: none; }
+  .dash-insight {
+    background: #fff;
+    border-left: 3px solid var(--olive);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font: 12.5px 'Inter', sans-serif;
+    color: var(--brown);
+    box-shadow: 0 2px 8px rgba(92,58,30,0.05);
+  }
+  .dash-insight strong { color: var(--olive-dark); }
+
+  .dash-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1.35fr 1fr;
+    grid-template-areas:
+      "tendencia mezcla"
+      "servicios masajistas";
+    gap: 12px;
+  }
+  .dash-area-tendencia  { grid-area: tendencia; }
+  .dash-area-mezcla     { grid-area: mezcla; }
+  .dash-area-servicios  { grid-area: servicios; }
+  .dash-area-masajistas { grid-area: masajistas; }
+  .dash-card {
+    background: #fff; border-radius: 12px;
+    padding: 12px 16px 14px;
+    box-shadow: 0 3px 12px rgba(92,58,30,0.06);
+    display: flex; flex-direction: column;
+    min-width: 0; min-height: 0;
+  }
+  .dash-card-title {
+    font: 600 12.5px 'Inter', sans-serif;
+    color: var(--brown);
+    margin-bottom: 8px;
+    flex: 0 0 auto;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+  .dash-card-title small {
+    font: 400 10.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .dash-chart-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .dash-wrap { height: auto; }
+    .dash-kpis { grid-template-columns: repeat(3, 1fr); }
+    .dash-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        "tendencia tendencia"
+        "mezcla masajistas"
+        "servicios servicios";
+    }
+    .dash-chart-wrap { min-height: 220px; }
+  }
+  @media (max-width: 640px) {
+    .dash-kpis { grid-template-columns: repeat(2, 1fr); }
+    .dash-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas: "tendencia" "mezcla" "servicios" "masajistas";
+    }
+  }
+
   /* ── Tab Citas (tabla) ── */
   .citas-filters {
     background: #fff; border-radius: 14px;
@@ -2387,91 +2536,87 @@
   </div>
   <nav class="admin-tabs" id="admin-tabs" role="tablist">
     <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
+    <button type="button" class="admin-tab" data-tab="proyeccion"  role="tab">Proyección</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
     <button type="button" class="admin-tab" data-tab="citas"       role="tab">Citas</button>
     <button type="button" class="admin-tab" data-tab="crear"       role="tab">Crear cita</button>
     <button type="button" class="admin-tab" data-tab="masajistas"  role="tab">Masajistas</button>
   </nav>
 
-  <!-- Tab: Resumen -->
+  <!-- Tab: Resumen — dashboard de una sola vista -->
   <div class="admin-tab-panel" id="tab-resumen" style="display:none">
-    <div class="panel-wrap panel-wrap-cal">
-      <div class="panel-header cal-header">
-        <h1>Resumen del <em>negocio</em></h1>
-        <p class="cal-subtitle">Ventas, citas y KPIs con filtros por fecha, tipo y masajista.</p>
-      </div>
+    <div class="panel-wrap panel-wrap-cal dash-wrap">
 
-      <!-- Filtros -->
-      <div class="stats-filters">
-        <div class="stats-presets" id="stats-presets" role="tablist">
-          <button type="button" class="active" data-preset="mes">Este mes</button>
-          <button type="button" data-preset="semana">Esta semana</button>
-          <button type="button" data-preset="hoy">Hoy</button>
-          <button type="button" data-preset="mes_ant">Mes anterior</button>
-          <button type="button" data-preset="custom">Personalizado</button>
+      <!-- Fila 1: título + filtros en una línea -->
+      <div class="dash-topbar">
+        <div class="dash-title">
+          <h1>Resumen del <em>negocio</em></h1>
         </div>
-        <div class="stats-inputs">
-          <label>
-            <span>Desde</span>
-            <input type="date" id="stats-desde">
-          </label>
-          <label>
-            <span>Hasta</span>
-            <input type="date" id="stats-hasta">
-          </label>
-          <label>
-            <span>Tipo</span>
-            <select id="stats-tipo">
-              <option value="">Todos</option>
-              <option value="sucursal">Sucursal</option>
-              <option value="domicilio">Domicilio</option>
-            </select>
-          </label>
-          <label>
-            <span>Masajista</span>
-            <select id="stats-terapeuta">
-              <option value="">Todas</option>
-            </select>
-          </label>
+        <div class="dash-filters">
+          <div class="stats-presets dash-presets" id="stats-presets" role="tablist">
+            <button type="button" class="active" data-preset="mes">Mes</button>
+            <button type="button" data-preset="semana">Semana</button>
+            <button type="button" data-preset="hoy">Hoy</button>
+            <button type="button" data-preset="mes_ant">Mes ant.</button>
+            <button type="button" data-preset="custom">Libre</button>
+          </div>
+          <input type="date" id="stats-desde" title="Desde">
+          <input type="date" id="stats-hasta" title="Hasta">
+          <select id="stats-tipo" title="Tipo de cita">
+            <option value="">Todos</option>
+            <option value="sucursal">Sucursal</option>
+            <option value="domicilio">Domicilio</option>
+          </select>
+          <select id="stats-terapeuta" title="Masajista">
+            <option value="">Todas</option>
+          </select>
           <button class="cal-refresh" id="stats-refresh" title="Refrescar">↻</button>
         </div>
       </div>
 
-      <!-- KPIs -->
-      <div class="stats-kpi-grid" id="stats-kpi-grid">
+      <!-- Fila 2: KPIs compactos -->
+      <div class="dash-kpis" id="stats-kpi-grid">
         <div class="stats-loading"><div class="spinner sm"></div><span>Cargando resumen…</span></div>
       </div>
 
-      <!-- Charts -->
-      <div class="stats-charts-grid">
-        <div class="stats-chart-card stats-chart-wide">
-          <div class="stats-chart-title">Ventas por día <small>(reservadas · MXN)</small></div>
-          <div class="stats-chart-wrap"><canvas id="chart-ventas-dia"></canvas></div>
+      <!-- Fila 3: insights narrativos -->
+      <div class="dash-insights" id="stats-insights"></div>
+
+      <!-- Fila 4: grid de gráficas -->
+      <div class="dash-grid">
+        <div class="dash-card dash-area-tendencia">
+          <div class="dash-card-title">Ritmo del negocio <small>citas (barras) · ingresos (línea)</small></div>
+          <div class="dash-chart-wrap"><canvas id="chart-tendencia"></canvas></div>
         </div>
-        <div class="stats-chart-card stats-chart-wide">
-          <div class="stats-chart-title">Citas por día</div>
-          <div class="stats-chart-wrap"><canvas id="chart-citas-dia"></canvas></div>
+        <div class="dash-card dash-area-mezcla">
+          <div class="dash-card-title">Dónde se atiende</div>
+          <div class="dash-chart-wrap dash-chart-donut"><canvas id="chart-tipo"></canvas></div>
         </div>
-        <div class="stats-chart-card">
-          <div class="stats-chart-title">Sucursal vs Domicilio</div>
-          <div class="stats-chart-wrap stats-chart-donut"><canvas id="chart-tipo"></canvas></div>
+        <div class="dash-card dash-area-servicios">
+          <div class="dash-card-title">Qué se vende más <small>top 6 servicios</small></div>
+          <div class="dash-chart-wrap"><canvas id="chart-servicios"></canvas></div>
         </div>
-        <div class="stats-chart-card">
-          <div class="stats-chart-title">Top servicios</div>
-          <div id="stats-top-servicios" class="stats-list">—</div>
-        </div>
-        <div class="stats-chart-card stats-chart-wide">
-          <div class="stats-chart-title">Citas por masajista</div>
-          <div id="stats-por-masajista" class="stats-list stats-list-h">—</div>
+        <div class="dash-card dash-area-masajistas">
+          <div class="dash-card-title">Quién lo entrega <small>citas por masajista</small></div>
+          <div class="dash-chart-wrap"><canvas id="chart-masajistas"></canvas></div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Predicción anual (histórico + proyección) -->
+  <!-- Tab: Proyección (histórico + predicción anual) -->
+  <div class="admin-tab-panel" id="tab-proyeccion" style="display:none">
+    <div class="panel-wrap panel-wrap-cal">
+      <div class="panel-header cal-header">
+        <h1>Proyección <em>anual</em></h1>
+        <p class="cal-subtitle">Ventas del año anterior contra el año en curso, con predicción de los meses que faltan.</p>
+      </div>
+
       <div class="stats-comparativa" id="stats-prediccion">
         <div class="stats-comp-header">
           <div>
             <h2 class="stats-comp-title">Predicción de ventas del año</h2>
-            <p class="stats-comp-subtitle">Ventas del año anterior + proyección del año actual (meses futuros).</p>
+            <p class="stats-comp-subtitle">Meses pasados con el dato real; meses futuros estimados con el histórico del año base.</p>
           </div>
           <div class="stats-comp-year-selector">
             <label>
@@ -3044,6 +3189,8 @@
         initCrearCitaTab();
       } else if (name === 'citas') {
         initCitasTab();
+      } else if (name === 'proyeccion') {
+        initComparativa();
       }
     }
   }
@@ -3091,7 +3238,6 @@
     if (refresh) refresh.addEventListener('click', () => loadStats());
     applyStatsPreset('mes');
     loadStats();
-    initComparativa();
   }
 
   function applyStatsPreset(preset) {
@@ -3172,29 +3318,74 @@
     const sucursal = porTipo.sucursal || 0;
     const totalTipo = domicilio + sucursal;
     const pctDomicilio = totalTipo ? Math.round(100 * domicilio / totalTipo) : 0;
+    const tasaCancel = total ? Math.round(100 * canceladas / total) : 0;
 
+    // KPIs compactos — sin redundancia con las gráficas
     grid.innerHTML = [
-      kpiCard('Ventas reservadas', fmtMoney(ventasRes), 'suma del precio de citas del periodo', 'primary'),
-      kpiCard('Ventas cobradas', fmtMoney(ventasCob), 'pagos registrados', 'secondary'),
-      kpiCard('Citas totales', total, `${completadas} completadas`, 'primary'),
-      kpiCard('Canceladas', canceladas, total ? `${Math.round(100*canceladas/total)}% del periodo` : '—', 'warn'),
-      kpiCard('Ticket promedio', fmtMoney(ticket), 'por cita del periodo', 'secondary'),
-      kpiCard('% Domicilio', `${pctDomicilio}%`, `${domicilio} domicilio · ${sucursal} sucursal`, 'secondary'),
+      kpiCard('Ventas del periodo', fmtMoney(ventasRes), ventasCob > 0 ? `Cobrado: ${fmtMoney(ventasCob)}` : 'Reservadas · MXN', 'hero'),
+      kpiCard('Citas', total, `${completadas} completada${completadas === 1 ? '' : 's'}`, ''),
+      kpiCard('Ticket promedio', fmtMoney(ticket), 'por cita', ''),
+      kpiCard('Cancelación', `${tasaCancel}%`, `${canceladas} cancelada${canceladas === 1 ? '' : 's'}`, ''),
+      kpiCard('Domicilio', `${pctDomicilio}%`, `${domicilio} dom · ${sucursal} suc`, ''),
     ].join('');
 
-    renderChartCitasDia(s.citas_por_dia || []);
-    renderChartVentasDia(s.ventas_por_dia || []);
+    renderInsights(s);
+    renderChartTendencia(s.citas_por_dia || [], s.ventas_por_dia || []);
     renderChartTipo(sucursal, domicilio);
-    renderTopServicios(s.top_servicios || []);
-    renderPorMasajista(s.por_masajista || []);
+    renderChartServicios(s.top_servicios || []);
+    renderChartMasajistas(s.por_masajista || []);
   }
 
   function kpiCard(label, value, sub, variant) {
-    return `<div class="stats-kpi kpi-${variant}">
-      <div class="stats-kpi-label">${escapeHtml(label)}</div>
-      <div class="stats-kpi-value">${value}</div>
-      <div class="stats-kpi-sub">${escapeHtml(sub || '')}</div>
+    return `<div class="dash-kpi ${variant === 'hero' ? 'kpi-hero' : ''}">
+      <div class="dash-kpi-label">${escapeHtml(label)}</div>
+      <div class="dash-kpi-value">${value}</div>
+      <div class="dash-kpi-sub">${escapeHtml(sub || '')}</div>
     </div>`;
+  }
+
+  // Insights narrativos — solo los que aportan algo, se ocultan sin datos
+  function renderInsights(s) {
+    const cont = document.getElementById('stats-insights');
+    if (!cont) return;
+    const insights = [];
+    const ventas = (s.ventas_por_dia || []).map(x => ({ fecha: x.fecha, monto: Number(x.monto ?? x.ventas ?? 0) }));
+    const totalVentas = ventas.reduce((a, x) => a + x.monto, 0);
+
+    // Mejor día
+    if (totalVentas > 0) {
+      const best = ventas.reduce((a, b) => (b.monto > a.monto ? b : a));
+      if (best.monto > 0) {
+        const pct = Math.round(100 * best.monto / totalVentas);
+        insights.push(`El mejor día fue el <strong>${formatHumanDate(best.fecha)}</strong> con <strong>${fmtMoney(best.monto)}</strong> (${pct}% del periodo).`);
+      }
+      const diasActivos = ventas.filter(x => x.monto > 0).length;
+      if (diasActivos > 1) {
+        insights.push(`Promedio en días con actividad: <strong>${fmtMoney(totalVentas / diasActivos)}</strong> (${diasActivos} días con ventas).`);
+      }
+    }
+
+    // Servicio dominante
+    const svcs = s.top_servicios || [];
+    const totalSvc = svcs.reduce((a, x) => a + Number(x.cnt ?? 0), 0);
+    if (svcs.length && totalSvc > 0) {
+      const topPct = Math.round(100 * Number(svcs[0].cnt ?? 0) / totalSvc);
+      if (topPct >= 30) {
+        insights.push(`<strong>${escapeHtml(svcs[0].nombre || '')}</strong> concentra el <strong>${topPct}%</strong> de los servicios vendidos.`);
+      }
+    }
+
+    // Carga del equipo
+    const mas = s.por_masajista || [];
+    if (mas.length >= 2) {
+      const totalMas = mas.reduce((a, x) => a + Number(x.cnt ?? 0), 0);
+      const topMasPct = totalMas ? Math.round(100 * Number(mas[0].cnt ?? 0) / totalMas) : 0;
+      if (topMasPct >= 50) {
+        insights.push(`<strong>${escapeHtml(mas[0].nombre || '')}</strong> lleva el <strong>${topMasPct}%</strong> de las citas asignadas — revisar distribución de carga.`);
+      }
+    }
+
+    cont.innerHTML = insights.slice(0, 3).map(t => `<div class="dash-insight">${t}</div>`).join('');
   }
 
   function destroyChart(key) {
@@ -3223,49 +3414,84 @@
     });
   }
 
-  function renderChartCitasDia(series) {
-    const ctx = document.getElementById('chart-citas-dia');
+  // Gráfica principal: citas (barras) + ingresos (línea) en una sola vista con doble eje
+  function renderChartTendencia(citasSerie, ventasSerie) {
+    const ctx = document.getElementById('chart-tendencia');
     if (!ctx || !window.Chart) return;
-    destroyChart('citas');
-    statsState.charts.citas = new Chart(ctx, {
-      type: 'bar',
+    destroyChart('tendencia');
+    const ventasByFecha = {};
+    ventasSerie.forEach(x => ventasByFecha[x.fecha] = Number(x.monto ?? x.ventas ?? 0));
+    statsState.charts.tendencia = new Chart(ctx, {
       data: {
-        labels: chartDayLabels(series),
-        datasets: [{
-          label: 'Citas',
-          data: series.map(x => x.citas || 0),
-          backgroundColor: CHART_COLORS.olive,
-          borderRadius: 4,
-          maxBarThickness: 22,
-        }]
+        labels: chartDayLabels(citasSerie),
+        datasets: [
+          {
+            type: 'line',
+            label: 'Ingresos',
+            yAxisID: 'yVentas',
+            data: citasSerie.map(x => ventasByFecha[x.fecha] || 0),
+            borderColor: CHART_COLORS.brown,
+            backgroundColor: 'rgba(92,58,30,0.08)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            borderWidth: 2,
+            order: 0,
+          },
+          {
+            type: 'bar',
+            label: 'Citas',
+            yAxisID: 'yCitas',
+            data: citasSerie.map(x => x.citas || 0),
+            backgroundColor: 'rgba(154,152,84,0.55)',
+            borderRadius: 3,
+            maxBarThickness: 18,
+            order: 1,
+          }
+        ]
       },
-      options: chartBaseOptions()
-    });
-  }
-
-  function renderChartVentasDia(series) {
-    const ctx = document.getElementById('chart-ventas-dia');
-    if (!ctx || !window.Chart) return;
-    destroyChart('ventas');
-    statsState.charts.ventas = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: chartDayLabels(series),
-        datasets: [{
-          label: 'Ventas',
-          data: series.map(x => Number(x.monto ?? x.ventas ?? 0)),
-          borderColor: CHART_COLORS.oliveDark,
-          backgroundColor: 'rgba(154,152,84,0.15)',
-          fill: true,
-          tension: 0.35,
-          pointRadius: 2,
-          pointHoverRadius: 5,
-          borderWidth: 2,
-        }]
-      },
-      options: chartBaseOptions({
-        yTickCallback: v => '$' + Number(v).toLocaleString('es-MX')
-      })
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: CHART_COLORS.brown,
+            padding: 10, titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 12 },
+            callbacks: {
+              label: c => c.dataset.label === 'Ingresos'
+                ? 'Ingresos: $' + Number(c.parsed.y).toLocaleString('es-MX')
+                : 'Citas: ' + c.parsed.y
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 10.5 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 14 }
+          },
+          yVentas: {
+            position: 'left',
+            grid: { color: CHART_COLORS.grid, drawBorder: false },
+            ticks: {
+              color: CHART_COLORS.brown, font: { family: 'Inter', size: 10.5 },
+              callback: v => '$' + Number(v).toLocaleString('es-MX'),
+              maxTicksLimit: 6,
+            },
+            beginAtZero: true,
+          },
+          yCitas: {
+            position: 'right',
+            grid: { display: false },
+            ticks: {
+              color: CHART_COLORS.oliveDark, font: { family: 'Inter', size: 10.5 },
+              precision: 0, maxTicksLimit: 5,
+            },
+            beginAtZero: true,
+          }
+        }
+      }
     });
   }
 
@@ -3294,26 +3520,58 @@
     });
   }
 
-  function renderTopServicios(items) {
-    const cont = document.getElementById('stats-top-servicios');
-    if (!items.length) { cont.innerHTML = '<div class="stats-list-empty">Sin datos en este periodo.</div>'; return; }
-    cont.innerHTML = items.slice(0, 10).map(x => `
-      <div class="stats-list-item">
-        <span class="stats-list-item-name">${escapeHtml(x.nombre || x.servicio || '—')}</span>
-        <span class="stats-list-item-val">${x.cnt ?? x.cantidad ?? 0}</span>
-      </div>
-    `).join('');
+  // Barras horizontales genéricas (top servicios / masajistas)
+  function renderHorizontalBars(canvasId, chartKey, items, color) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx || !window.Chart) return;
+    destroyChart(chartKey);
+    const labels = items.map(x => {
+      const n = (x.nombre || '—').toString();
+      return n.length > 24 ? n.slice(0, 23) + '…' : n;
+    });
+    statsState.charts[chartKey] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: items.map(x => Number(x.cnt ?? 0)),
+          backgroundColor: color,
+          borderRadius: 4,
+          maxBarThickness: 20,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: CHART_COLORS.brown,
+            padding: 10, bodyFont: { family: 'Inter', size: 12 },
+            callbacks: { label: c => c.parsed.x + ' cita' + (c.parsed.x === 1 ? '' : 's') }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: CHART_COLORS.grid, drawBorder: false },
+            ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 10.5 }, precision: 0, maxTicksLimit: 6 },
+            beginAtZero: true,
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 11 } }
+          }
+        }
+      }
+    });
   }
 
-  function renderPorMasajista(items) {
-    const cont = document.getElementById('stats-por-masajista');
-    if (!items.length) { cont.innerHTML = '<div class="stats-list-empty">Sin citas asignadas a masajistas en este periodo.</div>'; return; }
-    cont.innerHTML = items.map(x => `
-      <div class="stats-list-item">
-        <span class="stats-list-item-name">${escapeHtml(x.nombre || '—')}</span>
-        <span class="stats-list-item-val">${x.cnt ?? x.citas ?? 0} cita${(x.cnt ?? x.citas ?? 0) === 1 ? '' : 's'}</span>
-      </div>
-    `).join('');
+  function renderChartServicios(items) {
+    renderHorizontalBars('chart-servicios', 'servicios', (items || []).slice(0, 6), CHART_COLORS.olive);
+  }
+
+  function renderChartMasajistas(items) {
+    renderHorizontalBars('chart-masajistas', 'masajistas', (items || []).slice(0, 6), CHART_COLORS.warn);
   }
 
   function chartBaseOptions(opts) {
