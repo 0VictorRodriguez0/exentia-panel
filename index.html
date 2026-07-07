@@ -2555,7 +2555,6 @@
     <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
     <button type="button" class="admin-tab" data-tab="proyeccion"  role="tab">Proyección</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
-    <button type="button" class="admin-tab" data-tab="citas"       role="tab">Citas</button>
     <button type="button" class="admin-tab" data-tab="crear"       role="tab">Crear cita</button>
     <button type="button" class="admin-tab" data-tab="masajistas"  role="tab">Masajistas</button>
   </nav>
@@ -2671,77 +2670,6 @@
       </div>
       <div id="admin-grid" class="admin-grid">
         <div class="admin-empty"><div class="spinner sm"></div><span>Cargando calendarios...</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab: Citas -->
-  <div class="admin-tab-panel" id="tab-citas" style="display:none">
-    <div class="panel-wrap panel-wrap-cal">
-      <div class="panel-header cal-header">
-        <h1>Todas las <em>citas</em></h1>
-        <p class="cal-subtitle">Buscar, filtrar, reagendar, cancelar o eliminar cualquier cita.</p>
-      </div>
-
-      <div class="citas-filters">
-        <div class="citas-filters-row">
-          <input type="search" id="citas-search" placeholder="Buscar por código, cliente, teléfono o email…">
-          <button class="cal-refresh" id="citas-refresh" title="Refrescar">↻</button>
-        </div>
-        <div class="citas-filters-row citas-filters-chips" id="citas-status-chips" role="tablist">
-          <button type="button" class="active" data-filter="all">Todas</button>
-          <button type="button" data-filter="futuras">Futuras</button>
-          <button type="button" data-filter="pool">Pool</button>
-          <button type="button" data-filter="asignadas">Asignadas</button>
-          <button type="button" data-filter="pasadas">Pasadas</button>
-          <button type="button" data-filter="canceladas">Canceladas</button>
-        </div>
-        <div class="citas-filters-row citas-filters-selects">
-          <label>
-            <span>Tipo</span>
-            <select id="citas-tipo">
-              <option value="">Todos</option>
-              <option value="sucursal">Sucursal</option>
-              <option value="domicilio">Domicilio</option>
-            </select>
-          </label>
-          <label>
-            <span>Masajista</span>
-            <select id="citas-terapeuta">
-              <option value="">Todas</option>
-            </select>
-          </label>
-          <label>
-            <span>Desde</span>
-            <input type="date" id="citas-desde">
-          </label>
-          <label>
-            <span>Hasta</span>
-            <input type="date" id="citas-hasta">
-          </label>
-        </div>
-        <div class="citas-count" id="citas-count">— resultados</div>
-      </div>
-
-      <div class="citas-table-wrap">
-        <table class="citas-table" id="citas-table">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Cliente</th>
-              <th>Fecha · hora</th>
-              <th>Servicios</th>
-              <th>Tipo</th>
-              <th>Estado</th>
-              <th>Masajista(s)</th>
-              <th>Total</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="citas-tbody">
-            <tr><td colspan="9" class="citas-loading"><div class="spinner sm"></div>Cargando citas…</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
@@ -3187,8 +3115,6 @@
         initTerapeutasTab();
       } else if (name === 'crear') {
         initCrearCitaTab();
-      } else if (name === 'citas') {
-        initCitasTab();
       } else if (name === 'proyeccion') {
         initComparativa();
       }
