@@ -976,6 +976,168 @@
     .stats-inputs label { flex: 1 1 45%; }
   }
 
+  /* ── Tab Citas (tabla) ── */
+  .citas-filters {
+    background: #fff; border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.06);
+    margin: 10px 0 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .citas-filters-row {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .citas-filters-row input[type="search"] {
+    flex: 1 1 260px;
+    padding: 10px 14px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 14px 'Inter', sans-serif;
+    outline: none; transition: border-color .15s;
+  }
+  .citas-filters-row input[type="search"]:focus { border-color: var(--olive); }
+  .citas-filters-chips {
+    gap: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(154,138,117,0.15);
+  }
+  .citas-filters-chips button {
+    padding: 6px 13px;
+    background: #fbf9f1; color: var(--brown);
+    border: 1.5px solid transparent; border-radius: 999px;
+    cursor: pointer;
+    font: 600 11.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .citas-filters-chips button:hover { background: rgba(154,152,84,0.14); }
+  .citas-filters-chips button.active {
+    background: var(--olive); color: #fff; border-color: var(--olive);
+  }
+  .citas-filters-selects {
+    gap: 12px;
+  }
+  .citas-filters-selects label {
+    display: flex; flex-direction: column; gap: 4px;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    flex: 1 1 140px; min-width: 140px;
+  }
+  .citas-filters-selects input,
+  .citas-filters-selects select {
+    padding: 8px 10px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 13px 'Inter', sans-serif;
+    outline: none;
+  }
+  .citas-count {
+    font: 12px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+
+  .citas-table-wrap {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.07);
+    overflow-x: auto;
+  }
+  .citas-table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 13px 'Inter', sans-serif;
+    min-width: 900px;
+  }
+  .citas-table thead {
+    background: #fbf7eb;
+    border-bottom: 2px solid rgba(154,138,117,0.18);
+  }
+  .citas-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+    white-space: nowrap;
+  }
+  .citas-table tbody tr {
+    border-bottom: 1px solid rgba(154,138,117,0.1);
+    transition: background .15s;
+  }
+  .citas-table tbody tr:hover { background: rgba(154,152,84,0.06); cursor: pointer; }
+  .citas-table tbody tr:last-child { border-bottom: none; }
+  .citas-table td {
+    padding: 12px 14px;
+    color: var(--brown);
+    vertical-align: middle;
+  }
+  .citas-table .col-codigo {
+    font: 700 12px 'Lato', sans-serif;
+    color: var(--olive-dark);
+    letter-spacing: 0.5px;
+  }
+  .citas-table .col-cliente-name {
+    font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis;
+    max-width: 180px; white-space: nowrap;
+  }
+  .citas-table .col-cliente-tel {
+    font-size: 11.5px; color: var(--gray-soft);
+    display: block; margin-top: 2px;
+  }
+  .citas-table .col-fecha {
+    white-space: nowrap;
+  }
+  .citas-table .col-fecha-hora {
+    font-size: 11.5px; color: var(--gray-soft);
+  }
+  .citas-table .col-svc {
+    max-width: 220px;
+    font-size: 12px;
+    color: var(--gray-soft);
+  }
+  .citas-table .col-total {
+    font: 700 13px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    white-space: nowrap;
+  }
+  .citas-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font: 600 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .citas-badge-tipo { background: rgba(154,152,84,0.14); color: var(--olive-dark); }
+  .citas-badge-tipo.domicilio { background: rgba(200,160,79,0.18); color: #7a5b1e; }
+  .citas-badge-estado { background: rgba(30,105,45,0.12); color: #1b5e20; }
+  .citas-badge-estado.pool { background: rgba(200,160,79,0.18); color: #7a5b1e; }
+  .citas-badge-estado.cancelado { background: rgba(181,59,59,0.12); color: #942e2e; }
+  .citas-badge-estado.pasada { background: rgba(154,138,117,0.15); color: #6d5c48; }
+  .citas-loading, .citas-empty {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: var(--gray-soft);
+    font: 13px 'Inter', sans-serif;
+  }
+  .citas-loading .spinner { display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .citas-table .col-actions {
+    text-align: right; white-space: nowrap;
+  }
+  .citas-table .col-actions button {
+    padding: 5px 10px;
+    background: transparent; color: var(--olive-dark);
+    border: 1.5px solid rgba(154,138,117,0.25); border-radius: 6px;
+    cursor: pointer;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .citas-table .col-actions button:hover {
+    background: var(--olive); color: #fff; border-color: var(--olive);
+  }
+
   /* ── Tab Crear cita ── */
   .crear-form {
     display: flex; flex-direction: column; gap: 16px;
@@ -2111,9 +2273,66 @@
         <h1>Todas las <em>citas</em></h1>
         <p class="cal-subtitle">Buscar, filtrar, reagendar, cancelar o eliminar cualquier cita.</p>
       </div>
-      <div class="admin-placeholder">
-        <div class="admin-placeholder-title">Próximamente — Fase 3</div>
-        <div class="admin-placeholder-msg">Tabla con búsqueda, filtros por estado/tipo/masajista, y acciones (reagendar grupal o individual, cancelar, eliminar).</div>
+
+      <div class="citas-filters">
+        <div class="citas-filters-row">
+          <input type="search" id="citas-search" placeholder="Buscar por código, cliente, teléfono o email…">
+          <button class="cal-refresh" id="citas-refresh" title="Refrescar">↻</button>
+        </div>
+        <div class="citas-filters-row citas-filters-chips" id="citas-status-chips" role="tablist">
+          <button type="button" class="active" data-filter="all">Todas</button>
+          <button type="button" data-filter="futuras">Futuras</button>
+          <button type="button" data-filter="pool">Pool</button>
+          <button type="button" data-filter="asignadas">Asignadas</button>
+          <button type="button" data-filter="pasadas">Pasadas</button>
+          <button type="button" data-filter="canceladas">Canceladas</button>
+        </div>
+        <div class="citas-filters-row citas-filters-selects">
+          <label>
+            <span>Tipo</span>
+            <select id="citas-tipo">
+              <option value="">Todos</option>
+              <option value="sucursal">Sucursal</option>
+              <option value="domicilio">Domicilio</option>
+            </select>
+          </label>
+          <label>
+            <span>Masajista</span>
+            <select id="citas-terapeuta">
+              <option value="">Todas</option>
+            </select>
+          </label>
+          <label>
+            <span>Desde</span>
+            <input type="date" id="citas-desde">
+          </label>
+          <label>
+            <span>Hasta</span>
+            <input type="date" id="citas-hasta">
+          </label>
+        </div>
+        <div class="citas-count" id="citas-count">— resultados</div>
+      </div>
+
+      <div class="citas-table-wrap">
+        <table class="citas-table" id="citas-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Cliente</th>
+              <th>Fecha · hora</th>
+              <th>Servicios</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Masajista(s)</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="citas-tbody">
+            <tr><td colspan="9" class="citas-loading"><div class="spinner sm"></div>Cargando citas…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -2537,6 +2756,8 @@
         initTerapeutasTab();
       } else if (name === 'crear') {
         initCrearCitaTab();
+      } else if (name === 'citas') {
+        initCitasTab();
       }
     }
   }
@@ -3280,6 +3501,199 @@
     }
   }
   window.submitCrearCita = submitCrearCita;
+
+  // ── Tab Citas (tabla) ──
+  const citasState = {
+    all: [],
+    filterChip: 'all',
+    inited: false,
+    loading: false,
+  };
+
+  function initCitasTab() {
+    if (citasState.inited) return;
+    citasState.inited = true;
+    // Poblar dropdown de masajistas desde adminState
+    const sel = document.getElementById('citas-terapeuta');
+    if (adminState.data && adminState.data.terapeutas) {
+      sel.innerHTML = '<option value="">Todas</option>' + adminState.data.terapeutas
+        .map(t => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join('');
+    }
+    // Chips de estado
+    document.querySelectorAll('#citas-status-chips button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#citas-status-chips button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        citasState.filterChip = btn.dataset.filter;
+        renderCitasTable();
+      });
+    });
+    // Search + selects → re-render
+    ['citas-search','citas-tipo','citas-terapeuta','citas-desde','citas-hasta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', renderCitasTable);
+      if (el && el.tagName === 'SELECT') el.addEventListener('change', renderCitasTable);
+    });
+    // Refresh
+    const refresh = document.getElementById('citas-refresh');
+    if (refresh) refresh.addEventListener('click', () => loadCitas());
+    loadCitas();
+  }
+
+  async function loadCitas() {
+    if (citasState.loading) return;
+    citasState.loading = true;
+    const tbody = document.getElementById('citas-tbody');
+    tbody.innerHTML = '<tr><td colspan="9" class="citas-loading"><div class="spinner sm"></div>Cargando citas…</td></tr>';
+    try {
+      const url = SUPABASE_URL + '/rest/v1/exentia_admin_bookings?select=*&limit=500';
+      const res = await fetch(url, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Accept': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('bad citas');
+      citasState.all = data;
+      renderCitasTable();
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="9" class="citas-loading" style="color:#942e2e">No se pudo cargar. Intenta refrescar.</td></tr>';
+      console.error('citas', err);
+    } finally {
+      citasState.loading = false;
+    }
+  }
+
+  function renderCitasTable() {
+    const q = (document.getElementById('citas-search').value || '').toLowerCase().trim();
+    const tipo = document.getElementById('citas-tipo').value;
+    const terapeuta = document.getElementById('citas-terapeuta').value;
+    const desde = document.getElementById('citas-desde').value;
+    const hasta = document.getElementById('citas-hasta').value;
+    const chip = citasState.filterChip;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let list = citasState.all.slice();
+    // Chip
+    if (chip === 'futuras') list = list.filter(c => c.fecha && parseDateYMD(c.fecha) >= today && (c.estado || '') !== 'cancelado');
+    else if (chip === 'pool') list = list.filter(c => c.estado_asignacion === 'pool' || (c.slots_summary && c.slots_summary.pool > 0));
+    else if (chip === 'asignadas') list = list.filter(c => c.slots_summary && c.slots_summary.claimed > 0 && (c.estado || '') !== 'cancelado');
+    else if (chip === 'pasadas') list = list.filter(c => c.fecha && parseDateYMD(c.fecha) < today && (c.estado || '') !== 'cancelado');
+    else if (chip === 'canceladas') list = list.filter(c => (c.estado || '') === 'cancelado' || c.cancelado_at);
+    // Selects
+    if (tipo) list = list.filter(c => c.tipo_cita === tipo);
+    if (terapeuta) list = list.filter(c => Array.isArray(c.terapeutas_asignadas) && c.terapeutas_asignadas.some(t => t.id === terapeuta));
+    if (desde) list = list.filter(c => c.fecha && c.fecha >= desde);
+    if (hasta) list = list.filter(c => c.fecha && c.fecha <= hasta);
+    // Search
+    if (q) {
+      list = list.filter(c => {
+        return (c.booking_code || '').toLowerCase().includes(q)
+          || (c.cliente_nombre || '').toLowerCase().includes(q)
+          || (c.cliente_telefono || '').toLowerCase().includes(q)
+          || (c.cliente_email || '').toLowerCase().includes(q);
+      });
+    }
+    document.getElementById('citas-count').textContent = list.length + ' resultado' + (list.length === 1 ? '' : 's');
+
+    const tbody = document.getElementById('citas-tbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="citas-empty">Sin citas con esos filtros.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(c => renderCitaRow(c)).join('');
+    // Cablar clicks
+    tbody.querySelectorAll('tr[data-cita-id]').forEach(tr => {
+      tr.addEventListener('click', (ev) => {
+        if (ev.target.closest('button')) return; // ignora clicks en botones
+        openCitaFromTable(tr.dataset.citaId);
+      });
+    });
+  }
+
+  function renderCitaRow(c) {
+    const fecha = c.fecha ? formatHumanDate(c.fecha) : '—';
+    const hora = c.hora ? c.hora.slice(0, 5) : '—';
+    const esCancelado = (c.estado || '') === 'cancelado' || !!c.cancelado_at;
+    let estadoClass = '';
+    let estadoLabel = c.estado || '—';
+    if (esCancelado) { estadoClass = 'cancelado'; estadoLabel = 'Cancelada'; }
+    else if (c.slots_summary && c.slots_summary.claimed > 0) { estadoClass = ''; estadoLabel = 'Asignada'; }
+    else if (c.slots_summary && c.slots_summary.pool > 0) { estadoClass = 'pool'; estadoLabel = 'En pool'; }
+    else if (c.fecha) {
+      const d = parseDateYMD(c.fecha);
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (d < today) { estadoClass = 'pasada'; estadoLabel = 'Pasada'; }
+    }
+
+    const tipoClass = c.tipo_cita === 'domicilio' ? 'domicilio' : '';
+    const svcNames = Array.isArray(c.servicios) ? c.servicios.map(s => s.name || s.nombre || s.slug || '—').filter(Boolean) : [];
+    const svcText = svcNames.length ? svcNames.join(', ') : '—';
+    const terap = Array.isArray(c.terapeutas_asignadas) ? c.terapeutas_asignadas.map(t => escapeHtml(t.nombre || '')).filter(Boolean) : [];
+    const terapText = terap.length ? terap.join(', ') : '<span style="color:var(--gray-soft);font-style:italic">— sin asignar —</span>';
+
+    return `<tr data-cita-id="${escapeHtml(c.booking_id)}">
+      <td class="col-codigo">${escapeHtml(c.booking_code || '—')}</td>
+      <td>
+        <div class="col-cliente-name">${escapeHtml(c.cliente_nombre || 'Sin nombre')}</div>
+        <div class="col-cliente-tel">${escapeHtml(c.cliente_telefono || '—')}</div>
+      </td>
+      <td class="col-fecha">
+        ${fecha}
+        <div class="col-fecha-hora">${hora}</div>
+      </td>
+      <td class="col-svc" title="${escapeHtml(svcText)}">${escapeHtml(svcText)}</td>
+      <td><span class="citas-badge citas-badge-tipo ${tipoClass}">${escapeHtml(c.tipo_cita || '—')}</span></td>
+      <td><span class="citas-badge citas-badge-estado ${estadoClass}">${escapeHtml(estadoLabel)}</span></td>
+      <td>${terapText}</td>
+      <td class="col-total">$${Number(c.precio_total || 0).toLocaleString('es-MX')}</td>
+      <td class="col-actions"><button type="button">Abrir</button></td>
+    </tr>`;
+  }
+
+  function openCitaFromTable(bookingId) {
+    // Buscar en calendario data por booking_id → slot
+    const all = [
+      ...((adminState.data && adminState.data.mias) || []),
+      ...((adminState.data && adminState.data.pool) || []),
+    ];
+    const slot = all.find(s => s.booking_id === bookingId);
+    if (slot) {
+      const kind = slot.terapeuta_id ? 'mine' : 'pool';
+      openCitaModal(slot.slot_id || slot.id, kind, { adminMode: true, terapeuta_id: slot.terapeuta_id });
+      return;
+    }
+    // Fallback: usar el registro directo de citasState.all
+    const c = citasState.all.find(x => x.booking_id === bookingId);
+    if (c) {
+      const pseudoSlot = {
+        booking_id: c.booking_id,
+        slot_id: c.booking_id, // no hay slot_id; el modal admin lo tolera
+        cliente: c.cliente_nombre,
+        cliente_telefono: c.cliente_telefono,
+        cliente_email: c.cliente_email,
+        fecha: c.fecha,
+        hora: c.hora,
+        duracion_min: c.duracion_min,
+        precio_total: c.precio_total,
+        precio_traslado: c.traslado,
+        tipo_cita: c.tipo_cita,
+        modalidad: c.modalidad,
+        direccion: c.direccion_libre,
+        zona: [c.zona_municipio, c.zona_colonia].filter(Boolean).join(' · '),
+        servicios: c.servicios,
+        notas_cliente: c.notas_cliente,
+        notas_internas: c.notas_internas,
+        num_personas: c.num_personas,
+      };
+      openCitaModal(c.booking_id, 'mine', { adminMode: true, slot: pseudoSlot });
+    } else {
+      showToast('No se encontró detalle de la cita.', 'warn');
+    }
+  }
 
   function showAdminPanel(payload) {
     document.getElementById('view-login').style.display = 'none';
