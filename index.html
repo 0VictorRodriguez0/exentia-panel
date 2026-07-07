@@ -1086,9 +1086,79 @@
 
   @media (max-width: 700px) {
     .stats-comp-header { flex-direction: column; }
-    .stats-comp-year-selector { width: 100%; }
-    .stats-comp-year-selector label { flex: 1; }
+    .stats-comp-year-selector { width: 100%; flex-wrap: wrap; }
+    .stats-comp-year-selector label { flex: 1 1 45%; }
     .stats-comp-chart-wrap { height: 240px; }
+  }
+  .stats-comp-year-selector { flex-wrap: wrap; }
+  .stats-comp-year-selector input[type="number"] {
+    padding: 8px 12px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 13.5px 'Inter', sans-serif;
+    outline: none;
+  }
+  .stats-comp-summary {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin: 8px 0 12px;
+  }
+  .stats-comp-summary-card {
+    flex: 1 1 180px;
+    background: #fbf7eb; border-radius: 10px;
+    padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .stats-comp-summary-label {
+    font: 600 10px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+  }
+  .stats-comp-summary-value {
+    font: 700 18px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    letter-spacing: -0.2px;
+  }
+  .stats-comp-summary-sub {
+    font: 11.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .comp-badge-pred {
+    display: inline-block; margin-left: 8px;
+    padding: 2px 7px; border-radius: 999px;
+    background: rgba(233,30,99,0.12); color: #b91d67;
+    font: 600 9.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    vertical-align: middle;
+  }
+  .comp-badge-real {
+    display: inline-block; margin-left: 8px;
+    padding: 2px 7px; border-radius: 999px;
+    background: rgba(37,99,235,0.12); color: #1e4bc9;
+    font: 600 9.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    vertical-align: middle;
+  }
+
+  /* Modal editar histórico */
+  .hist-grid-item {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .hist-grid-item label {
+    font: 600 9.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--olive-dark);
+  }
+  .hist-grid-item input {
+    padding: 8px 10px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 6px;
+    background: #fffefa; color: var(--brown);
+    font: 13px 'Inter', sans-serif;
+    outline: none; text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .hist-grid-item input:focus { border-color: var(--olive); }
+  @media (max-width: 500px) {
+    #hist-grid { grid-template-columns: repeat(2, 1fr) !important; }
   }
 
   /* ── Tab Citas (tabla) ── */
@@ -2396,24 +2466,30 @@
         </div>
       </div>
 
-      <!-- Comparativa anual -->
-      <div class="stats-comparativa" id="stats-comparativa">
+      <!-- Predicción anual (histórico + proyección) -->
+      <div class="stats-comparativa" id="stats-prediccion">
         <div class="stats-comp-header">
           <div>
-            <h2 class="stats-comp-title">Comparativa anual de ventas</h2>
-            <p class="stats-comp-subtitle">Ventas reservadas por mes, por año.</p>
+            <h2 class="stats-comp-title">Predicción de ventas del año</h2>
+            <p class="stats-comp-subtitle">Ventas del año anterior + proyección del año actual (meses futuros).</p>
           </div>
           <div class="stats-comp-year-selector">
             <label>
-              <span>Año A</span>
+              <span>Base (histórico)</span>
               <select id="comp-año-a"></select>
             </label>
             <label>
-              <span>Año B</span>
+              <span>Objetivo</span>
               <select id="comp-año-b"></select>
             </label>
+            <label>
+              <span>Crecimiento %</span>
+              <input type="number" id="comp-factor" value="0" step="5" min="-50" max="200" style="width:80px;">
+            </label>
+            <button type="button" class="cita-btn-primary" id="btn-editar-historico" style="align-self:end;padding:9px 14px;font:600 12px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Editar histórico</button>
           </div>
         </div>
+        <div class="stats-comp-summary" id="stats-comp-summary"></div>
         <div class="stats-comp-legend" id="stats-comp-legend"></div>
         <div class="stats-comp-chart-wrap"><canvas id="chart-comparativa"></canvas></div>
         <div class="stats-comp-table-wrap">
@@ -2688,6 +2764,27 @@
         <button type="submit" class="cita-btn-primary" id="ter-submit">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ── MODAL: Editar histórico anual ── -->
+<div id="historico-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeHistoricoModal()"></div>
+  <div class="cita-modal-box" style="max-width:520px;">
+    <button class="cita-modal-close" onclick="closeHistoricoModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge">Ventas históricas</div>
+    <h2 class="cita-modal-title" id="hist-modal-title">Editar histórico</h2>
+    <p class="cita-modal-when">Captura las ventas reales por mes. Se usarán como base para la predicción del año actual.</p>
+    <label style="display:flex;flex-direction:column;gap:4px;font:600 11px 'Lato',sans-serif;text-transform:uppercase;letter-spacing:0.6px;color:var(--olive-dark);margin-top:14px;">
+      <span>Año</span>
+      <select id="hist-modal-año" style="padding:10px 12px;border:1.5px solid rgba(154,138,117,0.28);border-radius:8px;background:#fffefa;color:var(--brown);font:14px 'Inter',sans-serif;outline:none;"></select>
+    </label>
+    <div class="hist-grid" id="hist-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;"></div>
+    <div class="terapeuta-form-msg" id="hist-msg"></div>
+    <div class="cita-modal-actions">
+      <button type="button" class="cita-btn-secondary" onclick="closeHistoricoModal()">Cerrar</button>
+      <button type="button" class="cita-btn-primary" id="hist-submit" onclick="submitHistorico()">Guardar cambios</button>
+    </div>
   </div>
 </div>
 
@@ -3252,16 +3349,16 @@
     };
   }
 
-  // ── Comparativa anual ──
+  // ── Predicción anual ──
   const compState = {
     data: null,
-    años: null,
     loading: false,
     inited: false,
+    historico: null,
   };
   const COMP_COLORS = {
-    A: '#2563eb',   // azul (año anterior por default — mismo estilo mockup Yaz)
-    B: '#e91e63',   // magenta (año actual)
+    A: '#2563eb',   // azul — histórico
+    B: '#e91e63',   // magenta — año objetivo (real / predicción)
   };
 
   function initComparativa() {
@@ -3269,117 +3366,151 @@
     compState.inited = true;
     const now = new Date();
     const añoActual = now.getFullYear();
-    // Poblar selectores con últimos 6 años + año actual
     const selA = document.getElementById('comp-año-a');
     const selB = document.getElementById('comp-año-b');
     if (!selA || !selB) return;
     const opciones = [];
-    for (let y = añoActual + 1; y >= añoActual - 5; y--) {
-      opciones.push(y);
-    }
+    for (let y = añoActual + 1; y >= añoActual - 5; y--) opciones.push(y);
     const optsHtml = opciones.map(y => `<option value="${y}">${y}</option>`).join('');
     selA.innerHTML = optsHtml;
     selB.innerHTML = optsHtml;
     selA.value = String(añoActual - 1);
     selB.value = String(añoActual);
-    selA.addEventListener('change', loadComparativa);
-    selB.addEventListener('change', loadComparativa);
-    loadComparativa();
+    selA.addEventListener('change', loadPrediccion);
+    selB.addEventListener('change', loadPrediccion);
+    const factor = document.getElementById('comp-factor');
+    if (factor) factor.addEventListener('change', loadPrediccion);
+    const btnEdit = document.getElementById('btn-editar-historico');
+    if (btnEdit) btnEdit.addEventListener('click', () => openHistoricoModal());
+    loadPrediccion();
   }
 
-  async function loadComparativa() {
+  async function loadPrediccion() {
     if (compState.loading) return;
     compState.loading = true;
-    const añoA = parseInt(document.getElementById('comp-año-a').value, 10);
-    const añoB = parseInt(document.getElementById('comp-año-b').value, 10);
-    if (isNaN(añoA) || isNaN(añoB)) { compState.loading = false; return; }
-    // Orden: menor primero (A), mayor segundo (B) — para que se lea izq→der cronológico
-    const años = añoA <= añoB ? [añoA, añoB] : [añoB, añoA];
-    compState.años = años;
+    const base = parseInt(document.getElementById('comp-año-a').value, 10);
+    const target = parseInt(document.getElementById('comp-año-b').value, 10);
+    const factor = (parseFloat(document.getElementById('comp-factor').value) || 0) / 100;
+    if (isNaN(base) || isNaN(target)) { compState.loading = false; return; }
     const jwt = localStorage.getItem(STORAGE_KEY);
     const params = new URLSearchParams();
-    params.set('recurso', 'comparativa');
-    params.set('años', JSON.stringify(años));
+    params.set('recurso', 'prediccion');
+    params.set('base', base);
+    params.set('target', target);
+    params.set('factor', factor);
     try {
       const res = await fetch(ADMIN_DATA_ENDPOINT + '?' + params.toString(), {
         headers: { 'Authorization': 'Bearer ' + jwt }
       });
       const resp = await res.json();
-      if (!res.ok || resp.ok === false || !resp.data) throw new Error(resp.error || 'bad comparativa');
+      if (!res.ok || resp.ok === false || !resp.data) throw new Error(resp.error || 'bad prediccion');
       compState.data = resp.data;
-      renderComparativa();
+      renderPrediccion();
     } catch (err) {
-      console.error('comparativa', err);
+      console.error('prediccion', err);
     } finally {
       compState.loading = false;
     }
   }
 
-  function renderComparativa() {
+  function renderPrediccion() {
     const d = compState.data;
     if (!d) return;
-    const años = d.años || compState.años || [];
-    if (años.length < 2) return;
-    const [añoA, añoB] = años;
+    const añoA = d.año_base;
+    const añoB = d.año_target;
+
+    // Summary cards
+    const totBase = Number((d.totales && d.totales.base) || 0);
+    const totTarget = Number((d.totales && d.totales.target) || 0);
+    const totReal = Number((d.totales && d.totales.target_real) || 0);
+    const totPred = Number((d.totales && d.totales.target_prediccion) || 0);
+    const growth = totBase > 0 ? ((totTarget - totBase) / totBase * 100).toFixed(1) + '%' : '—';
+    document.getElementById('stats-comp-summary').innerHTML = `
+      <div class="stats-comp-summary-card">
+        <span class="stats-comp-summary-label">Histórico ${añoA}</span>
+        <span class="stats-comp-summary-value">${fmtMoneyDec(totBase)}</span>
+        <span class="stats-comp-summary-sub">Base de referencia</span>
+      </div>
+      <div class="stats-comp-summary-card">
+        <span class="stats-comp-summary-label">Real ${añoB}</span>
+        <span class="stats-comp-summary-value">${fmtMoneyDec(totReal)}</span>
+        <span class="stats-comp-summary-sub">Meses ya cerrados</span>
+      </div>
+      <div class="stats-comp-summary-card">
+        <span class="stats-comp-summary-label">Predicción ${añoB}</span>
+        <span class="stats-comp-summary-value">${fmtMoneyDec(totPred)}</span>
+        <span class="stats-comp-summary-sub">Meses restantes</span>
+      </div>
+      <div class="stats-comp-summary-card">
+        <span class="stats-comp-summary-label">Total ${añoB} estimado</span>
+        <span class="stats-comp-summary-value">${fmtMoneyDec(totTarget)}</span>
+        <span class="stats-comp-summary-sub">vs. ${añoA}: ${growth}</span>
+      </div>
+    `;
 
     // Leyenda
     document.getElementById('stats-comp-legend').innerHTML = `
-      <span><span class="comp-dot" style="background:${COMP_COLORS.A}"></span>${añoA}</span>
-      <span><span class="comp-dot" style="background:${COMP_COLORS.B}"></span>${añoB}</span>
+      <span><span class="comp-dot" style="background:${COMP_COLORS.A}"></span>${añoA} histórico</span>
+      <span><span class="comp-dot" style="background:${COMP_COLORS.B}"></span>${añoB} real</span>
+      <span><span class="comp-dot" style="background:${COMP_COLORS.B};opacity:0.55;border:1.5px dashed ${COMP_COLORS.B}"></span>${añoB} predicción</span>
     `;
 
     // Tabla
     const tbl = document.getElementById('stats-comp-table');
-    const thead = tbl.querySelector('thead tr');
-    thead.innerHTML = `<th>Mes</th><th class="comp-monto">${añoA}</th><th class="comp-monto">${añoB}</th>`;
-    const tbody = tbl.querySelector('tbody');
+    tbl.querySelector('thead tr').innerHTML = `<th>Mes</th><th class="comp-monto">${añoA}</th><th class="comp-monto">${añoB}</th>`;
     const meses = Array.isArray(d.meses) ? d.meses : [];
-    tbody.innerHTML = meses.map(m => {
-      const va = Number((m.por_año && m.por_año[añoA]) || 0);
-      const vb = Number((m.por_año && m.por_año[añoB]) || 0);
+    tbl.querySelector('tbody').innerHTML = meses.map(m => {
+      const va = Number(m.historico || 0);
+      const vb = Number(m.target || 0);
+      const badge = m.es_prediccion
+        ? '<span class="comp-badge-pred">predicción</span>'
+        : (vb > 0 ? '<span class="comp-badge-real">real</span>' : '');
       return `<tr>
-        <td class="comp-mes">${escapeHtml(m.nombre)}</td>
+        <td class="comp-mes">${escapeHtml(m.nombre)}${badge}</td>
         <td class="comp-monto ${va === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(va)}</td>
         <td class="comp-monto ${vb === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(vb)}</td>
       </tr>`;
     }).join('');
 
     // Totales
-    const totA = Number((d.totales_por_año && d.totales_por_año[añoA]) || 0);
-    const totB = Number((d.totales_por_año && d.totales_por_año[añoB]) || 0);
-    const tfoot = tbl.querySelector('tfoot tr');
-    tfoot.innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoneyDec(totA)}</td><td class="comp-monto">${fmtMoneyDec(totB)}</td>`;
+    tbl.querySelector('tfoot tr').innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoneyDec(totBase)}</td><td class="comp-monto">${fmtMoneyDec(totTarget)}</td>`;
 
-    // Gráfica de barras agrupadas
-    renderChartComparativa(meses, añoA, añoB);
+    // Gráfica
+    renderChartPrediccion(meses, añoA, añoB);
   }
 
   function fmtMoneyDec(n) {
     return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  function renderChartComparativa(meses, añoA, añoB) {
+  function renderChartPrediccion(meses, añoA, añoB) {
     const ctx = document.getElementById('chart-comparativa');
     if (!ctx || !window.Chart) return;
     destroyChart('comparativa');
+    // Barras del año objetivo: color sólido si real, alfa+dash si predicción
+    const targetColors = meses.map(m => m.es_prediccion
+      ? 'rgba(233,30,99,0.45)'
+      : COMP_COLORS.B);
+    const targetBorderColors = meses.map(m => m.es_prediccion ? COMP_COLORS.B : COMP_COLORS.B);
+    const targetBorderDashed = meses.map(m => m.es_prediccion ? [4,3] : []);
     statsState.charts.comparativa = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: meses.map(m => (m.nombre || '').slice(0, 3)),
         datasets: [
           {
-            label: String(añoA),
-            data: meses.map(m => Number((m.por_año && m.por_año[añoA]) || 0)),
+            label: String(añoA) + ' histórico',
+            data: meses.map(m => Number(m.historico || 0)),
             backgroundColor: COMP_COLORS.A,
-            borderRadius: 4,
-            maxBarThickness: 22,
+            borderRadius: 4, maxBarThickness: 22,
           },
           {
             label: String(añoB),
-            data: meses.map(m => Number((m.por_año && m.por_año[añoB]) || 0)),
-            backgroundColor: COMP_COLORS.B,
-            borderRadius: 4,
-            maxBarThickness: 22,
+            data: meses.map(m => Number(m.target || 0)),
+            backgroundColor: targetColors,
+            borderColor: targetBorderColors,
+            borderWidth: meses.map(m => m.es_prediccion ? 1.5 : 0),
+            borderRadius: 4, maxBarThickness: 22,
           }
         ]
       },
@@ -3391,7 +3522,11 @@
             backgroundColor: CHART_COLORS.brown,
             padding: 10, titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 12 },
             callbacks: {
-              label: c => c.dataset.label + ': $' + Number(c.parsed.y).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              label: c => {
+                const m = meses[c.dataIndex];
+                const suffix = (c.datasetIndex === 1 && m && m.es_prediccion) ? ' (predicción)' : '';
+                return c.dataset.label + ': $' + Number(c.parsed.y).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + suffix;
+              }
             }
           }
         },
@@ -3409,6 +3544,110 @@
       }
     });
   }
+
+  // ── Modal editar histórico ──
+  async function openHistoricoModal() {
+    // Cargar año base del select
+    const añoBase = parseInt(document.getElementById('comp-año-a').value, 10) || (new Date().getFullYear() - 1);
+    const sel = document.getElementById('hist-modal-año');
+    // Poblar años (últimos 6 + año actual)
+    const añoActual = new Date().getFullYear();
+    const opts = [];
+    for (let y = añoActual; y >= añoActual - 5; y--) opts.push(y);
+    sel.innerHTML = opts.map(y => `<option value="${y}">${y}</option>`).join('');
+    sel.value = String(añoBase);
+    sel.onchange = () => cargarHistoricoGrid(parseInt(sel.value, 10));
+    await cargarHistoricoGrid(añoBase);
+    document.getElementById('hist-msg').className = 'terapeuta-form-msg';
+    document.getElementById('hist-msg').textContent = '';
+    document.getElementById('historico-modal').style.display = 'flex';
+  }
+  window.openHistoricoModal = openHistoricoModal;
+
+  function closeHistoricoModal() {
+    document.getElementById('historico-modal').style.display = 'none';
+  }
+  window.closeHistoricoModal = closeHistoricoModal;
+
+  async function cargarHistoricoGrid(año) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    const params = new URLSearchParams();
+    params.set('recurso', 'historico');
+    params.set('año', año);
+    let filas = [];
+    try {
+      const res = await fetch(ADMIN_DATA_ENDPOINT + '?' + params.toString(), {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      const resp = await res.json();
+      filas = (resp.data && resp.data.filas) || [];
+    } catch (e) { console.error('load historico', e); }
+    compState.historico = { año, filas: filas.slice() };
+    // Render grid
+    const nombres = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const byMes = {};
+    filas.forEach(f => byMes[f.mes] = f.monto);
+    document.getElementById('hist-grid').innerHTML = nombres.map((n, i) => {
+      const mes = i + 1;
+      const val = byMes[mes] != null ? byMes[mes] : '';
+      return `<div class="hist-grid-item">
+        <label>${n}</label>
+        <input type="number" step="0.01" min="0" value="${val}" data-mes="${mes}" placeholder="0.00">
+      </div>`;
+    }).join('');
+  }
+
+  async function submitHistorico() {
+    const año = parseInt(document.getElementById('hist-modal-año').value, 10);
+    const inputs = document.querySelectorAll('#hist-grid input[data-mes]');
+    const original = compState.historico ? compState.historico.filas : [];
+    const originalByMes = {};
+    original.forEach(f => originalByMes[f.mes] = Number(f.monto || 0));
+    const cambios = [];
+    inputs.forEach(inp => {
+      const mes = parseInt(inp.dataset.mes, 10);
+      const raw = inp.value.trim();
+      const val = raw === '' ? 0 : Number(raw);
+      if (Number.isNaN(val)) return;
+      const orig = originalByMes[mes] != null ? originalByMes[mes] : 0;
+      if (Math.abs(orig - val) > 0.005) cambios.push({ mes, monto: val });
+    });
+    const msg = document.getElementById('hist-msg');
+    const submit = document.getElementById('hist-submit');
+    msg.className = 'terapeuta-form-msg';
+    if (!cambios.length) {
+      msg.className = 'terapeuta-form-msg show';
+      msg.style.background = 'rgba(154,152,84,0.10)';
+      msg.style.color = 'var(--olive-dark)';
+      msg.style.borderLeft = '3px solid var(--olive)';
+      msg.textContent = 'Sin cambios que guardar.';
+      return;
+    }
+    submit.disabled = true;
+    submit.textContent = 'Guardando…';
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    try {
+      for (const c of cambios) {
+        const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+          body: JSON.stringify({ action: 'upsert_historico', year: año, month: c.mes, monto: c.monto })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) throw new Error(data.error || 'error guardando ' + c.mes);
+      }
+      closeHistoricoModal();
+      showToast('Histórico actualizado (' + cambios.length + ' mes' + (cambios.length === 1 ? '' : 'es') + ').', 'ok');
+      loadPrediccion();
+    } catch (err) {
+      msg.className = 'terapeuta-form-msg show error';
+      msg.textContent = err.message || 'Error al guardar.';
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Guardar cambios';
+    }
+  }
+  window.submitHistorico = submitHistorico;
 
   // ── Tab Masajistas ──
   const terapeutasState = {
