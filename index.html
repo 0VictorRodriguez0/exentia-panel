@@ -976,6 +976,121 @@
     .stats-inputs label { flex: 1 1 45%; }
   }
 
+  /* ── Comparativa anual ── */
+  .stats-comparativa {
+    background: #fff; border-radius: 14px;
+    padding: 20px 22px 22px;
+    box-shadow: 0 4px 18px rgba(92,58,30,0.07);
+    margin-top: 22px;
+  }
+  .stats-comp-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .stats-comp-title {
+    font: 600 15px 'Inter', sans-serif;
+    color: var(--brown);
+    margin: 0 0 4px;
+  }
+  .stats-comp-subtitle {
+    margin: 0;
+    font: 12.5px 'Inter', sans-serif;
+    color: var(--gray-soft);
+  }
+  .stats-comp-year-selector {
+    display: flex; gap: 10px;
+    align-items: end;
+  }
+  .stats-comp-year-selector label {
+    display: flex; flex-direction: column; gap: 4px;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+  }
+  .stats-comp-year-selector select {
+    padding: 8px 12px;
+    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
+    background: #fffefa; color: var(--brown);
+    font: 13.5px 'Inter', sans-serif;
+    outline: none;
+    min-width: 110px;
+  }
+  .stats-comp-year-selector select:focus { border-color: var(--olive); }
+
+  .stats-comp-legend {
+    display: flex; gap: 18px;
+    margin: 4px 0 12px;
+    font: 13px 'Inter', sans-serif;
+    color: var(--brown);
+  }
+  .stats-comp-legend .comp-dot {
+    display: inline-block;
+    width: 12px; height: 12px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle;
+  }
+
+  .stats-comp-chart-wrap {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .stats-comp-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(154,138,117,0.15);
+  }
+  .stats-comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 14px 'Inter', sans-serif;
+    min-width: 480px;
+  }
+  .stats-comp-table thead {
+    background: #fbf7eb;
+    border-bottom: 2px solid rgba(154,138,117,0.18);
+  }
+  .stats-comp-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font: 600 11px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--olive-dark);
+  }
+  .stats-comp-table td {
+    padding: 11px 16px;
+    color: var(--brown);
+    border-bottom: 1px solid rgba(154,138,117,0.08);
+  }
+  .stats-comp-table tbody tr:last-child td { border-bottom: none; }
+  .stats-comp-table tbody tr:hover { background: rgba(154,152,84,0.04); }
+  .stats-comp-table .comp-mes { font-weight: 500; }
+  .stats-comp-table .comp-monto {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .stats-comp-table .comp-monto-zero { color: var(--gray-soft); }
+  .stats-comp-table th.comp-monto,
+  .stats-comp-table td.comp-monto { text-align: right; }
+  .stats-comp-totales th,
+  .stats-comp-totales td {
+    background: #fbf7eb;
+    font: 700 15px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    border-top: 2px solid rgba(154,138,117,0.22);
+    border-bottom: none;
+    padding: 14px 16px;
+  }
+
+  @media (max-width: 700px) {
+    .stats-comp-header { flex-direction: column; }
+    .stats-comp-year-selector { width: 100%; }
+    .stats-comp-year-selector label { flex: 1; }
+    .stats-comp-chart-wrap { height: 240px; }
+  }
+
   /* ── Tab Citas (tabla) ── */
   .citas-filters {
     background: #fff; border-radius: 14px;
@@ -2280,6 +2395,35 @@
           <div id="stats-por-masajista" class="stats-list stats-list-h">—</div>
         </div>
       </div>
+
+      <!-- Comparativa anual -->
+      <div class="stats-comparativa" id="stats-comparativa">
+        <div class="stats-comp-header">
+          <div>
+            <h2 class="stats-comp-title">Comparativa anual de ventas</h2>
+            <p class="stats-comp-subtitle">Ventas reservadas por mes, por año.</p>
+          </div>
+          <div class="stats-comp-year-selector">
+            <label>
+              <span>Año A</span>
+              <select id="comp-año-a"></select>
+            </label>
+            <label>
+              <span>Año B</span>
+              <select id="comp-año-b"></select>
+            </label>
+          </div>
+        </div>
+        <div class="stats-comp-legend" id="stats-comp-legend"></div>
+        <div class="stats-comp-chart-wrap"><canvas id="chart-comparativa"></canvas></div>
+        <div class="stats-comp-table-wrap">
+          <table class="stats-comp-table" id="stats-comp-table">
+            <thead><tr><th>Mes</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr class="stats-comp-totales"><th>Totales</th></tr></tfoot>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2851,6 +2995,7 @@
     if (refresh) refresh.addEventListener('click', () => loadStats());
     applyStatsPreset('mes');
     loadStats();
+    initComparativa();
   }
 
   function applyStatsPreset(preset) {
@@ -3105,6 +3250,164 @@
         }
       }
     };
+  }
+
+  // ── Comparativa anual ──
+  const compState = {
+    data: null,
+    años: null,
+    loading: false,
+    inited: false,
+  };
+  const COMP_COLORS = {
+    A: '#2563eb',   // azul (año anterior por default — mismo estilo mockup Yaz)
+    B: '#e91e63',   // magenta (año actual)
+  };
+
+  function initComparativa() {
+    if (compState.inited) return;
+    compState.inited = true;
+    const now = new Date();
+    const añoActual = now.getFullYear();
+    // Poblar selectores con últimos 6 años + año actual
+    const selA = document.getElementById('comp-año-a');
+    const selB = document.getElementById('comp-año-b');
+    if (!selA || !selB) return;
+    const opciones = [];
+    for (let y = añoActual + 1; y >= añoActual - 5; y--) {
+      opciones.push(y);
+    }
+    const optsHtml = opciones.map(y => `<option value="${y}">${y}</option>`).join('');
+    selA.innerHTML = optsHtml;
+    selB.innerHTML = optsHtml;
+    selA.value = String(añoActual - 1);
+    selB.value = String(añoActual);
+    selA.addEventListener('change', loadComparativa);
+    selB.addEventListener('change', loadComparativa);
+    loadComparativa();
+  }
+
+  async function loadComparativa() {
+    if (compState.loading) return;
+    compState.loading = true;
+    const añoA = parseInt(document.getElementById('comp-año-a').value, 10);
+    const añoB = parseInt(document.getElementById('comp-año-b').value, 10);
+    if (isNaN(añoA) || isNaN(añoB)) { compState.loading = false; return; }
+    // Orden: menor primero (A), mayor segundo (B) — para que se lea izq→der cronológico
+    const años = añoA <= añoB ? [añoA, añoB] : [añoB, añoA];
+    compState.años = años;
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    const params = new URLSearchParams();
+    params.set('recurso', 'comparativa');
+    params.set('años', JSON.stringify(años));
+    try {
+      const res = await fetch(ADMIN_DATA_ENDPOINT + '?' + params.toString(), {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      const resp = await res.json();
+      if (!res.ok || resp.ok === false || !resp.data) throw new Error(resp.error || 'bad comparativa');
+      compState.data = resp.data;
+      renderComparativa();
+    } catch (err) {
+      console.error('comparativa', err);
+    } finally {
+      compState.loading = false;
+    }
+  }
+
+  function renderComparativa() {
+    const d = compState.data;
+    if (!d) return;
+    const años = d.años || compState.años || [];
+    if (años.length < 2) return;
+    const [añoA, añoB] = años;
+
+    // Leyenda
+    document.getElementById('stats-comp-legend').innerHTML = `
+      <span><span class="comp-dot" style="background:${COMP_COLORS.A}"></span>${añoA}</span>
+      <span><span class="comp-dot" style="background:${COMP_COLORS.B}"></span>${añoB}</span>
+    `;
+
+    // Tabla
+    const tbl = document.getElementById('stats-comp-table');
+    const thead = tbl.querySelector('thead tr');
+    thead.innerHTML = `<th>Mes</th><th class="comp-monto">${añoA}</th><th class="comp-monto">${añoB}</th>`;
+    const tbody = tbl.querySelector('tbody');
+    const meses = Array.isArray(d.meses) ? d.meses : [];
+    tbody.innerHTML = meses.map(m => {
+      const va = Number((m.por_año && m.por_año[añoA]) || 0);
+      const vb = Number((m.por_año && m.por_año[añoB]) || 0);
+      return `<tr>
+        <td class="comp-mes">${escapeHtml(m.nombre)}</td>
+        <td class="comp-monto ${va === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(va)}</td>
+        <td class="comp-monto ${vb === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(vb)}</td>
+      </tr>`;
+    }).join('');
+
+    // Totales
+    const totA = Number((d.totales_por_año && d.totales_por_año[añoA]) || 0);
+    const totB = Number((d.totales_por_año && d.totales_por_año[añoB]) || 0);
+    const tfoot = tbl.querySelector('tfoot tr');
+    tfoot.innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoneyDec(totA)}</td><td class="comp-monto">${fmtMoneyDec(totB)}</td>`;
+
+    // Gráfica de barras agrupadas
+    renderChartComparativa(meses, añoA, añoB);
+  }
+
+  function fmtMoneyDec(n) {
+    return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function renderChartComparativa(meses, añoA, añoB) {
+    const ctx = document.getElementById('chart-comparativa');
+    if (!ctx || !window.Chart) return;
+    destroyChart('comparativa');
+    statsState.charts.comparativa = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: meses.map(m => (m.nombre || '').slice(0, 3)),
+        datasets: [
+          {
+            label: String(añoA),
+            data: meses.map(m => Number((m.por_año && m.por_año[añoA]) || 0)),
+            backgroundColor: COMP_COLORS.A,
+            borderRadius: 4,
+            maxBarThickness: 22,
+          },
+          {
+            label: String(añoB),
+            data: meses.map(m => Number((m.por_año && m.por_año[añoB]) || 0)),
+            backgroundColor: COMP_COLORS.B,
+            borderRadius: 4,
+            maxBarThickness: 22,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: CHART_COLORS.brown,
+            padding: 10, titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 12 },
+            callbacks: {
+              label: c => c.dataset.label + ': $' + Number(c.parsed.y).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 11 } } },
+          y: {
+            grid: { color: CHART_COLORS.grid, drawBorder: false },
+            ticks: {
+              color: CHART_COLORS.text, font: { family: 'Inter', size: 11 },
+              callback: v => '$' + Number(v).toLocaleString('es-MX')
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
   }
 
   // ── Tab Masajistas ──
