@@ -2971,7 +2971,7 @@
         labels: chartDayLabels(series),
         datasets: [{
           label: 'Ventas',
-          data: series.map(x => Number(x.ventas || 0)),
+          data: series.map(x => Number(x.monto ?? x.ventas ?? 0)),
           borderColor: CHART_COLORS.oliveDark,
           backgroundColor: 'rgba(154,152,84,0.15)',
           fill: true,
@@ -3018,7 +3018,7 @@
     cont.innerHTML = items.slice(0, 10).map(x => `
       <div class="stats-list-item">
         <span class="stats-list-item-name">${escapeHtml(x.nombre || x.servicio || '—')}</span>
-        <span class="stats-list-item-val">${x.cantidad || x.total || 0}</span>
+        <span class="stats-list-item-val">${x.cnt ?? x.cantidad ?? 0}</span>
       </div>
     `).join('');
   }
@@ -3029,7 +3029,7 @@
     cont.innerHTML = items.map(x => `
       <div class="stats-list-item">
         <span class="stats-list-item-name">${escapeHtml(x.nombre || '—')}</span>
-        <span class="stats-list-item-val">${x.citas || x.cantidad || 0} cita${(x.citas || x.cantidad || 0) === 1 ? '' : 's'}</span>
+        <span class="stats-list-item-val">${x.cnt ?? x.citas ?? 0} cita${(x.cnt ?? x.citas ?? 0) === 1 ? '' : 's'}</span>
       </div>
     `).join('');
   }
