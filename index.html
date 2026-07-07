@@ -2857,30 +2857,9 @@
       <form class="crear-form pos-layout" onsubmit="submitCrearCita(event)">
         <!-- Columna izquierda: pasos 1-2-3 -->
         <div class="pos-left">
-          <!-- Paso 1: Servicios -->
+          <!-- Paso 1: Configuración (personas + lugar + fecha) — define precios y disponibilidad -->
           <section class="crear-section pos-step">
-            <h3><span class="pos-step-num">1</span> Elige los servicios</h3>
-            <input type="search" id="cc-search-svc" class="pos-search" placeholder="Buscar servicio…">
-            <div class="pos-cat-chips" id="cc-cat-chips"></div>
-            <select id="cc-cat-filter" style="display:none">
-              <option value="">Todas las categorías</option>
-            </select>
-            <div class="crear-svc-list" id="cc-svc-list">
-              <div class="stats-loading"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
-            </div>
-          </section>
-
-          <!-- Paso 2: Cuándo y dónde -->
-          <section class="crear-section pos-step">
-            <h3><span class="pos-step-num">2</span> Cuándo y dónde</h3>
-            <div class="pos-when-row">
-              <div class="pos-quick-dates" id="cc-quick-dates">
-                <button type="button" data-dias="0">Hoy</button>
-                <button type="button" class="active" data-dias="1">Mañana</button>
-              </div>
-              <input type="date" id="cc-fecha" required>
-              <input type="time" id="cc-hora" step="900" required>
-            </div>
+            <h3><span class="pos-step-num">1</span> Configura la cita</h3>
             <div class="pos-subtitle">¿Para cuántas personas?</div>
             <div class="pos-tipo-toggle pos-personas-toggle" id="cc-personas-toggle">
               <button type="button" class="active" data-personas="1">
@@ -2927,6 +2906,16 @@
               <span>Dirección del domicilio</span>
               <input type="text" id="cc-direccion" placeholder="Calle, número, colonia, referencias">
             </label>
+
+            <div class="pos-subtitle">¿Cuándo?</div>
+            <div class="pos-when-row">
+              <div class="pos-quick-dates" id="cc-quick-dates">
+                <button type="button" data-dias="0">Hoy</button>
+                <button type="button" class="active" data-dias="1">Mañana</button>
+              </div>
+              <input type="date" id="cc-fecha" required>
+              <input type="time" id="cc-hora" step="900" required>
+            </div>
             <div class="crear-grid crear-grid-3" style="margin-top:12px;">
               <label>
                 <span>Masajista</span>
@@ -2934,6 +2923,19 @@
                   <option value="">Dejar en el pool</option>
                 </select>
               </label>
+            </div>
+          </section>
+
+          <!-- Paso 2: Servicios (precios según la configuración del paso 1) -->
+          <section class="crear-section pos-step">
+            <h3><span class="pos-step-num">2</span> Elige los servicios</h3>
+            <input type="search" id="cc-search-svc" class="pos-search" placeholder="Buscar servicio…">
+            <div class="pos-cat-chips" id="cc-cat-chips"></div>
+            <select id="cc-cat-filter" style="display:none">
+              <option value="">Todas las categorías</option>
+            </select>
+            <div class="crear-svc-list" id="cc-svc-list">
+              <div class="stats-loading"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
             </div>
           </section>
 
@@ -4213,6 +4215,7 @@
         const grupoWrap = document.getElementById('cc-grupo-wrap');
         const grupoN = document.getElementById('cc-grupo-n');
         const grupoLabel = grupoN.closest('label');
+        const prev = document.getElementById('cc-num-personas').value;
         if (v === 'grupo') {
           document.getElementById('cc-num-personas').value = String(parseInt(grupoN.value, 10) || 3);
           grupoWrap.style.display = 'flex';
@@ -4224,6 +4227,16 @@
           grupoLabel.style.display = 'none';
         }
         onNumPersonasChange();
+        // Los precios del catálogo dependen de individual/pareja: si cambió el modo
+        // y ya había servicios en el ticket, vaciarlo para que no queden precios viejos
+        const nuevo = document.getElementById('cc-num-personas').value;
+        const cruzoPareja = (prev === '2') !== (nuevo === '2');
+        if (cruzoPareja && crearState.cart.length) {
+          crearState.cart = [];
+          updateCartUI();
+          showToast('Se vació el ticket: los precios cambian entre individual y pareja.', 'warn');
+        }
+        renderCatalog();
         recalcSummary();
       });
     });
@@ -4359,17 +4372,27 @@
     const base = { label: 'Precio base', duracion_min: s.duracion_min || null, precio_mxn: Number(s.precio_mxn) || 0, vkey: '_base' };
     const p = s.precios;
     if (!p || typeof p !== 'object' || Array.isArray(p)) return [base];
-    const keys = Object.keys(p).filter(k => typeof p[k] === 'number' || (typeof p[k] === 'string' && p[k] !== ''));
+    let keys = Object.keys(p).filter(k => typeof p[k] === 'number' || (typeof p[k] === 'string' && p[k] !== ''));
     // 'base'/'desde' solos = precio único, no variantes elegibles
     const soloBase = keys.length <= 1 && (keys[0] === 'base' || keys[0] === 'desde' || !keys.length);
     if (soloBase) return [base];
+    // Filtrar por personas elegidas en el paso 1: 'parejas_*' solo para pareja,
+    // el resto para individual/grupo. Si el filtro deja vacío, mostrar todas.
+    const numPers = parseInt((document.getElementById('cc-num-personas') || {}).value, 10) || 1;
+    const esPareja = k => /pareja/i.test(k);
+    let filtered = numPers === 2 ? keys.filter(esPareja) : keys.filter(k => !esPareja(k));
+    if (!filtered.length) filtered = keys;
     const nice = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    return keys.map(k => ({
-      label: nice(k),
-      duracion_min: s.duracion_min || null,
-      precio_mxn: Number(p[k]) || 0,
-      vkey: k,
-    }));
+    return filtered.map(k => {
+      // Sufijo numérico del vkey = duración en minutos (ej. individual_50 → 50 min)
+      const mDur = k.match(/_(\d{2,3})$/);
+      return {
+        label: nice(k),
+        duracion_min: mDur ? parseInt(mDur[1], 10) : (s.duracion_min || null),
+        precio_mxn: Number(p[k]) || 0,
+        vkey: k,
+      };
+    });
   }
 
   function addSvcToCart(id, vkey) {
