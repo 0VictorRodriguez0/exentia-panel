@@ -3397,6 +3397,7 @@
     document.getElementById('cc-sum-svc').textContent = '$' + svc.toLocaleString('es-MX');
     document.getElementById('cc-sum-traslado').textContent = '$' + traslado.toLocaleString('es-MX');
     document.getElementById('cc-sum-total').textContent = '$' + (svc + traslado).toLocaleString('es-MX');
+    return { svc, traslado, total: svc + traslado };
   }
 
   function resetCrearCita() {
@@ -3457,6 +3458,7 @@
     submit.textContent = 'Creando…';
 
     const jwt = localStorage.getItem(STORAGE_KEY);
+    const summary = recalcSummary();
     const payload = {
       cliente_nombre,
       cliente_telefono,
@@ -3465,7 +3467,9 @@
       tipo_cita,
       direccion: tipo_cita === 'domicilio' ? direccion : null,
       num_personas,
+      personas_total: num_personas,
       modalidad,
+      costo_traslado_total: summary.traslado,
       cart: crearState.cart.map(c => ({
         slug: c.slug, name: c.name,
         duracion_min: c.duracion_min, precio_mxn: c.precio_mxn,
