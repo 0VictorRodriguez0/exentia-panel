@@ -2635,30 +2635,7 @@
         <p class="cal-subtitle">Ventas del año anterior contra el año en curso, con predicción de los meses que faltan.</p>
       </div>
 
-      <div class="stats-comparativa" id="stats-prediccion">
-        <div class="stats-comp-header">
-          <div>
-            <h2 class="stats-comp-title">Predicción de ventas del año</h2>
-            <p class="stats-comp-subtitle">Meses pasados con el dato real; meses futuros estimados con el histórico del año base.</p>
-          </div>
-          <div class="stats-comp-year-selector">
-            <label>
-              <span>Base (histórico)</span>
-              <select id="comp-año-a"></select>
-            </label>
-            <label>
-              <span>Objetivo</span>
-              <select id="comp-año-b"></select>
-            </label>
-            <label>
-              <span>Crecimiento %</span>
-              <input type="number" id="comp-factor" value="0" step="5" min="-50" max="200" style="width:80px;">
-            </label>
-          </div>
-        </div>
-        <div class="stats-comp-summary" id="stats-comp-summary"></div>
-        <div class="stats-comp-legend" id="stats-comp-legend"></div>
-        <div class="stats-comp-chart-wrap"><canvas id="chart-comparativa"></canvas></div>
+      <div class="stats-comparativa" id="stats-prediccion" style="max-width:720px;">
         <div class="stats-comp-table-wrap">
           <table class="stats-comp-table" id="stats-comp-table">
             <thead><tr><th>Mes</th></tr></thead>
@@ -3656,40 +3633,20 @@
   function initComparativa() {
     if (compState.inited) return;
     compState.inited = true;
-    const now = new Date();
-    const añoActual = now.getFullYear();
-    const selA = document.getElementById('comp-año-a');
-    const selB = document.getElementById('comp-año-b');
-    if (!selA || !selB) return;
-    const opciones = [];
-    for (let y = añoActual + 1; y >= añoActual - 5; y--) opciones.push(y);
-    const optsHtml = opciones.map(y => `<option value="${y}">${y}</option>`).join('');
-    selA.innerHTML = optsHtml;
-    selB.innerHTML = optsHtml;
-    selA.value = String(añoActual - 1);
-    selB.value = String(añoActual);
-    selA.addEventListener('change', loadPrediccion);
-    selB.addEventListener('change', loadPrediccion);
-    const factor = document.getElementById('comp-factor');
-    if (factor) factor.addEventListener('change', loadPrediccion);
-    const btnEdit = document.getElementById('btn-editar-historico');
-    if (btnEdit) btnEdit.addEventListener('click', () => openHistoricoModal());
     loadPrediccion();
   }
 
   async function loadPrediccion() {
     if (compState.loading) return;
     compState.loading = true;
-    const base = parseInt(document.getElementById('comp-año-a').value, 10);
-    const target = parseInt(document.getElementById('comp-año-b').value, 10);
-    const factor = (parseFloat(document.getElementById('comp-factor').value) || 0) / 100;
-    if (isNaN(base) || isNaN(target)) { compState.loading = false; return; }
+    // Siempre: año anterior como base, año actual como objetivo, sin factor
+    const añoActual = new Date().getFullYear();
     const jwt = localStorage.getItem(STORAGE_KEY);
     const params = new URLSearchParams();
     params.set('recurso', 'prediccion');
-    params.set('base', base);
-    params.set('target', target);
-    params.set('factor', factor);
+    params.set('base', añoActual - 1);
+    params.set('target', añoActual);
+    params.set('factor', 0);
     try {
       const res = await fetch(ADMIN_DATA_ENDPOINT + '?' + params.toString(), {
         headers: { 'Authorization': 'Bearer ' + jwt }
@@ -3710,44 +3667,9 @@
     if (!d) return;
     const añoA = d.año_base;
     const añoB = d.año_target;
-
-    // Summary cards
     const totBase = Number((d.totales && d.totales.base) || 0);
     const totTarget = Number((d.totales && d.totales.target) || 0);
-    const totReal = Number((d.totales && d.totales.target_real) || 0);
-    const totPred = Number((d.totales && d.totales.target_prediccion) || 0);
-    const growth = totBase > 0 ? ((totTarget - totBase) / totBase * 100).toFixed(1) + '%' : '—';
-    document.getElementById('stats-comp-summary').innerHTML = `
-      <div class="stats-comp-summary-card">
-        <span class="stats-comp-summary-label">Histórico ${añoA}</span>
-        <span class="stats-comp-summary-value">${fmtMoneyDec(totBase)}</span>
-        <span class="stats-comp-summary-sub">Base de referencia</span>
-      </div>
-      <div class="stats-comp-summary-card">
-        <span class="stats-comp-summary-label">Real ${añoB}</span>
-        <span class="stats-comp-summary-value">${fmtMoneyDec(totReal)}</span>
-        <span class="stats-comp-summary-sub">Meses ya cerrados</span>
-      </div>
-      <div class="stats-comp-summary-card">
-        <span class="stats-comp-summary-label">Predicción ${añoB}</span>
-        <span class="stats-comp-summary-value">${fmtMoneyDec(totPred)}</span>
-        <span class="stats-comp-summary-sub">Meses restantes</span>
-      </div>
-      <div class="stats-comp-summary-card">
-        <span class="stats-comp-summary-label">Total ${añoB} estimado</span>
-        <span class="stats-comp-summary-value">${fmtMoneyDec(totTarget)}</span>
-        <span class="stats-comp-summary-sub">vs. ${añoA}: ${growth}</span>
-      </div>
-    `;
 
-    // Leyenda
-    document.getElementById('stats-comp-legend').innerHTML = `
-      <span><span class="comp-dot" style="background:${COMP_COLORS.A}"></span>${añoA} histórico</span>
-      <span><span class="comp-dot" style="background:${COMP_COLORS.B}"></span>${añoB} real</span>
-      <span><span class="comp-dot" style="background:${COMP_COLORS.B};opacity:0.55;border:1.5px dashed ${COMP_COLORS.B}"></span>${añoB} predicción</span>
-    `;
-
-    // Tabla
     const tbl = document.getElementById('stats-comp-table');
     tbl.querySelector('thead tr').innerHTML = `<th>Mes</th><th class="comp-monto">${añoA}</th><th class="comp-monto">${añoB}</th>`;
     const meses = Array.isArray(d.meses) ? d.meses : [];
@@ -3764,11 +3686,7 @@
       </tr>`;
     }).join('');
 
-    // Totales
     tbl.querySelector('tfoot tr').innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoneyDec(totBase)}</td><td class="comp-monto">${fmtMoneyDec(totTarget)}</td>`;
-
-    // Gráfica
-    renderChartPrediccion(meses, añoA, añoB);
   }
 
   function fmtMoneyDec(n) {
