@@ -1288,6 +1288,23 @@
     flex: 1 1 auto;
     min-height: 0;
   }
+  .dash-mini-toggle {
+    display: inline-flex; gap: 2px;
+    background: #fbf9f1; border-radius: 999px;
+    padding: 2px;
+  }
+  .dash-mini-toggle button {
+    padding: 4px 12px;
+    background: transparent; color: var(--brown);
+    border: none; border-radius: 999px;
+    cursor: pointer;
+    font: 600 10.5px 'Lato', sans-serif;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    transition: background .15s, color .15s;
+  }
+  .dash-mini-toggle button.active {
+    background: var(--olive); color: #fff;
+  }
 
   @media (max-width: 1100px) {
     .dash-wrap { height: auto; }
@@ -2585,7 +2602,13 @@
       <!-- Fila 4: grid de gráficas -->
       <div class="dash-grid">
         <div class="dash-card dash-area-tendencia">
-          <div class="dash-card-title">Ritmo del negocio <small>citas (barras) · ingresos (línea)</small></div>
+          <div class="dash-card-title">
+            <span id="tendencia-title">Ingresos por día</span>
+            <div class="dash-mini-toggle" id="tendencia-toggle">
+              <button type="button" class="active" data-metrica="ingresos">Ingresos</button>
+              <button type="button" data-metrica="citas">Citas</button>
+            </div>
+          </div>
           <div class="dash-chart-wrap"><canvas id="chart-tendencia"></canvas></div>
         </div>
         <div class="dash-card dash-area-mezcla">
@@ -3414,55 +3437,76 @@
     });
   }
 
-  // Gráfica principal: citas (barras) + ingresos (línea) en una sola vista con doble eje
+  // Gráfica principal: UNA métrica a la vez (Ingresos o Citas), toggle arriba.
+  // El tooltip siempre muestra ambos datos del día.
   function renderChartTendencia(citasSerie, ventasSerie) {
+    // Guardar series para que el toggle re-dibuje sin volver a pedir datos
+    statsState.tendenciaData = { citasSerie, ventasSerie };
+    bindTendenciaToggle();
+    drawTendencia(statsState.tendenciaMetrica || 'ingresos');
+  }
+
+  function bindTendenciaToggle() {
+    document.querySelectorAll('#tendencia-toggle button').forEach(btn => {
+      if (btn._bound) return;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#tendencia-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        statsState.tendenciaMetrica = btn.dataset.metrica;
+        drawTendencia(btn.dataset.metrica);
+      });
+      btn._bound = true;
+    });
+  }
+
+  function drawTendencia(metrica) {
     const ctx = document.getElementById('chart-tendencia');
-    if (!ctx || !window.Chart) return;
+    const data = statsState.tendenciaData;
+    if (!ctx || !window.Chart || !data) return;
     destroyChart('tendencia');
+
+    const { citasSerie, ventasSerie } = data;
     const ventasByFecha = {};
     ventasSerie.forEach(x => ventasByFecha[x.fecha] = Number(x.monto ?? x.ventas ?? 0));
+    const citasByFecha = {};
+    citasSerie.forEach(x => citasByFecha[x.fecha] = Number(x.citas || 0));
+    const fechas = citasSerie.map(x => x.fecha);
+
+    const esIngresos = metrica === 'ingresos';
+    const titleEl = document.getElementById('tendencia-title');
+    if (titleEl) titleEl.textContent = esIngresos ? 'Ingresos por día' : 'Citas por día';
+
     statsState.charts.tendencia = new Chart(ctx, {
+      type: 'bar',
       data: {
         labels: chartDayLabels(citasSerie),
-        datasets: [
-          {
-            type: 'line',
-            label: 'Ingresos',
-            yAxisID: 'yVentas',
-            data: citasSerie.map(x => ventasByFecha[x.fecha] || 0),
-            borderColor: CHART_COLORS.brown,
-            backgroundColor: 'rgba(92,58,30,0.08)',
-            fill: true,
-            tension: 0.35,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            borderWidth: 2,
-            order: 0,
-          },
-          {
-            type: 'bar',
-            label: 'Citas',
-            yAxisID: 'yCitas',
-            data: citasSerie.map(x => x.citas || 0),
-            backgroundColor: 'rgba(154,152,84,0.55)',
-            borderRadius: 3,
-            maxBarThickness: 18,
-            order: 1,
-          }
-        ]
+        datasets: [{
+          data: fechas.map(f => esIngresos ? (ventasByFecha[f] || 0) : (citasByFecha[f] || 0)),
+          backgroundColor: esIngresos ? CHART_COLORS.olive : CHART_COLORS.warn,
+          borderRadius: 4,
+          maxBarThickness: 26,
+        }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
             backgroundColor: CHART_COLORS.brown,
-            padding: 10, titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 12 },
+            padding: 12,
+            titleFont: { family: 'Inter', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter', size: 12 },
             callbacks: {
-              label: c => c.dataset.label === 'Ingresos'
-                ? 'Ingresos: $' + Number(c.parsed.y).toLocaleString('es-MX')
-                : 'Citas: ' + c.parsed.y
+              // El tooltip cuenta la historia completa del día
+              label: (c) => {
+                const f = fechas[c.dataIndex];
+                const monto = ventasByFecha[f] || 0;
+                const nCitas = citasByFecha[f] || 0;
+                return [
+                  'Ingresos: $' + monto.toLocaleString('es-MX'),
+                  'Citas: ' + nCitas,
+                ];
+              }
             }
           }
         },
@@ -3471,22 +3515,13 @@
             grid: { display: false },
             ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 10.5 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 14 }
           },
-          yVentas: {
-            position: 'left',
+          y: {
             grid: { color: CHART_COLORS.grid, drawBorder: false },
             ticks: {
-              color: CHART_COLORS.brown, font: { family: 'Inter', size: 10.5 },
-              callback: v => '$' + Number(v).toLocaleString('es-MX'),
+              color: CHART_COLORS.text, font: { family: 'Inter', size: 10.5 },
               maxTicksLimit: 6,
-            },
-            beginAtZero: true,
-          },
-          yCitas: {
-            position: 'right',
-            grid: { display: false },
-            ticks: {
-              color: CHART_COLORS.oliveDark, font: { family: 'Inter', size: 10.5 },
-              precision: 0, maxTicksLimit: 5,
+              precision: 0,
+              callback: v => esIngresos ? '$' + Number(v).toLocaleString('es-MX') : v,
             },
             beginAtZero: true,
           }
