@@ -3662,8 +3662,7 @@
     ];
     const slot = all.find(s => s.booking_id === bookingId);
     if (slot) {
-      const kind = slot.terapeuta_id ? 'mine' : 'pool';
-      openCitaModal(slot.slot_id || slot.id, kind, { adminMode: true, terapeuta_id: slot.terapeuta_id });
+      openAdminCitaModal(slot.slot_id || slot.id);
       return;
     }
     // Fallback: usar el registro directo de citasState.all
@@ -3671,7 +3670,9 @@
     if (c) {
       const pseudoSlot = {
         booking_id: c.booking_id,
-        slot_id: c.booking_id, // no hay slot_id; el modal admin lo tolera
+        // sin slot_id real — marca para que el reagendado use scope booking
+        id: c.booking_id,
+        _noSlot: true,
         cliente: c.cliente_nombre,
         cliente_telefono: c.cliente_telefono,
         cliente_email: c.cliente_email,
@@ -3679,17 +3680,22 @@
         hora: c.hora,
         duracion_min: c.duracion_min,
         precio_total: c.precio_total,
-        precio_traslado: c.traslado,
+        costo_traslado: c.traslado,
         tipo_cita: c.tipo_cita,
         modalidad: c.modalidad,
-        direccion: c.direccion_libre,
+        direccion_libre: c.direccion_libre,
         zona: [c.zona_municipio, c.zona_colonia].filter(Boolean).join(' · '),
         servicios: c.servicios,
         notas_cliente: c.notas_cliente,
         notas_internas: c.notas_internas,
-        num_personas: c.num_personas,
+        estado_asignacion: c.estado_asignacion,
+        cupos_total: c.slots_summary ? c.slots_summary.total : 1,
+        cupos_tomados: c.slots_summary ? c.slots_summary.claimed : 0,
       };
-      openCitaModal(c.booking_id, 'mine', { adminMode: true, slot: pseudoSlot });
+      if (!window._modalExtraRef) window._modalExtraRef = {};
+      const kind = (c.slots_summary && c.slots_summary.claimed > 0) ? 'mine' : 'pool';
+      window._modalExtraRef[c.booking_id] = { kind, booking: pseudoSlot };
+      openCitaModal(c.booking_id, kind, { adminMode: true });
     } else {
       showToast('No se encontró detalle de la cita.', 'warn');
     }
@@ -5010,6 +5016,10 @@
     _adminReschedule.booking = booking;
     _adminReschedule.terapeuta_id = terapeutaId || null;
     _adminReschedule.scope = 'booking';
+
+    // Si el booking no tiene slot real (viene del tab Citas fallback), ocultar "Solo este cupo"
+    const slotBtn = document.querySelector('#admin-resch-scope button[data-scope="slot"]');
+    if (slotBtn) slotBtn.style.display = booking._noSlot ? 'none' : '';
 
     const modal = document.getElementById('admin-reschedule-modal');
     const cliente = (booking.cliente || booking.cliente_nombre || 'Cliente').trim();
