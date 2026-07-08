@@ -1927,13 +1927,21 @@
   .terapeuta-info-meta span::before { content: '·'; margin-right: 6px; opacity: 0.6; }
   .terapeuta-info-meta span:first-child::before { content: ''; margin-right: 0; }
   .terapeuta-badge-sexo {
-    padding: 3px 8px; border-radius: 999px;
-    background: rgba(154,152,84,0.15); color: var(--olive-dark);
+    display: inline-grid; place-items: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(154,152,84,0.18); color: var(--olive-dark);
+    font: 700 11px 'Lato', sans-serif;
+    letter-spacing: 0;
+    cursor: help;
+  }
+  .terapeuta-badge-sexo.sexo-mujer      { background: rgba(219,112,147,0.18); color: #9d3163; }
+  .terapeuta-badge-sexo.sexo-hombre     { background: rgba(37,99,235,0.14);    color: #1e4bc9; }
+  .terapeuta-badge-sexo.sexo-indistinto { background: rgba(154,152,84,0.20);   color: var(--olive-dark); }
+  .terapeuta-badge-sexo.na {
+    width: auto; height: auto; padding: 3px 8px; border-radius: 999px;
+    background: rgba(200,160,79,0.18); color: #7a5b1e;
     font: 600 10px 'Lato', sans-serif;
     text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .terapeuta-badge-sexo.na {
-    background: rgba(200,160,79,0.18); color: #7a5b1e;
   }
   .terapeuta-count {
     font: 600 11px 'Lato', sans-serif;
@@ -3033,8 +3041,9 @@
         <span>Sexo</span>
         <select id="ter-sexo">
           <option value="">— Sin especificar —</option>
-          <option value="femenino">Femenino</option>
-          <option value="masculino">Masculino</option>
+          <option value="mujer">Mujer</option>
+          <option value="hombre">Hombre</option>
+          <option value="indistinto">Indistinto</option>
         </select>
       </label>
       <label class="terapeuta-form-checkbox">
@@ -4053,6 +4062,18 @@
     }).length;
   }
 
+  // Devuelve la inicial (H/M/I), la palabra completa y una clase CSS para el badge de sexo.
+  function sexoBadgeParts(raw) {
+    const s = (raw || '').toString().toLowerCase().trim();
+    if (s === 'm' || s === 'mujer' || s === 'femenino' || s === 'f')
+      return { letra: 'M', completo: 'Mujer', cls: 'mujer' };
+    if (s === 'h' || s === 'hombre' || s === 'masculino')
+      return { letra: 'H', completo: 'Hombre', cls: 'hombre' };
+    if (s === 'i' || s === 'indistinto' || s === 'ambos')
+      return { letra: 'I', completo: 'Indistinto', cls: 'indistinto' };
+    return { letra: '', completo: 'Sin especificar', cls: '' };
+  }
+
   function renderTerapeutasList() {
     const cont = document.getElementById('terapeutas-list');
     let list = terapeutasState.list;
@@ -4067,9 +4088,11 @@
       if (t.email) meta.push(`<span>${escapeHtml(t.email)}</span>`);
       if (t.telefono) meta.push(`<span>${escapeHtml(t.telefono)}</span>`);
       if (!t.activo) meta.push('<span style="color:#942e2e;font-weight:600">Inactiva</span>');
-      const sexoBadge = t.sexo
-        ? `<span class="terapeuta-badge-sexo">${escapeHtml(t.sexo)}</span>`
-        : '<span class="terapeuta-badge-sexo na">sin sexo</span>';
+      // Badge compacto: solo la inicial (M / H / I). El nombre completo se muestra al pasar el mouse.
+      const sexoInfo = sexoBadgeParts(t.sexo);
+      const sexoBadge = sexoInfo.letra
+        ? `<span class="terapeuta-badge-sexo sexo-${sexoInfo.cls}" title="${escapeHtml(sexoInfo.completo)}">${sexoInfo.letra}</span>`
+        : '<span class="terapeuta-badge-sexo na">Sin sexo</span>';
       meta.push(sexoBadge);
       const citasMes = citasDelMesPorTerapeuta(t.id);
       return `<div class="terapeuta-card ${t.activo ? '' : 'is-inactive'}">
@@ -4093,7 +4116,10 @@
     document.getElementById('ter-nombre').value = t ? (t.nombre || '') : '';
     document.getElementById('ter-email').value = t ? (t.email || '') : '';
     document.getElementById('ter-telefono').value = t ? (t.telefono || '') : '';
-    document.getElementById('ter-sexo').value = t ? (t.sexo || '') : '';
+    // Normaliza valores legacy (femenino/masculino) al nuevo esquema (mujer/hombre)
+    const sexoRaw = t ? (t.sexo || '') : '';
+    const sexoNorm = { femenino: 'mujer', masculino: 'hombre', f: 'mujer', m: 'hombre', i: 'indistinto' }[sexoRaw.toLowerCase()] || sexoRaw.toLowerCase();
+    document.getElementById('ter-sexo').value = sexoNorm;
     document.getElementById('ter-activo').checked = t ? !!t.activo : true;
     const msg = document.getElementById('ter-msg');
     msg.className = 'terapeuta-form-msg';
