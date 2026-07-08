@@ -452,6 +452,21 @@
     text-transform: uppercase; line-height: 1.5;
     margin-bottom: 5px;
   }
+  /* Badge de preferencia de sexo del cliente (M/H/I) — arriba a la derecha del chip */
+  .cal-chip { position: relative; }
+  .chip-sexo {
+    position: absolute; top: 8px; right: 8px;
+    display: inline-grid; place-items: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    font: 800 11px 'Lato', sans-serif;
+    line-height: 1;
+    cursor: help;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .chip-sexo-mujer      { background: #f6c6d8; color: #9d3163; }
+  .chip-sexo-hombre     { background: #cfdcff; color: #1e4bc9; }
+  .chip-sexo-indistinto { background: #d9d9d9; color: #4a4a4a; }
+  .cal-week-grid-mini .chip-sexo { width: 16px; height: 16px; font-size: 9.5px; top: 5px; right: 5px; }
 
   /* Grid semanal */
   .cal-week {
@@ -5026,8 +5041,13 @@
       : slot.tipo_cita === 'sucursal'
       ? '<span class="chip-pill chip-pill-tipo-sucursal">Suc</span>'
       : '';
+    const sexoInfo = sexoBadgeParts(slot.preferencia_sexo);
+    const sexoTag = sexoInfo.letra
+      ? '<span class="chip-sexo chip-sexo-' + sexoInfo.cls + '" title="Cliente pide: ' + escapeHtml(sexoInfo.completo) + '">' + sexoInfo.letra + '</span>'
+      : '';
     return '<div class="' + cls + '" data-slot-id="' + (slot.slot_id || slot.id) + '" data-kind="' + kind + '" onclick="openAdminCitaModal(\'' + (slot.slot_id || slot.id) + '\')">'
       + '<span class="cal-chip-state" style="' + stateStyle + '">' + stateLabel + '</span>'
+      + sexoTag
       + '<div class="cal-chip-time">' + escapeHtml(fmtHora(slot.hora)) + '</div>'
       + (tipoTag ? '<div class="cal-chip-meta">' + tipoTag + '</div>' : '')
       + '<div class="cal-chip-cliente">' + escapeHtml(slot.cliente || '—') + '</div>'
@@ -5608,6 +5628,10 @@
       : (b.tipo_cita === 'sucursal'
         ? `<span class="chip-pill chip-pill-tipo-sucursal">Sucursal</span>`
         : '');
+    const _sexoInfo = sexoBadgeParts(b.preferencia_sexo);
+    const sexoBadgeChip = _sexoInfo.letra
+      ? `<span class="chip-sexo chip-sexo-${_sexoInfo.cls}" title="Cliente pide: ${escapeHtml(_sexoInfo.completo)}">${_sexoInfo.letra}</span>`
+      : '';
 
     const horaTxt = sinFecha ? 'Contactar cliente' : fmtHora(b.hora);
     const personaLine = (isMulti && b.persona_label)
@@ -5642,7 +5666,7 @@
         stateLabel = '<span class="cal-chip-state" style="background:rgba(255,255,255,0.22);color:#fff;">Asignada</span>';
       }
       chip.innerHTML =
-        stateLabel +
+        stateLabel + sexoBadgeChip +
         '<div class="cal-chip-time">' + horaTxt + '</div>' +
         buildMetaRow() +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
@@ -5668,7 +5692,7 @@
         return parts.length ? `<div class="cal-chip-meta">${parts.join('')}</div>` : '';
       };
       chip.innerHTML =
-        poolStateLabel +
+        poolStateLabel + sexoBadgeChip +
         '<div class="cal-chip-time">' + horaTxt + '</div>' +
         buildMetaRowPool() +
         '<div class="cal-chip-cliente">' + escapeHtml(b.cliente || '—') + '</div>' +
