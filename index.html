@@ -5728,7 +5728,12 @@
       ? `<a href="https://wa.me/${telDigits}" target="_blank" rel="noopener" style="color:var(--brown);text-decoration:none;border-bottom:1px dashed var(--olive);">${escapeHtml(telRaw)} <span style="font-size:10px;color:var(--olive-dark);">WhatsApp ↗</span></a>`
       : '—';
     document.getElementById('cita-email').textContent = b.cliente_email || '—';
-    const prefMap = { 'F': 'Mujer masajista', 'M': 'Hombre masajista', 'I': 'Indistinto', 'femenino':'Mujer masajista', 'masculino':'Hombre masajista' };
+    const prefMap = {
+      'F': 'Mujer masajista', 'M': 'Hombre masajista', 'I': 'Indistinto',
+      'femenino':'Mujer masajista', 'masculino':'Hombre masajista',
+      'mujer':'Mujer masajista', 'hombre':'Hombre masajista', 'indistinto':'Indistinto',
+      'mixto':'Indistinto (grupo mixto)'
+    };
     document.getElementById('cita-pref').textContent = prefMap[b.preferencia_sexo] || prefMap[String(b.preferencia_sexo).toLowerCase()] || 'Indistinto';
 
     // ─── Sección 2: Servicios ───
