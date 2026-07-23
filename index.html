@@ -1532,6 +1532,16 @@
   }
   .crear-form-checkbox input { accent-color: var(--olive); width: 18px; height: 18px; }
 
+  .form-msg-inline {
+    font: 12.5px 'Inter', sans-serif;
+    padding: 8px 12px; border-radius: 8px;
+    display: none;
+  }
+  .form-msg-inline.show { display: block; }
+  .form-msg-inline.error {
+    background: rgba(181,59,59,0.08); color: #942e2e;
+    border-left: 3px solid #b53b3b;
+  }
   .crear-form-msg {
     font: 13px 'Inter', sans-serif;
     padding: 10px 14px; border-radius: 8px;
@@ -1579,6 +1589,41 @@
   .pos-search {
     width: 100%; box-sizing: border-box;
     margin-bottom: 10px;
+  }
+  .pos-personas-tabs {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 0 0 12px; margin-bottom: 6px;
+    border-bottom: 1px dashed rgba(154,138,117,0.28);
+  }
+  .pos-persona-tab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 999px; cursor: pointer;
+    background: #fff; border: 1.5px solid rgba(154,138,117,0.25);
+    font: 600 12px 'Inter', sans-serif; color: var(--brown);
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  .pos-persona-tab:hover { border-color: var(--olive); }
+  .pos-persona-tab.active {
+    background: var(--olive); border-color: var(--olive); color: var(--off-white);
+  }
+  .pos-persona-tab .tab-num {
+    display: inline-grid; place-items: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(154,152,84,0.16); color: var(--olive-dark);
+    font: 700 11.5px 'Inter', sans-serif;
+  }
+  .pos-persona-tab.active .tab-num { background: rgba(255,255,255,0.22); color: #fff; }
+  .pos-persona-tab .tab-cnt {
+    background: rgba(200,160,79,0.28); color: #7a5b1e;
+    padding: 1px 7px; border-radius: 999px;
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.3px;
+  }
+  .pos-persona-tab.active .tab-cnt { background: rgba(255,255,255,0.28); color: #fff; }
+  .crear-cart-group { margin-bottom: 8px; }
+  .crear-cart-group-title {
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.6px;
+    color: var(--olive-dark); text-transform: uppercase;
+    padding: 4px 2px 6px;
   }
   .pos-cat-chips {
     display: flex; flex-wrap: wrap; gap: 6px;
@@ -1745,151 +1790,6 @@
     .pos-ticket { position: static; }
   }
 
-  /* ── Tab Masajistas ── */
-  .terapeutas-toolbar {
-    display: flex; align-items: center; gap: 16px;
-    margin: 10px 0 18px;
-  }
-  .terapeutas-filter {
-    display: flex; align-items: center; gap: 8px;
-    font: 12.5px 'Inter', sans-serif;
-    color: var(--olive-dark);
-    cursor: pointer;
-  }
-  .terapeutas-filter input { accent-color: var(--olive); }
-  .terapeutas-list {
-    display: grid; gap: 12px;
-  }
-  .terapeuta-card {
-    background: #fff; border-radius: 12px;
-    padding: 16px 18px;
-    box-shadow: 0 4px 16px rgba(92,58,30,0.06);
-    display: grid; gap: 14px;
-    grid-template-columns: auto 1fr auto auto;
-    align-items: center;
-    border-left: 4px solid var(--olive);
-  }
-  .terapeuta-card.is-inactive {
-    border-left-color: rgba(154,138,117,0.25);
-    opacity: 0.6;
-  }
-  .terapeuta-card .terapeuta-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--olive); color: var(--off-white);
-    font: 700 16px 'Lato', sans-serif;
-    display: grid; place-items: center;
-  }
-  .terapeuta-card.is-inactive .terapeuta-avatar {
-    background: rgba(154,138,117,0.35);
-  }
-  .terapeuta-info { min-width: 0; }
-  .terapeuta-info-name {
-    font: 600 15px 'Inter', sans-serif;
-    color: var(--brown);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .terapeuta-info-meta {
-    font: 12px 'Inter', sans-serif;
-    color: var(--gray-soft);
-    margin-top: 3px;
-    display: flex; flex-wrap: wrap; gap: 4px 12px;
-  }
-  .terapeuta-info-meta span::before { content: '·'; margin-right: 6px; opacity: 0.6; }
-  .terapeuta-info-meta span:first-child::before { content: ''; margin-right: 0; }
-  .terapeuta-badge-sexo {
-    display: inline-grid; place-items: center;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: rgba(154,152,84,0.18); color: var(--olive-dark);
-    font: 700 11px 'Lato', sans-serif;
-    letter-spacing: 0;
-    cursor: help;
-  }
-  .terapeuta-badge-sexo.sexo-mujer      { background: rgba(219,112,147,0.18); color: #9d3163; }
-  .terapeuta-badge-sexo.sexo-hombre     { background: rgba(37,99,235,0.14);    color: #1e4bc9; }
-  .terapeuta-badge-sexo.sexo-indistinto { background: rgba(154,152,84,0.20);   color: var(--olive-dark); }
-  .terapeuta-badge-sexo.na {
-    width: auto; height: auto; padding: 3px 8px; border-radius: 999px;
-    background: rgba(200,160,79,0.18); color: #7a5b1e;
-    font: 600 10px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .terapeuta-count {
-    font: 600 11px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    color: var(--olive-dark);
-    background: rgba(154,152,84,0.12);
-    padding: 6px 10px; border-radius: 999px;
-    text-align: center; min-width: 80px;
-  }
-  .terapeuta-count small { display: block; font-weight: 400; font-size: 10px; opacity: 0.85; }
-  .terapeuta-actions {
-    display: flex; gap: 6px;
-  }
-  .terapeuta-actions button {
-    padding: 7px 12px; border-radius: 8px;
-    background: transparent; color: var(--olive-dark);
-    border: 1.5px solid rgba(154,138,117,0.28);
-    cursor: pointer;
-    font: 600 11.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    transition: background .15s, color .15s, border-color .15s;
-  }
-  .terapeuta-actions button:hover {
-    background: var(--olive); color: #fff; border-color: var(--olive);
-  }
-  .terapeuta-form { display: flex; flex-direction: column; gap: 12px; }
-  .terapeuta-form label {
-    display: flex; flex-direction: column; gap: 4px;
-    font: 600 11px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    color: var(--olive-dark);
-  }
-  .terapeuta-form label small {
-    display: inline; font: 400 10.5px 'Inter', sans-serif;
-    text-transform: none; letter-spacing: 0; color: var(--gray-soft);
-    margin-left: 4px;
-  }
-  .terapeuta-form input,
-  .terapeuta-form select {
-    padding: 10px 12px;
-    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
-    background: #fffefa; color: var(--brown);
-    font: 14px 'Inter', sans-serif;
-    outline: none; transition: border-color .15s;
-  }
-  .terapeuta-form input:focus,
-  .terapeuta-form select:focus { border-color: var(--olive); }
-  .terapeuta-form-checkbox {
-    flex-direction: row !important; align-items: center; gap: 10px !important;
-    text-transform: none !important; font: 13px 'Inter', sans-serif !important;
-    color: var(--brown) !important; letter-spacing: 0 !important;
-    padding: 6px 0;
-  }
-  .terapeuta-form-checkbox input { accent-color: var(--olive); width: 18px; height: 18px; }
-  .terapeuta-form-msg {
-    font: 12.5px 'Inter', sans-serif;
-    padding: 8px 12px; border-radius: 8px;
-    display: none;
-  }
-  .terapeuta-form-msg.show { display: block; }
-  .terapeuta-form-msg.error {
-    background: rgba(181,59,59,0.08);
-    color: #942e2e;
-    border-left: 3px solid #b53b3b;
-  }
-  @media (max-width: 700px) {
-    .terapeuta-card {
-      grid-template-columns: auto 1fr;
-      grid-template-areas: 'avatar info' 'count actions';
-      gap: 10px;
-    }
-    .terapeuta-card .terapeuta-avatar { grid-area: avatar; }
-    .terapeuta-info { grid-area: info; }
-    .terapeuta-count { grid-area: count; justify-self: start; }
-    .terapeuta-actions { grid-area: actions; justify-self: end; }
-  }
-
-  /* ── Admin panel — cada masajista fila completa, días amplios ── */
   .admin-grid {
     display: flex; flex-direction: column;
     gap: 22px;
@@ -1984,11 +1884,36 @@
   .ucal-more:hover { background: rgba(92,58,30,0.18); }
   .ucal-popover {
     position: fixed; z-index: 1200;
-    width: min(300px, calc(100vw - 24px));
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(560px, calc(100vh - 40px));
+    overflow-y: auto;
     background: #fff; border-radius: 14px;
     box-shadow: 0 12px 40px rgba(92,58,30,0.25);
     padding: 14px 16px;
     font: 13px 'Inter', sans-serif; color: var(--brown);
+  }
+  .ucal-popover .pop-cliente-tel {
+    color: var(--olive-dark); text-decoration: none;
+    border-bottom: 1px dashed rgba(154,152,84,0.5);
+    font-weight: 600;
+  }
+  .ucal-popover .pop-notas {
+    background: rgba(200,160,79,0.08); border-radius: 8px;
+    padding: 7px 10px; margin-top: 8px;
+    font-size: 12.5px; color: var(--brown);
+    border-left: 3px solid var(--olive-light);
+  }
+  .ucal-popover .pop-persona {
+    padding: 6px 0; border-top: 1px dashed rgba(154,138,117,0.2);
+    margin-top: 6px;
+  }
+  .ucal-popover .pop-persona-title {
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.4px;
+    text-transform: uppercase; color: var(--olive-dark);
+    margin-bottom: 2px;
+  }
+  .ucal-popover .pop-persona-items {
+    font-size: 12.5px; color: var(--brown); line-height: 1.4;
   }
   .ucal-popover h4 {
     margin: 0 0 8px; font: 700 14px 'Inter', sans-serif;
@@ -2655,7 +2580,6 @@
     <button type="button" class="admin-tab" data-tab="proyeccion"  role="tab">Proyección</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
     <button type="button" class="admin-tab" data-tab="crear"       role="tab">Crear cita</button>
-    <button type="button" class="admin-tab" data-tab="masajistas"  role="tab">Masajistas</button>
   </nav>
 
   <!-- Tab: Resumen — dashboard de una sola vista -->
@@ -2857,6 +2781,7 @@
           <!-- Paso 2: Servicios (precios según la configuración del paso 1) -->
           <section class="crear-section pos-step">
             <h3><span class="pos-step-num">2</span> Elige los servicios</h3>
+            <div class="pos-personas-tabs" id="cc-personas-tabs" style="display:none"></div>
             <input type="search" id="cc-search-svc" class="pos-search" placeholder="Buscar servicio…">
             <div class="pos-cat-chips" id="cc-cat-chips"></div>
             <select id="cc-cat-filter" style="display:none">
@@ -2934,68 +2859,6 @@
     </div>
   </div>
 
-  <!-- Tab: Masajistas -->
-  <div class="admin-tab-panel" id="tab-masajistas" style="display:none">
-    <div class="panel-wrap panel-wrap-cal">
-      <div class="panel-header cal-header">
-        <h1>Equipo de <em>masajistas</em></h1>
-        <p class="cal-subtitle">Alta, edición, sexo y activación de terapeutas.</p>
-      </div>
-      <div class="terapeutas-toolbar">
-        <button class="cita-btn-primary" id="btn-add-terapeuta">+ Agregar masajista</button>
-        <label class="terapeutas-filter">
-          <input type="checkbox" id="terapeutas-show-inactive"> Mostrar inactivas
-        </label>
-      </div>
-      <div class="terapeutas-list" id="terapeutas-list">
-        <div class="stats-loading"><div class="spinner sm"></div><span>Cargando equipo…</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL: Alta/Edición de masajista ── -->
-<div id="terapeuta-modal" class="cita-modal" style="display:none">
-  <div class="cita-modal-backdrop" onclick="closeTerapeutaModal()"></div>
-  <div class="cita-modal-box" style="max-width:520px;">
-    <button class="cita-modal-close" onclick="closeTerapeutaModal()" aria-label="Cerrar">×</button>
-    <div class="cita-modal-badge" id="terapeuta-modal-badge">Nueva masajista</div>
-    <h2 class="cita-modal-title" id="terapeuta-modal-title">Agregar masajista</h2>
-    <form class="terapeuta-form" onsubmit="submitTerapeuta(event)">
-      <label>
-        <span>Nombre completo</span>
-        <input type="text" id="ter-nombre" required autocomplete="name">
-      </label>
-      <label>
-        <span>Email <small>(login del panel)</small></span>
-        <input type="email" id="ter-email" required autocomplete="email">
-      </label>
-      <label>
-        <span>Teléfono</span>
-        <input type="tel" id="ter-telefono" autocomplete="tel">
-      </label>
-      <label>
-        <span>Sexo</span>
-        <select id="ter-sexo">
-          <option value="">— Sin especificar —</option>
-          <option value="mujer">Mujer</option>
-          <option value="hombre">Hombre</option>
-          <option value="indistinto">Indistinto</option>
-        </select>
-      </label>
-      <label class="terapeuta-form-checkbox">
-        <input type="checkbox" id="ter-activo" checked>
-        <span>Activa en el equipo</span>
-      </label>
-      <div class="terapeuta-form-msg" id="ter-msg"></div>
-      <div class="cita-modal-actions">
-        <button type="button" class="cita-btn-secondary" onclick="closeTerapeutaModal()">Cancelar</button>
-        <button type="submit" class="cita-btn-primary" id="ter-submit">Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <!-- ── MODAL: Editar histórico anual ── -->
 <div id="historico-modal" class="cita-modal" style="display:none">
   <div class="cita-modal-backdrop" onclick="closeHistoricoModal()"></div>
@@ -3009,7 +2872,7 @@
       <select id="hist-modal-año" style="padding:10px 12px;border:1.5px solid rgba(154,138,117,0.28);border-radius:8px;background:#fffefa;color:var(--brown);font:14px 'Inter',sans-serif;outline:none;"></select>
     </label>
     <div class="hist-grid" id="hist-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;"></div>
-    <div class="terapeuta-form-msg" id="hist-msg"></div>
+    <div class="form-msg-inline" id="hist-msg"></div>
     <div class="cita-modal-actions">
       <button type="button" class="cita-btn-secondary" onclick="closeHistoricoModal()">Cerrar</button>
       <button type="button" class="cita-btn-primary" id="hist-submit" onclick="submitHistorico()">Guardar cambios</button>
@@ -3286,8 +3149,6 @@
         // Ya se inicializa en showAdminPanel, no re-hacer nada
       } else if (name === 'resumen') {
         initStatsTab();
-      } else if (name === 'masajistas') {
-        initTerapeutasTab();
       } else if (name === 'crear') {
         initCrearCitaTab();
       } else if (name === 'proyeccion') {
@@ -3844,9 +3705,9 @@
     });
     const msg = document.getElementById('hist-msg');
     const submit = document.getElementById('hist-submit');
-    msg.className = 'terapeuta-form-msg';
+    msg.className = 'form-msg-inline';
     if (!cambios.length) {
-      msg.className = 'terapeuta-form-msg show';
+      msg.className = 'form-msg-inline show';
       msg.style.background = 'rgba(154,152,84,0.10)';
       msg.style.color = 'var(--olive-dark)';
       msg.style.borderLeft = '3px solid var(--olive)';
@@ -3870,7 +3731,7 @@
       showToast('Histórico actualizado (' + cambios.length + ' mes' + (cambios.length === 1 ? '' : 'es') + ').', 'ok');
       loadPrediccion();
     } catch (err) {
-      msg.className = 'terapeuta-form-msg show error';
+      msg.className = 'form-msg-inline show error';
       msg.textContent = err.message || 'Error al guardar.';
     } finally {
       submit.disabled = false;
@@ -3878,63 +3739,6 @@
     }
   }
   window.submitHistorico = submitHistorico;
-
-  // ── Tab Masajistas ──
-  const terapeutasState = {
-    list: [],
-    showInactive: false,
-    loading: false,
-  };
-
-  function initTerapeutasTab() {
-    const btnAdd = document.getElementById('btn-add-terapeuta');
-    if (btnAdd && !btnAdd._bound) {
-      btnAdd.addEventListener('click', () => openTerapeutaModal(null));
-      btnAdd._bound = true;
-    }
-    const chk = document.getElementById('terapeutas-show-inactive');
-    if (chk && !chk._bound) {
-      chk.addEventListener('change', () => {
-        terapeutasState.showInactive = chk.checked;
-        renderTerapeutasList();
-      });
-      chk._bound = true;
-    }
-    loadTerapeutas();
-  }
-
-  async function loadTerapeutas() {
-    if (terapeutasState.loading) return;
-    terapeutasState.loading = true;
-    const cont = document.getElementById('terapeutas-list');
-    try {
-      const jwt = localStorage.getItem(STORAGE_KEY);
-      const res = await fetch(ADMIN_DATA_ENDPOINT + '?recurso=terapeutas', {
-        headers: { 'Authorization': 'Bearer ' + jwt }
-      });
-      const data = await res.json();
-      if (!res.ok || data.ok === false || !Array.isArray(data.rows)) throw new Error(data.error || 'bad response');
-      terapeutasState.list = data.rows;
-      renderTerapeutasList();
-    } catch (err) {
-      cont.innerHTML = '<div class="stats-loading" style="color:#942e2e">No se pudo cargar el equipo. Intenta refrescar.</div>';
-      console.error('terapeutas', err);
-    } finally {
-      terapeutasState.loading = false;
-    }
-  }
-
-  function citasDelMesPorTerapeuta(terapeutaId) {
-    if (!adminState.data || !adminState.data.mias) return 0;
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return adminState.data.mias.filter(m => {
-      if (m.terapeuta_id !== terapeutaId) return false;
-      const d = parseDateYMD(m.fecha);
-      return d && d >= monthStart && d < monthEnd;
-    }).length;
-  }
 
   // Devuelve la inicial (H/M/I), la palabra completa y una clase CSS para el badge de sexo.
   function sexoBadgeParts(raw) {
@@ -3948,125 +3752,11 @@
     return { letra: '', completo: 'Sin especificar', cls: '' };
   }
 
-  function renderTerapeutasList() {
-    const cont = document.getElementById('terapeutas-list');
-    let list = terapeutasState.list;
-    if (!terapeutasState.showInactive) list = list.filter(t => t.activo);
-    if (!list.length) {
-      cont.innerHTML = '<div class="stats-loading">Sin masajistas para mostrar.</div>';
-      return;
-    }
-    cont.innerHTML = list.map(t => {
-      const initials = _avatarInitials(t.nombre);
-      const meta = [];
-      if (t.email) meta.push(`<span>${escapeHtml(t.email)}</span>`);
-      if (t.telefono) meta.push(`<span>${escapeHtml(t.telefono)}</span>`);
-      if (!t.activo) meta.push('<span style="color:#942e2e;font-weight:600">Inactiva</span>');
-      // Badge compacto: solo la inicial (M / H / I). El nombre completo se muestra al pasar el mouse.
-      const sexoInfo = sexoBadgeParts(t.sexo);
-      const sexoBadge = sexoInfo.letra
-        ? `<span class="terapeuta-badge-sexo sexo-${sexoInfo.cls}" title="${escapeHtml(sexoInfo.completo)}">${sexoInfo.letra}</span>`
-        : '<span class="terapeuta-badge-sexo na">Sin sexo</span>';
-      meta.push(sexoBadge);
-      const citasMes = citasDelMesPorTerapeuta(t.id);
-      return `<div class="terapeuta-card ${t.activo ? '' : 'is-inactive'}">
-        <div class="terapeuta-avatar">${initials}</div>
-        <div class="terapeuta-info">
-          <div class="terapeuta-info-name">${escapeHtml(t.nombre || '—')}</div>
-          <div class="terapeuta-info-meta">${meta.join('')}</div>
-        </div>
-        <div class="terapeuta-count">${citasMes}<small>este mes</small></div>
-        <div class="terapeuta-actions">
-          <button type="button" onclick='editTerapeuta(${JSON.stringify(t.id)})'>Editar</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function openTerapeutaModal(t) {
-    const isEdit = !!t;
-    document.getElementById('terapeuta-modal-badge').textContent = isEdit ? 'Editar masajista' : 'Nueva masajista';
-    document.getElementById('terapeuta-modal-title').textContent = isEdit ? (t.nombre || 'Sin nombre') : 'Agregar masajista';
-    document.getElementById('ter-nombre').value = t ? (t.nombre || '') : '';
-    document.getElementById('ter-email').value = t ? (t.email || '') : '';
-    document.getElementById('ter-telefono').value = t ? (t.telefono || '') : '';
-    // Normaliza valores legacy (femenino/masculino) al nuevo esquema (mujer/hombre)
-    const sexoRaw = t ? (t.sexo || '') : '';
-    const sexoNorm = { femenino: 'mujer', masculino: 'hombre', f: 'mujer', m: 'hombre', i: 'indistinto' }[sexoRaw.toLowerCase()] || sexoRaw.toLowerCase();
-    document.getElementById('ter-sexo').value = sexoNorm;
-    document.getElementById('ter-activo').checked = t ? !!t.activo : true;
-    const msg = document.getElementById('ter-msg');
-    msg.className = 'terapeuta-form-msg';
-    msg.textContent = '';
-    const submit = document.getElementById('ter-submit');
-    submit.disabled = false;
-    submit.textContent = isEdit ? 'Guardar cambios' : 'Crear masajista';
-    document.getElementById('terapeuta-modal').dataset.editId = t ? t.id : '';
-    document.getElementById('terapeuta-modal').style.display = 'flex';
-  }
-  window.openTerapeutaModal = openTerapeutaModal;
-
-  function editTerapeuta(id) {
-    const t = terapeutasState.list.find(x => x.id === id);
-    if (!t) return;
-    openTerapeutaModal(t);
-  }
-  window.editTerapeuta = editTerapeuta;
-
-  function closeTerapeutaModal() {
-    document.getElementById('terapeuta-modal').style.display = 'none';
-  }
-  window.closeTerapeutaModal = closeTerapeutaModal;
-
-  async function submitTerapeuta(e) {
-    e.preventDefault();
-    const editId = document.getElementById('terapeuta-modal').dataset.editId || null;
-    const nombre = document.getElementById('ter-nombre').value.trim();
-    const email = document.getElementById('ter-email').value.trim().toLowerCase();
-    const telefono = document.getElementById('ter-telefono').value.trim();
-    const sexo = document.getElementById('ter-sexo').value.trim().toLowerCase();
-    const activo = document.getElementById('ter-activo').checked;
-    const msg = document.getElementById('ter-msg');
-    const submit = document.getElementById('ter-submit');
-    msg.className = 'terapeuta-form-msg';
-
-    if (!nombre) { msg.className = 'terapeuta-form-msg show error'; msg.textContent = 'Falta el nombre.'; return; }
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { msg.className = 'terapeuta-form-msg show error'; msg.textContent = 'Email no válido.'; return; }
-
-    submit.disabled = true;
-    submit.textContent = 'Guardando…';
-
-    const jwt = localStorage.getItem(STORAGE_KEY);
-    try {
-      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({
-          action: 'upsert_terapeuta',
-          id: editId || null,
-          nombre, email, telefono, sexo, activo
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false || (data.result && data.result.status === 'error')) {
-        throw new Error((data.result && data.result.error) || data.error || 'No se pudo guardar.');
-      }
-      closeTerapeutaModal();
-      showToast(editId ? 'Masajista actualizada.' : 'Masajista agregada.', 'ok');
-      loadTerapeutas();
-    } catch (err) {
-      msg.className = 'terapeuta-form-msg show error';
-      msg.textContent = err.message || 'Error al guardar.';
-      submit.disabled = false;
-      submit.textContent = editId ? 'Guardar cambios' : 'Crear masajista';
-    }
-  }
-  window.submitTerapeuta = submitTerapeuta;
-
   // ── Tab Crear cita ──
   const crearState = {
     catalog: [],
     cart: [],
+    personaActiva: 1,
     inited: false,
     loading: false,
   };
@@ -4232,12 +3922,20 @@
     let list = crearState.catalog;
     if (cat) list = list.filter(s => s.categoria === cat);
     if (q) list = list.filter(s => (s.nombre || '').toLowerCase().includes(q) || (s.categoria || '').toLowerCase().includes(q));
-    const cartIds = new Set(crearState.cart.map(c => c.__key));
+    const activa = (parseInt(document.getElementById('cc-num-personas').value, 10) || 1) === 1
+      ? 1 : (crearState.personaActiva || 1);
+    const cartIds = new Set(crearState.cart
+      .filter(c => activa === 0 ? c.persona_id === 0 : (c.persona_id === 0 || (c.persona_id || 1) === activa))
+      .map(c => c.__key));
     const cont = document.getElementById('cc-svc-list');
+    const numPers = parseInt(document.getElementById('cc-num-personas').value, 10) || 1;
     if (!list.length) { cont.innerHTML = '<div class="crear-cart-empty" style="grid-column:1/-1">Sin resultados.</div>'; return; }
     cont.innerHTML = list.slice(0, 60).map(s => {
       const variants = extractVariants(s);
-      const anySelected = variants.some(v => cartIds.has(s.id + ':' + v.vkey));
+      const anySelected = variants.some(v => {
+        const pid = (numPers === 2 && /pareja/i.test(v.vkey)) ? 0 : (activa || 1);
+        return cartIds.has(s.id + ':' + v.vkey + '#p' + pid);
+      });
       if (variants.length === 1) {
         const primary = variants[0];
         return `<div class="crear-svc-item ${anySelected ? 'selected' : ''}" onclick='addSvcToCart(${JSON.stringify(s.id)}, ${JSON.stringify(primary.vkey)})'>
@@ -4256,7 +3954,8 @@
         </div>
         <div class="crear-svc-variants">
           ${variants.map(v => {
-            const key = s.id + ':' + v.vkey;
+            const pid = (numPers === 2 && /pareja/i.test(v.vkey)) ? 0 : (activa || 1);
+            const key = s.id + ':' + v.vkey + '#p' + pid;
             const sel = cartIds.has(key);
             return `<button type="button" class="crear-svc-variant ${sel ? 'selected' : ''}" onclick='addSvcToCart(${JSON.stringify(s.id)}, ${JSON.stringify(v.vkey)})'>
               <span>${escapeHtml(v.label)}</span>
@@ -4300,7 +3999,10 @@
     if (!svc) return;
     const variants = extractVariants(svc);
     const variant = variants.find(v => v.vkey === vkey) || variants[0];
-    const key = id + ':' + variant.vkey;
+    const numPers = parseInt(document.getElementById('cc-num-personas').value, 10) || 1;
+    const esPareja = numPers === 2 && /pareja/i.test(variant.vkey || '');
+    const pid = esPareja ? 0 : (numPers === 1 ? 1 : (crearState.personaActiva || 1));
+    const key = id + ':' + variant.vkey + '#p' + pid;
     const idx = crearState.cart.findIndex(c => c.__key === key);
     if (idx >= 0) {
       crearState.cart.splice(idx, 1);
@@ -4309,12 +4011,14 @@
         __key: key,
         slug: svc.slug,
         name: svc.nombre + (variant.vkey !== '_base' ? ' — ' + variant.label : ''),
-        duracion_min: variant.duracion_min || 60,   // default cuando la BD no tiene duración
+        duracion_min: variant.duracion_min || 60,
         precio_mxn: variant.precio_mxn || 0,
         categoria: svc.categoria,
         servicio_id: svc.id,
+        persona_id: pid,
       });
     }
+    renderPersonasTabs();
     updateCartUI();
     renderCatalog();
   }
@@ -4327,24 +4031,36 @@
   }
   window.removeFromCart = removeFromCart;
 
+  function renderCartRow(c) {
+    return '<div class="crear-cart-item">'
+      + '<div class="crear-cart-item-name">' + escapeHtml(c.name) + '</div>'
+      + '<div class="crear-cart-item-dur"><input type="number" class="crear-cart-dur" min="10" step="5" value="' + (c.duracion_min || 60) + '" data-key="' + escapeHtml(c.__key) + '"> min</div>'
+      + '<div class="crear-cart-item-meta">$' + (c.precio_mxn || 0).toLocaleString('es-MX') + '</div>'
+      + '<button type="button" class="crear-cart-item-remove" onclick=\'removeFromCart(' + JSON.stringify(c.__key) + ')\' title="Quitar">×</button>'
+      + '</div>';
+  }
+
   function updateCartUI() {
     const cont = document.getElementById('cc-cart');
     const count = crearState.cart.length;
+    const numPers = parseInt(document.getElementById('cc-num-personas').value, 10) || 1;
     document.getElementById('cc-servicios-count').textContent = count + ' seleccionado' + (count === 1 ? '' : 's');
     if (!count) {
       cont.innerHTML = '<div class="crear-cart-empty">Aún no has agregado servicios.</div>';
+    } else if (numPers === 1) {
+      cont.innerHTML = crearState.cart.map(c => renderCartRow(c)).join('');
     } else {
-      cont.innerHTML = crearState.cart.map(c => `
-        <div class="crear-cart-item">
-          <div class="crear-cart-item-name">${escapeHtml(c.name)}</div>
-          <div class="crear-cart-item-dur">
-            <input type="number" class="crear-cart-dur" min="10" step="5"
-              value="${c.duracion_min || 60}" data-key="${escapeHtml(c.__key)}"> min
-          </div>
-          <div class="crear-cart-item-meta">$${(c.precio_mxn || 0).toLocaleString('es-MX')}</div>
-          <button type="button" class="crear-cart-item-remove" onclick='removeFromCart(${JSON.stringify(c.__key)})' title="Quitar">×</button>
-        </div>
-      `).join('');
+      const buckets = {};
+      crearState.cart.forEach(c => {
+        const pid = c.persona_id === 0 ? 0 : (c.persona_id || 1);
+        (buckets[pid] = buckets[pid] || []).push(c);
+      });
+      const groupTitle = (pid) => pid === 0 ? 'Para las 2' : ('Persona ' + pid);
+      const order = Object.keys(buckets).map(n => parseInt(n, 10)).sort((a, b) => a - b);
+      cont.innerHTML = order.map(pid => {
+        const items = buckets[pid].map(c => renderCartRow(c)).join('');
+        return '<div class="crear-cart-group"><div class="crear-cart-group-title">' + groupTitle(pid) + '</div>' + items + '</div>';
+      }).join('');
       // Cablar inputs de duración (delegación)
       if (!cont._durBound) {
         cont.addEventListener('change', (ev) => {
@@ -4371,8 +4087,46 @@
   function onNumPersonasChange() {
     const val = parseInt(document.getElementById('cc-num-personas').value, 10) || 1;
     document.getElementById('cc-modalidad-wrap').style.display = val > 1 ? 'flex' : 'none';
+    if (crearState.personaActiva > val) crearState.personaActiva = 1;
+    if (val === 1) crearState.personaActiva = 1;
+    crearState.cart = crearState.cart.filter(c => (c.persona_id || 1) <= val || c.persona_id === 0);
+    renderPersonasTabs();
+    if (typeof updateCartUI === 'function') updateCartUI();
+    if (typeof renderCatalog === 'function') renderCatalog();
   }
   window.onNumPersonasChange = onNumPersonasChange;
+
+  function renderPersonasTabs() {
+    const wrap = document.getElementById('cc-personas-tabs');
+    if (!wrap) return;
+    const n = parseInt(document.getElementById('cc-num-personas').value, 10) || 1;
+    if (n === 1) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    wrap.style.display = 'flex';
+    const chips = [];
+    if (n === 2) {
+      const active = crearState.personaActiva === 0 ? ' active' : '';
+      const cnt = crearState.cart.filter(c => c.persona_id === 0).length;
+      chips.push('<button type="button" class="pos-persona-tab' + active + '" onclick="setPersonaActiva(0)">'
+        + '<span class="tab-lbl">Para las 2</span>'
+        + (cnt ? '<span class="tab-cnt">' + cnt + '</span>' : '') + '</button>');
+    }
+    for (let i = 1; i <= n; i++) {
+      const active = crearState.personaActiva === i ? ' active' : '';
+      const cnt = crearState.cart.filter(c => (c.persona_id || 1) === i).length;
+      chips.push('<button type="button" class="pos-persona-tab' + active + '" onclick="setPersonaActiva(' + i + ')">'
+        + '<span class="tab-num">' + i + '</span>'
+        + '<span class="tab-lbl">Persona ' + i + '</span>'
+        + (cnt ? '<span class="tab-cnt">' + cnt + '</span>' : '') + '</button>');
+    }
+    wrap.innerHTML = chips.join('');
+  }
+
+  function setPersonaActiva(p) {
+    crearState.personaActiva = p;
+    renderPersonasTabs();
+    if (typeof renderCatalog === 'function') renderCatalog();
+  }
+  window.setPersonaActiva = setPersonaActiva;
 
   function recalcSummary() {
     const svc = crearState.cart.reduce((s, c) => s + (c.precio_mxn || 0), 0);
@@ -4394,6 +4148,7 @@
     document.getElementById('cc-notif-cliente').checked = false;
     document.getElementById('cc-metodo-pago').value = '';
     crearState.cart = [];
+    crearState.personaActiva = 1;
     // Volver a los defaults del POS: individual + sucursal + mañana 10:00
     document.getElementById('cc-num-personas').value = '1';
     document.querySelectorAll('#cc-personas-toggle button').forEach(b => b.classList.toggle('active', b.dataset.personas === '1'));
@@ -4405,6 +4160,7 @@
     document.getElementById('cc-fecha').value = ymd(addDays(new Date(), 1));
     document.getElementById('cc-hora').value = '10:00';
     document.querySelectorAll('#cc-quick-dates button').forEach(b => b.classList.toggle('active', b.dataset.dias === '1'));
+    renderPersonasTabs();
     updateCartUI();
     renderCatalog();
     updateTicketMeta();
@@ -4413,6 +4169,23 @@
     msg.textContent = '';
   }
   window.resetCrearCita = resetCrearCita;
+
+  function buildPersonasServicios(numPers) {
+    if (numPers <= 1) return null;
+    const out = [];
+    for (let i = 1; i <= numPers; i++) {
+      const items = crearState.cart.filter(c => c.persona_id === 0 || (c.persona_id || 1) === i);
+      out.push({
+        persona_id: i,
+        servicios: items.map(c => ({
+          slug: c.slug, name: c.name,
+          duracion_min: c.duracion_min, precio_mxn: c.precio_mxn,
+          categoria: c.categoria, servicio_id: c.servicio_id
+        }))
+      });
+    }
+    return out;
+  }
 
   async function submitCrearCita(e) {
     e.preventDefault();
@@ -4472,8 +4245,10 @@
       cart: crearState.cart.map(c => ({
         slug: c.slug, name: c.name,
         duracion_min: c.duracion_min, precio_mxn: c.precio_mxn,
-        categoria: c.categoria, servicio_id: c.servicio_id
+        categoria: c.categoria, servicio_id: c.servicio_id,
+        persona_id: c.persona_id || 1
       })),
+      personas_servicios: buildPersonasServicios(num_personas),
       asignar_a,
       notificar_cliente,
       metodo_pago_previsto: document.getElementById('cc-metodo-pago').value || null,
@@ -5010,16 +4785,37 @@
     const sexoInfo = sexoBadgeParts(s.preferencia_sexo);
     const tipo = s.tipo_cita === 'domicilio' ? 'Domicilio' : 'Sucursal';
     const dur = s.duracion_min ? (s.duracion_min + ' min') : '';
+    const tel = s.cliente_telefono || '';
+    const telDigits = tel.replace(/[^\d]/g, '');
+    const telHtml = tel
+      ? '<a href="https://wa.me/' + telDigits + '" target="_blank" rel="noopener" class="pop-cliente-tel">' + escapeHtml(tel) + ' · WhatsApp ↗</a>'
+      : '—';
     const rows = [
       '<div class="row"><span class="lbl">Hora</span><b>' + escapeHtml(fmtHora(s.hora)) + '</b> ' + dur + '</div>',
-      '<div class="row"><span class="lbl">Masajista</span>' + escapeHtml(masajista) + '</div>',
+      '<div class="row"><span class="lbl">Cupo</span>' + escapeHtml(masajista) + '</div>',
+      '<div class="row"><span class="lbl">Teléfono</span>' + telHtml + '</div>',
       '<div class="row"><span class="lbl">Servicios</span>' + escapeHtml(s.servicios_label || '—') + '</div>',
-      '<div class="row"><span class="lbl">Lugar</span>' + tipo + '</div>',
+      '<div class="row"><span class="lbl">Lugar</span>' + tipo + (s.direccion_libre ? ' · ' + escapeHtml(s.direccion_libre) : '') + '</div>',
     ];
     if (sexoInfo.letra) rows.push('<div class="row"><span class="lbl">Pidió</span>' + escapeHtml(sexoInfo.completo) + '</div>');
-    if (s.estado_pago) rows.push('<div class="row"><span class="lbl">Pago</span>' + ucalPagoBadge(s) + '</div>');
+    const total = (Number(s.precio_total || s.precio_mxn) || 0) + (Number(s.costo_traslado) || 0);
+    if (total > 0) rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + '</div>');
+    if (s.estado_pago) rows.push('<div class="row"><span class="lbl">Pago</span>' + ucalPagoBadge(s) + (Number(s.total_pagado || 0) > 0 ? ' <span style="color:var(--gray-soft);font-size:11.5px">($' + Number(s.total_pagado).toLocaleString('es-MX') + ')</span>' : '') + '</div>');
+    // Breakdown por persona si aplica
+    let personasHtml = '';
+    if (Array.isArray(s.personas_servicios) && s.personas_servicios.length > 1) {
+      personasHtml = s.personas_servicios.map(ps => {
+        const items = (ps.servicios || []).map(x => escapeHtml(x.name || x.slug || '—')).join(' · ') || '—';
+        return '<div class="pop-persona"><div class="pop-persona-title">Persona ' + (ps.persona_id || '') + '</div><div class="pop-persona-items">' + items + '</div></div>';
+      }).join('');
+    }
+    const notasHtml = s.notas_cliente || s.notas_internas
+      ? '<div class="pop-notas">' + escapeHtml(s.notas_cliente || s.notas_internas) + '</div>'
+      : '';
     const html = '<h4><span class="dot" style="background:' + color + '"></span>' + escapeHtml(s.cliente || '—') + '</h4>'
       + rows.join('')
+      + personasHtml
+      + notasHtml
       + '<div class="pop-actions"><button type="button" onclick="closeUcalPopoverAndOpen(\'' + slotId + '\')">Ver completo</button></div>';
     _ucalShowPopover(html, ev);
   }
