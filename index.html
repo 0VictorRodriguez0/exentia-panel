@@ -466,7 +466,6 @@
   .chip-sexo-mujer      { background: #f6c6d8; color: #9d3163; }
   .chip-sexo-hombre     { background: #cfdcff; color: #1e4bc9; }
   .chip-sexo-indistinto { background: #d9d9d9; color: #4a4a4a; }
-  .cal-week-grid-mini .chip-sexo { width: 16px; height: 16px; font-size: 9.5px; top: 5px; right: 5px; }
 
   /* Grid semanal */
   .cal-week {
@@ -1342,168 +1341,6 @@
     }
   }
 
-  /* ── Tab Citas (tabla) ── */
-  .citas-filters {
-    background: #fff; border-radius: 14px;
-    padding: 14px 16px;
-    box-shadow: 0 4px 18px rgba(92,58,30,0.06);
-    margin: 10px 0 18px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .citas-filters-row {
-    display: flex; align-items: center; gap: 10px;
-    flex-wrap: wrap;
-  }
-  .citas-filters-row input[type="search"] {
-    flex: 1 1 260px;
-    padding: 10px 14px;
-    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
-    background: #fffefa; color: var(--brown);
-    font: 14px 'Inter', sans-serif;
-    outline: none; transition: border-color .15s;
-  }
-  .citas-filters-row input[type="search"]:focus { border-color: var(--olive); }
-  .citas-filters-chips {
-    gap: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(154,138,117,0.15);
-  }
-  .citas-filters-chips button {
-    padding: 6px 13px;
-    background: #fbf9f1; color: var(--brown);
-    border: 1.5px solid transparent; border-radius: 999px;
-    cursor: pointer;
-    font: 600 11.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .citas-filters-chips button:hover { background: rgba(154,152,84,0.14); }
-  .citas-filters-chips button.active {
-    background: var(--olive); color: #fff; border-color: var(--olive);
-  }
-  .citas-filters-selects {
-    gap: 12px;
-  }
-  .citas-filters-selects label {
-    display: flex; flex-direction: column; gap: 4px;
-    font: 600 10.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    color: var(--olive-dark);
-    flex: 1 1 140px; min-width: 140px;
-  }
-  .citas-filters-selects input,
-  .citas-filters-selects select {
-    padding: 8px 10px;
-    border: 1.5px solid rgba(154,138,117,0.28); border-radius: 8px;
-    background: #fffefa; color: var(--brown);
-    font: 13px 'Inter', sans-serif;
-    outline: none;
-  }
-  .citas-count {
-    font: 12px 'Inter', sans-serif;
-    color: var(--gray-soft);
-  }
-
-  .citas-table-wrap {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(92,58,30,0.07);
-    overflow-x: auto;
-  }
-  .citas-table {
-    width: 100%;
-    border-collapse: collapse;
-    font: 13px 'Inter', sans-serif;
-    min-width: 900px;
-  }
-  .citas-table thead {
-    background: #fbf7eb;
-    border-bottom: 2px solid rgba(154,138,117,0.18);
-  }
-  .citas-table th {
-    text-align: left;
-    padding: 12px 14px;
-    font: 600 10.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    color: var(--olive-dark);
-    white-space: nowrap;
-  }
-  .citas-table tbody tr {
-    border-bottom: 1px solid rgba(154,138,117,0.1);
-    transition: background .15s;
-  }
-  .citas-table tbody tr:hover { background: rgba(154,152,84,0.06); cursor: pointer; }
-  .citas-table tbody tr:last-child { border-bottom: none; }
-  .citas-table td {
-    padding: 12px 14px;
-    color: var(--brown);
-    vertical-align: middle;
-  }
-  .citas-table .col-codigo {
-    font: 700 12px 'Lato', sans-serif;
-    color: var(--olive-dark);
-    letter-spacing: 0.5px;
-  }
-  .citas-table .col-cliente-name {
-    font-weight: 600;
-    overflow: hidden; text-overflow: ellipsis;
-    max-width: 180px; white-space: nowrap;
-  }
-  .citas-table .col-cliente-tel {
-    font-size: 11.5px; color: var(--gray-soft);
-    display: block; margin-top: 2px;
-  }
-  .citas-table .col-fecha {
-    white-space: nowrap;
-  }
-  .citas-table .col-fecha-hora {
-    font-size: 11.5px; color: var(--gray-soft);
-  }
-  .citas-table .col-svc {
-    max-width: 220px;
-    font-size: 12px;
-    color: var(--gray-soft);
-  }
-  .citas-table .col-total {
-    font: 700 13px 'Cormorant Garamond', serif;
-    color: var(--brown);
-    white-space: nowrap;
-  }
-  .citas-badge {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font: 600 10px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-  .citas-badge-tipo { background: rgba(154,152,84,0.14); color: var(--olive-dark); }
-  .citas-badge-tipo.domicilio { background: rgba(200,160,79,0.18); color: #7a5b1e; }
-  .citas-badge-estado { background: rgba(30,105,45,0.12); color: #1b5e20; }
-  .citas-badge-estado.pool { background: rgba(200,160,79,0.18); color: #7a5b1e; }
-  .citas-badge-estado.cancelado { background: rgba(181,59,59,0.12); color: #942e2e; }
-  .citas-badge-estado.pasada { background: rgba(154,138,117,0.15); color: #6d5c48; }
-  .citas-loading, .citas-empty {
-    text-align: center;
-    padding: 40px 20px !important;
-    color: var(--gray-soft);
-    font: 13px 'Inter', sans-serif;
-  }
-  .citas-loading .spinner { display: inline-block; margin-right: 8px; vertical-align: middle; }
-  .citas-table .col-actions {
-    text-align: right; white-space: nowrap;
-  }
-  .citas-table .col-actions button {
-    padding: 5px 10px;
-    background: transparent; color: var(--olive-dark);
-    border: 1.5px solid rgba(154,138,117,0.25); border-radius: 6px;
-    cursor: pointer;
-    font: 600 10.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.4px;
-  }
-  .citas-table .col-actions button:hover {
-    background: var(--olive); color: #fff; border-color: var(--olive);
-  }
-
   /* ── Tab Crear cita ── */
   .crear-form {
     display: flex; flex-direction: column; gap: 16px;
@@ -1880,6 +1717,24 @@
     padding-top: 8px;
   }
   .pos-ticket-sms { padding: 2px 0 0 !important; }
+  .pos-ticket-pago {
+    border-top: 1.5px dashed rgba(154,138,117,0.3);
+    padding-top: 10px; margin-top: 2px;
+  }
+  .pos-pago-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font: 600 13px 'Inter', sans-serif; color: var(--brown);
+  }
+  .pos-pago-note {
+    margin: 6px 0 8px; font: 11.5px 'Inter', sans-serif; color: var(--gray-soft);
+  }
+  .pos-pago-metodo { display: flex; flex-direction: column; gap: 4px; }
+  .pos-pago-metodo span { font: 600 11.5px 'Inter', sans-serif; color: var(--olive-dark); }
+  .pos-pago-metodo select {
+    padding: 8px 10px; border-radius: 8px;
+    border: 1.5px solid rgba(154,138,117,0.28);
+    background: #fffefa; color: var(--brown); font: 13px 'Inter', sans-serif;
+  }
   .pos-ticket-submit {
     width: 100%;
     padding: 14px !important;
@@ -2046,139 +1901,193 @@
     font: 14px 'Inter', sans-serif;
     background: #fff; border-radius: 14px;
   }
-  .therapist-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 22px 24px 24px;
+  /* ── Calendario unificado (admin) ── */
+  .ucal-legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .ucal-legend-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px; border-radius: 999px;
+    background: #fff; border: 1.5px solid rgba(154,138,117,0.25);
+    font: 600 12px 'Inter', sans-serif; color: var(--brown);
+    cursor: pointer; transition: opacity .15s, border-color .15s;
+  }
+  .ucal-legend-chip .dot {
+    width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+  }
+  .ucal-legend-chip.off { opacity: 0.38; }
+  .ucal-legend-chip:hover { border-color: var(--olive); }
+  .ucal-card {
+    background: #fff; border-radius: 16px;
     box-shadow: 0 6px 24px rgba(92,58,30,0.08);
-    border-top: 5px solid var(--olive);
-    display: flex; flex-direction: column;
+    padding: 16px 18px 20px;
   }
-  .therapist-card.pool-card {
-    border-top-color: var(--olive-light);
-    border-top-style: dashed;
-    background: linear-gradient(180deg, #fbf7eb 0%, #ffffff 60%);
+  .ucal-head-row, .ucal-body {
+    display: grid;
+    grid-template-columns: 46px repeat(7, minmax(0, 1fr));
   }
-  .therapist-card-header {
-    display: flex; align-items: center; gap: 14px;
-    padding-bottom: 16px; margin-bottom: 16px;
-    border-bottom: 1px solid rgba(154,138,117,0.18);
+  .ucal-day-head {
+    text-align: center; padding: 4px 2px 10px;
+    font: 600 11px 'Lato', sans-serif; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--olive-dark);
   }
-  .therapist-avatar {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: var(--olive); color: var(--off-white);
-    font: 700 17px 'Lato', sans-serif;
-    letter-spacing: 0.5px;
-    display: grid; place-items: center;
-    flex: 0 0 auto;
+  .ucal-day-head .num {
+    display: block; font: 700 17px 'Inter', sans-serif; color: var(--brown);
   }
-  .therapist-card.pool-card .therapist-avatar {
-    background: rgba(154,152,84,0.18); color: var(--olive-dark);
-    border: 1.5px dashed var(--olive);
+  .ucal-day-head.is-today .num {
+    color: var(--off-white); background: var(--olive);
+    width: 28px; height: 28px; line-height: 28px; border-radius: 50%; margin: 0 auto;
   }
-  .therapist-card-name {
-    font: 600 19px 'Inter', sans-serif;
-    color: var(--brown);
-    flex: 1; min-width: 0;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  .ucal-axis { position: relative; }
+  .ucal-axis span {
+    position: absolute; right: 6px; transform: translateY(-50%);
+    font: 500 10px 'Inter', sans-serif; color: var(--gray-soft);
   }
-  .therapist-card-count {
-    font: 600 11px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.6px;
-    color: var(--olive-dark);
-    background: rgba(154,152,84,0.12);
-    padding: 6px 11px; border-radius: 999px;
-    flex: 0 0 auto;
+  .ucal-col {
+    position: relative;
+    border-left: 1px solid rgba(154,138,117,0.16);
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0, transparent 65px,
+      rgba(154,138,117,0.12) 65px, rgba(154,138,117,0.12) 66px
+    );
   }
-  .therapist-card-toggle {
-    background: transparent; border: 1.5px solid rgba(154,138,117,0.25);
-    color: var(--olive-dark);
-    width: 34px; height: 34px; border-radius: 50%;
-    cursor: pointer;
-    display: grid; place-items: center;
-    font: 700 16px/1 'Inter', sans-serif;
-    transition: background .15s, border-color .15s, transform .2s;
-    flex: 0 0 auto;
+  .ucal-col.is-today { background-color: rgba(154,152,84,0.06); }
+  .ucal-ev {
+    position: absolute; z-index: 2;
+    border-radius: 7px; border-left: 4px solid;
+    padding: 3px 6px; overflow: hidden; cursor: pointer;
+    font: 500 10.5px/1.3 'Inter', sans-serif; color: var(--brown);
+    box-shadow: 0 1px 4px rgba(92,58,30,0.10);
+    transition: box-shadow .12s, transform .12s;
+    min-height: 16px; box-sizing: border-box;
   }
-  .therapist-card-toggle:hover { background: rgba(154,152,84,0.12); border-color: var(--olive); }
-  .therapist-card.is-collapsed .therapist-card-toggle { transform: rotate(-90deg); }
-  .therapist-card.is-collapsed .cal-week-grid-mini,
-  .therapist-card.is-collapsed .pool-card-list { display: none; }
-
-  /* Semana amplia: cada día tiene mucho espacio */
-  .cal-week-grid-mini {
-    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px;
+  .ucal-ev:hover { box-shadow: 0 3px 10px rgba(92,58,30,0.22); z-index: 3; }
+  .ucal-ev .ev-hora { font-weight: 700; font-size: 10px; }
+  .ucal-ev .ev-cliente { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucal-ev .ev-svc { opacity: 0.8; font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucal-ev.is-pool { border-left-style: dashed; }
+  .ucal-ev .ev-pago-dot {
+    position: absolute; top: 4px; right: 4px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #c8a04f;
   }
-  .cal-week-grid-mini .cal-day {
-    background: #fbf9f1;
-    border-radius: 9px;
-    padding: 10px 8px 8px;
-    min-height: 220px;
-    font-size: 12.5px;
-    display: flex; flex-direction: column;
+  .ucal-more {
+    position: absolute; z-index: 2;
+    border-radius: 7px; cursor: pointer;
+    background: rgba(92,58,30,0.10); border: 1.5px dashed rgba(92,58,30,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font: 700 11px 'Inter', sans-serif; color: var(--brown);
+    box-sizing: border-box;
   }
-  .cal-week-grid-mini .cal-day.is-today {
-    background: rgba(154,152,84,0.14);
-    box-shadow: inset 0 0 0 1.5px var(--olive);
+  .ucal-more:hover { background: rgba(92,58,30,0.18); }
+  .ucal-popover {
+    position: fixed; z-index: 1200;
+    width: min(300px, calc(100vw - 24px));
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(92,58,30,0.25);
+    padding: 14px 16px;
+    font: 13px 'Inter', sans-serif; color: var(--brown);
   }
-  .cal-week-grid-mini .cal-day .cal-day-head {
-    padding: 0 2px 8px;
-    font-size: 10.5px;
-    letter-spacing: 0.5px;
-    display: flex; align-items: baseline; gap: 6px;
+  .ucal-popover h4 {
+    margin: 0 0 8px; font: 700 14px 'Inter', sans-serif;
+    display: flex; align-items: center; gap: 8px;
   }
-  .cal-week-grid-mini .cal-day .cal-day-num {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--brown);
+  .ucal-popover h4 .dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+  .ucal-popover .row { margin: 3px 0; display: flex; gap: 6px; align-items: baseline; }
+  .ucal-popover .row .lbl { color: var(--gray-soft); font-size: 11.5px; flex: 0 0 72px; }
+  .ucal-popover .pop-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .ucal-popover .pop-actions button {
+    flex: 1; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    font: 600 12.5px 'Inter', sans-serif;
+    border: 1.5px solid var(--olive); background: var(--olive); color: var(--off-white);
   }
-  .cal-week-grid-mini .cal-day .cal-day-name {
-    text-transform: uppercase;
-    color: var(--olive-dark);
-    font-weight: 600;
+  .ucal-popover .pop-actions button:hover { background: var(--olive-dark); }
+  .ucal-popover .mini-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 4px; border-radius: 8px; cursor: pointer;
   }
-  .cal-week-grid-mini .cal-day-list {
-    display: flex; flex-direction: column;
-    gap: 6px;
-    flex: 1 1 auto;
+  .ucal-popover .mini-row:hover { background: rgba(154,152,84,0.10); }
+  .ucal-popover .mini-row .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+  .ucal-popover .mini-row .hora { font-weight: 700; font-size: 12px; flex: 0 0 auto; }
+  .ucal-popover .mini-row .nom { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; }
+  .pago-badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 999px;
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
   }
-  .cal-week-grid-mini .cal-chip {
-    padding: 7px 8px;
-    border-radius: 8px;
-    gap: 3px;
-    line-height: 1.25;
+  .pago-badge.pendiente { background: rgba(200,160,79,0.18); color: #7a5b1e; }
+  .pago-badge.parcial { background: rgba(63,110,125,0.15); color: #2c5460; }
+  .pago-badge.pagado { background: rgba(30,105,45,0.13); color: #1b5e20; }
+  .cita-pago-estado {
+    display: flex; align-items: center; gap: 10px;
+    padding-top: 8px; margin-top: 6px;
+    border-top: 1px dashed rgba(154,138,117,0.3);
   }
-  .cal-week-grid-mini .cal-chip-time { font-size: 12.5px; font-weight: 700; }
-  .cal-week-grid-mini .cal-chip-cliente { font-size: 12px; font-weight: 600; }
-  .cal-week-grid-mini .cal-chip-svc { font-size: 11px; opacity: 0.85; }
-  .cal-week-grid-mini .cal-chip-persona { font-size: 10.5px; opacity: 0.7; display: block; }
-  .cal-week-grid-mini .cal-chip-state {
-    font-size: 9.5px;
-    padding: 2px 6px;
-    letter-spacing: 0.3px;
+  .cita-pago-btn {
+    margin-left: auto; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1.5px solid var(--olive); background: transparent; color: var(--olive-dark);
+    font: 600 12px 'Inter', sans-serif;
   }
-  .cal-week-grid-mini .cal-chip-meta { display: none; }
-
-  /* Pool card: grid de 2-3 columnas para aprovechar el ancho */
-  .pool-card-list {
-    display: grid; gap: 8px;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    max-height: 320px; overflow-y: auto;
+  .cita-pago-btn:hover { background: rgba(154,152,84,0.12); }
+  .cita-pago-form {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end;
+    margin-top: 8px;
   }
-  .pool-card-list .cal-chip {
-    flex-direction: row; align-items: center;
-    padding: 9px 11px; gap: 10px;
+  .cita-pago-form label { display: flex; flex-direction: column; gap: 3px; }
+  .cita-pago-form label span { font: 600 11px 'Inter', sans-serif; color: var(--olive-dark); }
+  .cita-pago-form input, .cita-pago-form select {
+    padding: 8px 9px; border-radius: 8px;
+    border: 1.5px solid rgba(154,138,117,0.28);
+    background: #fffefa; color: var(--brown); font: 13px 'Inter', sans-serif;
+    width: 100%; box-sizing: border-box;
   }
-  .pool-card-list .cal-chip-time {
-    flex: 0 0 auto; font-size: 13px; font-weight: 700;
-    border-right: 1px solid rgba(154,138,117,0.25);
-    padding-right: 10px;
+  .cita-pago-form button {
+    padding: 9px 14px; border-radius: 8px; cursor: pointer;
+    border: none; background: var(--olive); color: var(--off-white);
+    font: 600 12.5px 'Inter', sans-serif;
   }
-  .pool-card-list .cal-chip-cliente,
-  .pool-card-list .cal-chip-svc { flex: 1 1 auto; font-size: 12px; }
-  .pool-card-list .cal-chip-state { flex: 0 0 auto; font-size: 10px; }
-  .pool-card-list .cal-chip-meta,
-  .pool-card-list .cal-chip-persona { display: none; }
+  .cita-pago-form button:hover { background: var(--olive-dark); }
+  .cita-pago-msg { grid-column: 1 / -1; font: 12px 'Inter', sans-serif; color: #942e2e; }
+  /* Móvil: tira de días + agenda */
+  .ucal-daystrip {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+    margin-bottom: 12px;
+  }
+  .ucal-daystrip button {
+    padding: 8px 2px 7px; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid rgba(154,138,117,0.22); background: #fff;
+    font: 600 10.5px 'Lato', sans-serif; color: var(--olive-dark);
+    text-transform: uppercase; letter-spacing: 0.3px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .ucal-daystrip button .num { font: 700 15px 'Inter', sans-serif; color: var(--brown); }
+  .ucal-daystrip button .cnt {
+    font-size: 9px; background: rgba(154,152,84,0.16); color: var(--olive-dark);
+    border-radius: 999px; padding: 1px 6px; min-width: 14px;
+  }
+  .ucal-daystrip button.active {
+    background: var(--olive); border-color: var(--olive);
+  }
+  .ucal-daystrip button.active .num, .ucal-daystrip button.active { color: var(--off-white); }
+  .ucal-daystrip button.active .cnt { background: rgba(255,255,255,0.25); color: #fff; }
+  .ucal-agenda { display: flex; flex-direction: column; gap: 8px; }
+  .ucal-agenda-row {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border-radius: 12px; padding: 11px 13px;
+    box-shadow: 0 2px 10px rgba(92,58,30,0.07);
+    cursor: pointer; border-left: 4px solid transparent;
+  }
+  .ucal-agenda-row.is-pool { border-left-style: dashed; }
+  .ucal-agenda-row .hora { font: 700 13px 'Inter', sans-serif; flex: 0 0 46px; }
+  .ucal-agenda-row .mid { flex: 1; min-width: 0; }
+  .ucal-agenda-row .mid .nom { font: 600 13px 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucal-agenda-row .mid .svc { font: 11.5px 'Inter', sans-serif; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucal-agenda-empty {
+    text-align: center; padding: 32px 10px; color: var(--gray-soft);
+    font: 13px 'Inter', sans-serif;
+  }
   /* Login: admin password form se ve igual que email-form */
   #admin-password-form { display: flex; flex-direction: column; gap: 10px; }
   #admin-password-input {
@@ -2188,17 +2097,12 @@
     box-sizing: border-box; outline: none; transition: border-color .15s;
   }
   #admin-password-input:focus { border-color: var(--olive); }
-  @media (max-width: 900px) {
-    .cal-week-grid-mini { grid-template-columns: repeat(2, 1fr); }
-    .cal-week-grid-mini .cal-day { min-height: 160px; }
-    .therapist-card { padding: 16px 14px 18px; }
-    .therapist-card-name { font-size: 17px; }
-  }
   @media (max-width: 600px) {
     .admin-grid { gap: 14px; }
-    .cal-week-grid-mini { grid-template-columns: 1fr; gap: 6px; }
-    .cal-week-grid-mini .cal-day { min-height: auto; }
-    .pool-card-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .admin-tabs { padding: 0 10px; gap: 2px; }
+    .admin-tab { padding: 10px 10px; font-size: 12.5px; }
   }
 
   /* Modal de detalle de cita */
@@ -2846,7 +2750,7 @@
     <div class="panel-wrap panel-wrap-cal">
       <div class="panel-header cal-header">
         <h1>Calendarios del <em>equipo</em></h1>
-        <p class="cal-subtitle">Todos los calendarios de masajistas + el pool de citas disponibles.</p>
+        <p class="cal-subtitle">Todas las citas del equipo en un solo calendario. Filtra por masajista con la leyenda de colores.</p>
       </div>
       <div class="cal-toolbar">
         <button class="cal-nav-btn" id="admin-cal-prev" title="Semana anterior">‹</button>
@@ -2909,6 +2813,7 @@
                 <select id="cc-modalidad">
                   <option value="simultaneo">Al mismo tiempo</option>
                   <option value="sucesivo">Uno después de otro</option>
+                  <option value="turnos">Por turnos (menos masajistas)</option>
                 </select>
               </label>
             </div>
@@ -2941,7 +2846,7 @@
             </div>
             <div class="crear-grid crear-grid-3" style="margin-top:12px;">
               <label>
-                <span>Masajista</span>
+                <span>Masajista <small>(opcional)</small></span>
                 <select id="cc-asignar">
                   <option value="">Dejar en el pool</option>
                 </select>
@@ -2997,6 +2902,23 @@
             <div class="crear-summary-row"><span>Servicios</span><span id="cc-sum-svc">$0</span></div>
             <div class="crear-summary-row"><span>Traslado</span><span id="cc-sum-traslado">$0</span></div>
             <div class="crear-summary-row crear-summary-total"><span>TOTAL</span><span id="cc-sum-total">$0</span></div>
+          </div>
+
+          <div class="pos-ticket-pago">
+            <div class="pos-pago-head">
+              <span>Pago</span>
+              <span class="pago-badge pendiente">Pendiente</span>
+            </div>
+            <p class="pos-pago-note">La cita se crea con el pago pendiente. Se registra al cobrar.</p>
+            <label class="pos-pago-metodo">
+              <span>Método previsto <small>(opcional)</small></span>
+              <select id="cc-metodo-pago">
+                <option value="">Sin definir</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+            </label>
           </div>
 
           <label class="crear-form-checkbox pos-ticket-sms">
@@ -3127,6 +3049,24 @@
         <div class="cita-precio-row"><span>Servicios</span><span id="cita-precio-svc">—</span></div>
         <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
         <div class="cita-precio-row cita-precio-total"><span>TOTAL A COBRAR</span><span id="cita-precio-total">—</span></div>
+        <div class="cita-pago-estado" id="cita-pago-estado" style="display:none">
+          <span id="cita-pago-badge"></span>
+          <span id="cita-pago-detalle" style="font-size:12px;color:var(--gray-soft);"></span>
+          <button type="button" id="cita-pago-btn" class="cita-pago-btn" onclick="toggleRegistrarPago()">Registrar pago</button>
+        </div>
+        <div class="cita-pago-form" id="cita-pago-form" style="display:none">
+          <label><span>Monto (MXN)</span><input type="number" id="cita-pago-monto" min="1" step="1"></label>
+          <label><span>Método</span>
+            <select id="cita-pago-metodo">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <button type="button" id="cita-pago-submit" onclick="submitRegistrarPago()">Guardar</button>
+          <div class="cita-pago-msg" id="cita-pago-msg"></div>
+        </div>
       </div>
     </div>
 
@@ -3854,87 +3794,6 @@
     return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  function renderChartPrediccion(meses, añoA, añoB) {
-    const ctx = document.getElementById('chart-comparativa');
-    if (!ctx || !window.Chart) return;
-    destroyChart('comparativa');
-    // Barras del año objetivo: color sólido si real, alfa+dash si predicción
-    const targetColors = meses.map(m => m.es_prediccion
-      ? 'rgba(233,30,99,0.45)'
-      : COMP_COLORS.B);
-    const targetBorderColors = meses.map(m => m.es_prediccion ? COMP_COLORS.B : COMP_COLORS.B);
-    const targetBorderDashed = meses.map(m => m.es_prediccion ? [4,3] : []);
-    statsState.charts.comparativa = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: meses.map(m => (m.nombre || '').slice(0, 3)),
-        datasets: [
-          {
-            label: String(añoA) + ' histórico',
-            data: meses.map(m => Number(m.historico || 0)),
-            backgroundColor: COMP_COLORS.A,
-            borderRadius: 4, maxBarThickness: 22,
-          },
-          {
-            label: String(añoB),
-            data: meses.map(m => Number(m.target || 0)),
-            backgroundColor: targetColors,
-            borderColor: targetBorderColors,
-            borderWidth: meses.map(m => m.es_prediccion ? 1.5 : 0),
-            borderRadius: 4, maxBarThickness: 22,
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: CHART_COLORS.brown,
-            padding: 10, titleFont: { family: 'Inter', size: 12 }, bodyFont: { family: 'Inter', size: 12 },
-            callbacks: {
-              label: c => {
-                const m = meses[c.dataIndex];
-                const suffix = (c.datasetIndex === 1 && m && m.es_prediccion) ? ' (predicción)' : '';
-                return c.dataset.label + ': $' + Number(c.parsed.y).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + suffix;
-              }
-            }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: CHART_COLORS.text, font: { family: 'Inter', size: 11 } } },
-          y: {
-            grid: { color: CHART_COLORS.grid, drawBorder: false },
-            ticks: {
-              color: CHART_COLORS.text, font: { family: 'Inter', size: 11 },
-              callback: v => '$' + Number(v).toLocaleString('es-MX')
-            },
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  }
-
-  // ── Modal editar histórico ──
-  async function openHistoricoModal() {
-    // Cargar año base del select
-    const añoBase = parseInt(document.getElementById('comp-año-a').value, 10) || (new Date().getFullYear() - 1);
-    const sel = document.getElementById('hist-modal-año');
-    // Poblar años (últimos 6 + año actual)
-    const añoActual = new Date().getFullYear();
-    const opts = [];
-    for (let y = añoActual; y >= añoActual - 5; y--) opts.push(y);
-    sel.innerHTML = opts.map(y => `<option value="${y}">${y}</option>`).join('');
-    sel.value = String(añoBase);
-    sel.onchange = () => cargarHistoricoGrid(parseInt(sel.value, 10));
-    await cargarHistoricoGrid(añoBase);
-    document.getElementById('hist-msg').className = 'terapeuta-form-msg';
-    document.getElementById('hist-msg').textContent = '';
-    document.getElementById('historico-modal').style.display = 'flex';
-  }
-  window.openHistoricoModal = openHistoricoModal;
-
   function closeHistoricoModal() {
     document.getElementById('historico-modal').style.display = 'none';
   }
@@ -4533,6 +4392,7 @@
     document.getElementById('cc-cliente-email').value = '';
     document.getElementById('cc-direccion').value = '';
     document.getElementById('cc-notif-cliente').checked = false;
+    document.getElementById('cc-metodo-pago').value = '';
     crearState.cart = [];
     // Volver a los defaults del POS: individual + sucursal + mañana 10:00
     document.getElementById('cc-num-personas').value = '1';
@@ -4616,6 +4476,7 @@
       })),
       asignar_a,
       notificar_cliente,
+      metodo_pago_previsto: document.getElementById('cc-metodo-pago').value || null,
       origen: 'panel-admin'
     };
 
@@ -4644,196 +4505,6 @@
     }
   }
   window.submitCrearCita = submitCrearCita;
-
-  // ── Tab Citas (tabla) ──
-  const citasState = {
-    all: [],
-    filterChip: 'all',
-    inited: false,
-    loading: false,
-  };
-
-  function initCitasTab() {
-    if (citasState.inited) return;
-    citasState.inited = true;
-    populateTerapeutaDropdowns();
-    // Chips de estado
-    document.querySelectorAll('#citas-status-chips button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#citas-status-chips button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        citasState.filterChip = btn.dataset.filter;
-        renderCitasTable();
-      });
-    });
-    // Search + selects → re-render
-    ['citas-search','citas-tipo','citas-terapeuta','citas-desde','citas-hasta'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', renderCitasTable);
-      if (el && el.tagName === 'SELECT') el.addEventListener('change', renderCitasTable);
-    });
-    // Refresh
-    const refresh = document.getElementById('citas-refresh');
-    if (refresh) refresh.addEventListener('click', () => loadCitas());
-    loadCitas();
-  }
-
-  async function loadCitas() {
-    if (citasState.loading) return;
-    citasState.loading = true;
-    const tbody = document.getElementById('citas-tbody');
-    tbody.innerHTML = '<tr><td colspan="9" class="citas-loading"><div class="spinner sm"></div>Cargando citas…</td></tr>';
-    try {
-      const jwt = localStorage.getItem(STORAGE_KEY);
-      const res = await fetch(ADMIN_DATA_ENDPOINT + '?recurso=bookings', {
-        headers: { 'Authorization': 'Bearer ' + jwt }
-      });
-      const data = await res.json();
-      if (!res.ok || data.ok === false || !Array.isArray(data.rows)) throw new Error(data.error || 'bad citas');
-      citasState.all = data.rows;
-      renderCitasTable();
-    } catch (err) {
-      tbody.innerHTML = '<tr><td colspan="9" class="citas-loading" style="color:#942e2e">No se pudo cargar. Intenta refrescar.</td></tr>';
-      console.error('citas', err);
-    } finally {
-      citasState.loading = false;
-    }
-  }
-
-  function renderCitasTable() {
-    const q = (document.getElementById('citas-search').value || '').toLowerCase().trim();
-    const tipo = document.getElementById('citas-tipo').value;
-    const terapeuta = document.getElementById('citas-terapeuta').value;
-    const desde = document.getElementById('citas-desde').value;
-    const hasta = document.getElementById('citas-hasta').value;
-    const chip = citasState.filterChip;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let list = citasState.all.slice();
-    // Chip
-    if (chip === 'futuras') list = list.filter(c => c.fecha && parseDateYMD(c.fecha) >= today && (c.estado || '') !== 'cancelado');
-    else if (chip === 'pool') list = list.filter(c => c.estado_asignacion === 'pool' || (c.slots_summary && c.slots_summary.pool > 0));
-    else if (chip === 'asignadas') list = list.filter(c => c.slots_summary && c.slots_summary.claimed > 0 && (c.estado || '') !== 'cancelado');
-    else if (chip === 'pasadas') list = list.filter(c => c.fecha && parseDateYMD(c.fecha) < today && (c.estado || '') !== 'cancelado');
-    else if (chip === 'canceladas') list = list.filter(c => (c.estado || '') === 'cancelado' || c.cancelado_at);
-    // Selects
-    if (tipo) list = list.filter(c => c.tipo_cita === tipo);
-    if (terapeuta) list = list.filter(c => Array.isArray(c.terapeutas_asignadas) && c.terapeutas_asignadas.some(t => t.id === terapeuta));
-    if (desde) list = list.filter(c => c.fecha && c.fecha >= desde);
-    if (hasta) list = list.filter(c => c.fecha && c.fecha <= hasta);
-    // Search
-    if (q) {
-      list = list.filter(c => {
-        return (c.booking_code || '').toLowerCase().includes(q)
-          || (c.cliente_nombre || '').toLowerCase().includes(q)
-          || (c.cliente_telefono || '').toLowerCase().includes(q)
-          || (c.cliente_email || '').toLowerCase().includes(q);
-      });
-    }
-    document.getElementById('citas-count').textContent = list.length + ' resultado' + (list.length === 1 ? '' : 's');
-
-    const tbody = document.getElementById('citas-tbody');
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="citas-empty">Sin citas con esos filtros.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = list.map(c => renderCitaRow(c)).join('');
-    // Cablar clicks
-    tbody.querySelectorAll('tr[data-cita-id]').forEach(tr => {
-      tr.addEventListener('click', (ev) => {
-        if (ev.target.closest('button')) return; // ignora clicks en botones
-        openCitaFromTable(tr.dataset.citaId);
-      });
-    });
-  }
-
-  function renderCitaRow(c) {
-    const fecha = c.fecha ? formatHumanDate(c.fecha) : '—';
-    const hora = c.hora ? c.hora.slice(0, 5) : '—';
-    const esCancelado = (c.estado || '') === 'cancelado' || !!c.cancelado_at;
-    let estadoClass = '';
-    let estadoLabel = c.estado || '—';
-    if (esCancelado) { estadoClass = 'cancelado'; estadoLabel = 'Cancelada'; }
-    else if (c.slots_summary && c.slots_summary.claimed > 0) { estadoClass = ''; estadoLabel = 'Asignada'; }
-    else if (c.slots_summary && c.slots_summary.pool > 0) { estadoClass = 'pool'; estadoLabel = 'En pool'; }
-    else if (c.fecha) {
-      const d = parseDateYMD(c.fecha);
-      const today = new Date(); today.setHours(0,0,0,0);
-      if (d < today) { estadoClass = 'pasada'; estadoLabel = 'Pasada'; }
-    }
-
-    const tipoClass = c.tipo_cita === 'domicilio' ? 'domicilio' : '';
-    const svcNames = Array.isArray(c.servicios) ? c.servicios.map(s => s.name || s.nombre || s.slug || '—').filter(Boolean) : [];
-    const svcText = svcNames.length ? svcNames.join(', ') : '—';
-    const terap = Array.isArray(c.terapeutas_asignadas) ? c.terapeutas_asignadas.map(t => escapeHtml(t.nombre || '')).filter(Boolean) : [];
-    const terapText = terap.length ? terap.join(', ') : '<span style="color:var(--gray-soft);font-style:italic">— sin asignar —</span>';
-
-    return `<tr data-cita-id="${escapeHtml(c.booking_id)}">
-      <td class="col-codigo">${escapeHtml(c.booking_code || '—')}</td>
-      <td>
-        <div class="col-cliente-name">${escapeHtml(c.cliente_nombre || 'Sin nombre')}</div>
-        <div class="col-cliente-tel">${escapeHtml(c.cliente_telefono || '—')}</div>
-      </td>
-      <td class="col-fecha">
-        ${fecha}
-        <div class="col-fecha-hora">${hora}</div>
-      </td>
-      <td class="col-svc" title="${escapeHtml(svcText)}">${escapeHtml(svcText)}</td>
-      <td><span class="citas-badge citas-badge-tipo ${tipoClass}">${escapeHtml(c.tipo_cita || '—')}</span></td>
-      <td><span class="citas-badge citas-badge-estado ${estadoClass}">${escapeHtml(estadoLabel)}</span></td>
-      <td>${terapText}</td>
-      <td class="col-total">$${Number(c.precio_total || 0).toLocaleString('es-MX')}</td>
-      <td class="col-actions"><button type="button">Abrir</button></td>
-    </tr>`;
-  }
-
-  function openCitaFromTable(bookingId) {
-    // Buscar en calendario data por booking_id → slot
-    const all = [
-      ...((adminState.data && adminState.data.mias) || []),
-      ...((adminState.data && adminState.data.pool) || []),
-    ];
-    const slot = all.find(s => s.booking_id === bookingId);
-    if (slot) {
-      openAdminCitaModal(slot.slot_id || slot.id);
-      return;
-    }
-    // Fallback: usar el registro directo de citasState.all
-    const c = citasState.all.find(x => x.booking_id === bookingId);
-    if (c) {
-      const pseudoSlot = {
-        booking_id: c.booking_id,
-        // sin slot_id real — marca para que el reagendado use scope booking
-        id: c.booking_id,
-        _noSlot: true,
-        cliente: c.cliente_nombre,
-        cliente_telefono: c.cliente_telefono,
-        cliente_email: c.cliente_email,
-        fecha: c.fecha,
-        hora: c.hora,
-        duracion_min: c.duracion_min,
-        precio_total: c.precio_total,
-        costo_traslado: c.traslado,
-        tipo_cita: c.tipo_cita,
-        modalidad: c.modalidad,
-        direccion_libre: c.direccion_libre,
-        zona: [c.zona_municipio, c.zona_colonia].filter(Boolean).join(' · '),
-        servicios: c.servicios,
-        notas_cliente: c.notas_cliente,
-        notas_internas: c.notas_internas,
-        estado_asignacion: c.estado_asignacion,
-        cupos_total: c.slots_summary ? c.slots_summary.total : 1,
-        cupos_tomados: c.slots_summary ? c.slots_summary.claimed : 0,
-      };
-      if (!window._modalExtraRef) window._modalExtraRef = {};
-      const kind = (c.slots_summary && c.slots_summary.claimed > 0) ? 'mine' : 'pool';
-      window._modalExtraRef[c.booking_id] = { kind, booking: pseudoSlot };
-      openCitaModal(c.booking_id, kind, { adminMode: true });
-    } else {
-      showToast('No se encontró detalle de la cita.', 'warn');
-    }
-  }
 
   function showAdminPanel(payload) {
     document.getElementById('view-login').style.display = 'none';
@@ -4920,50 +4591,98 @@
     } catch (_) {}
   }
 
-  function renderAdminCalendars() {
-    const data = adminState.data;
-    if (!data) return;
-    const grid = document.getElementById('admin-grid');
-    const rangeEl = document.getElementById('admin-cal-range');
-    if (rangeEl) rangeEl.textContent = fmtRange(adminState.weekStart);
+  // ── Estado de pago en el modal de cita (masajista y admin) ──
+  const pagoState = { bookingId: null, restante: 0, open: false };
 
-    const weekStart = adminState.weekStart;
-    const weekEnd = addDays(weekStart, 7);
-    const terapeutas = data.terapeutas || [];
-    const allMias = data.mias || [];
-    const pool = data.pool || [];
-
-    // Indexar mias por terapeuta_id
-    const miasByTerapeuta = {};
-    terapeutas.forEach(t => miasByTerapeuta[t.id] = []);
-    allMias.forEach(m => {
-      if (!m.terapeuta_id) return;
-      if (!miasByTerapeuta[m.terapeuta_id]) miasByTerapeuta[m.terapeuta_id] = [];
-      miasByTerapeuta[m.terapeuta_id].push(m);
-    });
-
-    // Filtrar pool/mias por semana visible
-    function inWeek(slot) {
-      if (!slot.fecha) return false;
-      const d = parseDateYMD(slot.fecha);
-      return d >= weekStart && d < weekEnd;
+  function renderPagoSection(b, totalFinal) {
+    const wrap = document.getElementById('cita-pago-estado');
+    const form = document.getElementById('cita-pago-form');
+    const badge = document.getElementById('cita-pago-badge');
+    const det = document.getElementById('cita-pago-detalle');
+    const btn = document.getElementById('cita-pago-btn');
+    if (!wrap) return;
+    form.style.display = 'none';
+    pagoState.open = false;
+    const estado = b.estado_pago || null;
+    if (!estado || !b.booking_id) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    pagoState.bookingId = b.booking_id;
+    const pagado = Number(b.total_pagado || 0);
+    pagoState.restante = Math.max(0, totalFinal - pagado);
+    if (estado === 'pagado') {
+      badge.innerHTML = '<span class="pago-badge pagado">Pagado</span>';
+      det.textContent = '';
+      btn.style.display = 'none';
+    } else if (estado === 'parcial') {
+      badge.innerHTML = '<span class="pago-badge parcial">Parcial</span>';
+      det.textContent = '$' + pagado.toLocaleString('es-MX') + ' de $' + totalFinal.toLocaleString('es-MX');
+      btn.style.display = '';
+    } else {
+      badge.innerHTML = '<span class="pago-badge pendiente">Pendiente</span>';
+      det.textContent = '';
+      btn.style.display = '';
     }
-    const poolWeek = pool.filter(inWeek);
-
-    // Construir cards
-    const html = [];
-    // Card del pool (ancho completo)
-    html.push(renderPoolCard(poolWeek));
-    // Una card por terapeuta
-    terapeutas.forEach(t => {
-      const miasT = (miasByTerapeuta[t.id] || []).filter(inWeek);
-      html.push(renderTherapistCard(t, miasT, weekStart));
-    });
-    grid.innerHTML = html.join('');
-    populateViewAsDropdown();
-    populateTerapeutaDropdowns();
   }
 
+  function toggleRegistrarPago() {
+    const form = document.getElementById('cita-pago-form');
+    pagoState.open = !pagoState.open;
+    form.style.display = pagoState.open ? 'grid' : 'none';
+    if (pagoState.open) {
+      const monto = document.getElementById('cita-pago-monto');
+      monto.value = pagoState.restante > 0 ? pagoState.restante : '';
+      document.getElementById('cita-pago-msg').textContent = '';
+      setTimeout(() => monto.focus(), 30);
+    }
+  }
+  window.toggleRegistrarPago = toggleRegistrarPago;
+
+  async function submitRegistrarPago() {
+    const monto = Number(document.getElementById('cita-pago-monto').value);
+    const metodo = document.getElementById('cita-pago-metodo').value;
+    const msg = document.getElementById('cita-pago-msg');
+    const btn = document.getElementById('cita-pago-submit');
+    if (!monto || monto <= 0) { msg.textContent = 'Escribe un monto válido.'; return; }
+    if (!pagoState.bookingId) return;
+    btn.disabled = true; btn.textContent = 'Guardando…'; msg.textContent = '';
+    try {
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(PAGO_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ bookingId: pagoState.bookingId, monto, metodo })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.detail || 'No se pudo registrar el pago.');
+      // Actualizar badge sin recargar
+      const badge = document.getElementById('cita-pago-badge');
+      const det = document.getElementById('cita-pago-detalle');
+      const btnReg = document.getElementById('cita-pago-btn');
+      const totalPagado = Number(data.total_pagado || 0);
+      if (data.estado_pago === 'pagado') {
+        badge.innerHTML = '<span class="pago-badge pagado">Pagado</span>';
+        det.textContent = '';
+        btnReg.style.display = 'none';
+      } else {
+        badge.innerHTML = '<span class="pago-badge parcial">Parcial</span>';
+        det.textContent = '$' + totalPagado.toLocaleString('es-MX') + ' registrados';
+        pagoState.restante = Math.max(0, pagoState.restante - monto);
+      }
+      document.getElementById('cita-pago-form').style.display = 'none';
+      pagoState.open = false;
+      showToast('Pago registrado.', 'ok');
+      // Refrescar datos de fondo (admin o masajista)
+      if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
+      else if (typeof fetchCitas === 'function') { try { fetchCitas({ silent: true }); } catch (_) {} }
+    } catch (err) {
+      msg.textContent = err.message || 'Error al registrar.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Guardar';
+    }
+  }
+  window.submitRegistrarPago = submitRegistrarPago;
+
+  // ── Calendario unificado: todas las masajistas + pool en una sola vista ──
   function _avatarInitials(nombre) {
     const parts = (nombre || '').split(/\s+/).filter(Boolean);
     if (!parts.length) return '?';
@@ -4971,89 +4690,364 @@
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  function renderPoolCard(slots) {
-    const count = slots.length;
-    const inner = count === 0
-      ? '<div class="admin-empty" style="padding:20px 10px;font-size:12.5px;">Sin citas en pool esta semana.</div>'
-      : slots.slice(0, 30).map(s => renderAdminChip(s, 'pool')).join('');
-    return '<div class="therapist-card pool-card">'
-      + '<div class="therapist-card-header">'
-      +   '<div class="therapist-avatar">P</div>'
-      +   '<div class="therapist-card-name">Pool de citas disponibles</div>'
-      +   '<div class="therapist-card-count">' + count + ' esta semana</div>'
-      +   '<button type="button" class="therapist-card-toggle" title="Colapsar" onclick="toggleTherapistCard(this)">▾</button>'
-      + '</div>'
-      + '<div class="pool-card-list">' + inner + '</div>'
-      + '</div>';
+  const UCAL_COLORS = ['#7d7c3f', '#a3542c', '#3f6e7d', '#7d3f6e', '#2c7d54', '#8a6d1f'];
+  const UCAL_POOL_COLOR = '#9a8a75';
+  const UCAL_START_MIN = 9 * 60;   // 9:00
+  const UCAL_END_MIN = 19 * 60;    // 19:00
+  const UCAL_PX_PER_HOUR = 66;
+  const ucalMobileQuery = window.matchMedia('(max-width: 768px)');
+  if (ucalMobileQuery.addEventListener) {
+    ucalMobileQuery.addEventListener('change', () => { if (adminState.data) renderAdminCalendars(); });
   }
 
-  function renderTherapistCard(t, mias, weekStart) {
-    const count = mias.length;
-    const days = [];
+  function ucalColorFor(terapeutaId) {
+    if (!terapeutaId) return UCAL_POOL_COLOR;
+    const ts = (adminState.data && adminState.data.terapeutas) || [];
+    const idx = ts.findIndex(t => t.id === terapeutaId);
+    return UCAL_COLORS[(idx >= 0 ? idx : 0) % UCAL_COLORS.length];
+  }
+
+  function ucalHexToRgba(hex, alpha) {
+    const n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+  }
+
+  function ucalMinutes(hora) {
+    if (!hora) return null;
+    const parts = String(hora).split(':');
+    const h = parseInt(parts[0], 10), m = parseInt(parts[1], 10) || 0;
+    if (isNaN(h)) return null;
+    return h * 60 + m;
+  }
+
+  function ucalBuildEvents(weekStart) {
+    const data = adminState.data;
+    const weekEnd = addDays(weekStart, 7);
+    const filter = adminState.calFilter; // Set de terapeuta_ids + 'pool' visibles (null = todos)
+    const evs = [];
+    function push(slot, kind) {
+      if (!slot.fecha) return;
+      const d = parseDateYMD(slot.fecha);
+      if (!d || d < weekStart || d >= weekEnd) return;
+      const key = kind === 'pool' ? 'pool' : (slot.terapeuta_id || 'pool');
+      if (filter && !filter.has(key)) return;
+      const startMin = ucalMinutes(slot.hora);
+      evs.push({
+        slotId: slot.slot_id || slot.id,
+        kind,
+        terapeutaId: kind === 'pool' ? null : slot.terapeuta_id,
+        dayIdx: Math.round((d - weekStart) / 86400000),
+        startMin: startMin == null ? UCAL_START_MIN : startMin,
+        durMin: Math.max(30, parseInt(slot.duracion_min, 10) || 60),
+        slot,
+      });
+    }
+    (data.mias || []).forEach(s => push(s, 'mine'));
+    (data.pool || []).forEach(s => push(s, 'pool'));
+    return evs;
+  }
+
+  // Collision groups (patrón FullCalendar): eventos que se tocan transitivamente
+  // comparten grupo; dentro del grupo cada uno toma la primera columna libre.
+  function ucalLayoutDay(events) {
+    const sorted = events.slice().sort((a, b) => a.startMin - b.startMin || b.durMin - a.durMin);
+    const groups = [];
+    let current = null, currentEnd = -1;
+    sorted.forEach(ev => {
+      const end = ev.startMin + ev.durMin;
+      if (!current || ev.startMin >= currentEnd) {
+        current = []; groups.push(current); currentEnd = end;
+      } else {
+        currentEnd = Math.max(currentEnd, end);
+      }
+      current.push(ev);
+    });
+    groups.forEach(group => {
+      const colEnds = [];
+      group.forEach(ev => {
+        let col = colEnds.findIndex(e => e <= ev.startMin);
+        if (col === -1) { col = colEnds.length; colEnds.push(0); }
+        colEnds[col] = ev.startMin + ev.durMin;
+        ev.col = col;
+      });
+      group.forEach(ev => { ev.cols = colEnds.length; ev.group = group; });
+    });
+    return sorted;
+  }
+
+  function renderAdminCalendars() {
+    const data = adminState.data;
+    if (!data) return;
+    const grid = document.getElementById('admin-grid');
+    const rangeEl = document.getElementById('admin-cal-range');
+    if (rangeEl) rangeEl.textContent = fmtRange(adminState.weekStart);
+    closeUcalPopover();
+
+    const weekStart = adminState.weekStart;
+    const terapeutas = data.terapeutas || [];
+    if (!adminState.calFilter) {
+      adminState.calFilter = new Set(terapeutas.map(t => t.id).concat(['pool']));
+    } else {
+      terapeutas.forEach(t => { if (!adminState._calFilterTouched) adminState.calFilter.add(t.id); });
+    }
+
+    const events = ucalBuildEvents(weekStart);
+    const legend = renderUcalLegend(terapeutas);
+    const body = ucalMobileQuery.matches
+      ? renderUcalAgenda(events, weekStart)
+      : renderUcalWeek(events, weekStart);
+    grid.innerHTML = legend + body;
+    populateViewAsDropdown();
+    populateTerapeutaDropdowns();
+  }
+
+  function renderUcalLegend(terapeutas) {
+    const filter = adminState.calFilter;
+    const chips = terapeutas.map(t => {
+      const color = ucalColorFor(t.id);
+      const off = filter && !filter.has(t.id) ? ' off' : '';
+      return '<button type="button" class="ucal-legend-chip' + off + '" onclick="ucalToggleFilter(\'' + t.id + '\')">'
+        + '<span class="dot" style="background:' + color + '"></span>' + escapeHtml(t.nombre || '—') + '</button>';
+    });
+    const poolOff = filter && !filter.has('pool') ? ' off' : '';
+    chips.push('<button type="button" class="ucal-legend-chip' + poolOff + '" onclick="ucalToggleFilter(\'pool\')">'
+      + '<span class="dot" style="background:' + UCAL_POOL_COLOR + ';border:1.5px dashed #6d5c48;box-sizing:border-box;"></span>Pool (sin asignar)</button>');
+    return '<div class="ucal-legend">' + chips.join('') + '</div>';
+  }
+
+  function ucalToggleFilter(key) {
+    if (!adminState.calFilter) return;
+    adminState._calFilterTouched = true;
+    if (adminState.calFilter.has(key)) adminState.calFilter.delete(key);
+    else adminState.calFilter.add(key);
+    renderAdminCalendars();
+  }
+  window.ucalToggleFilter = ucalToggleFilter;
+
+  function renderUcalWeek(events, weekStart) {
+    const totalMin = UCAL_END_MIN - UCAL_START_MIN;
+    const heightPx = (totalMin / 60) * UCAL_PX_PER_HOUR;
+    const today = new Date();
+    const dias = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+
+    const heads = ['<div></div>'];
     for (let i = 0; i < 7; i++) {
       const d = addDays(weekStart, i);
-      days.push(d);
+      const cls = isSameDay(d, today) ? ' is-today' : '';
+      heads.push('<div class="ucal-day-head' + cls + '">' + dias[i] + '<span class="num">' + d.getDate() + '</span></div>');
     }
+
+    let axis = '<div class="ucal-axis" style="height:' + heightPx + 'px">';
+    for (let h = UCAL_START_MIN / 60; h <= UCAL_END_MIN / 60; h++) {
+      const top = (h * 60 - UCAL_START_MIN) / totalMin * 100;
+      axis += '<span style="top:' + top + '%">' + h + ':00</span>';
+    }
+    axis += '</div>';
+
+    const cols = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i);
+      const dayEvents = ucalLayoutDay(events.filter(e => e.dayIdx === i));
+      const cls = isSameDay(d, today) ? ' is-today' : '';
+      const MAXCOLS = 3;
+      const seenGroups = new Set();
+      const chips = [];
+      dayEvents.forEach(ev => {
+        const clampStart = Math.max(ev.startMin, UCAL_START_MIN);
+        const clampEnd = Math.min(ev.startMin + ev.durMin, UCAL_END_MIN);
+        if (clampEnd <= clampStart) return;
+        const top = (clampStart - UCAL_START_MIN) / totalMin * 100;
+        const height = (clampEnd - clampStart) / totalMin * 100;
+        const totCols = Math.min(ev.cols, MAXCOLS);
+        if (ev.cols > MAXCOLS) {
+          if (ev.col >= MAXCOLS - 1) {
+            // Cluster "+N": un solo chip por grupo en la última columna
+            if (!seenGroups.has(ev.group)) {
+              seenGroups.add(ev.group);
+              const hidden = ev.group.filter(x => x.col >= MAXCOLS - 1);
+              const gStart = Math.max(Math.min.apply(null, hidden.map(x => x.startMin)), UCAL_START_MIN);
+              const gEnd = Math.min(Math.max.apply(null, hidden.map(x => x.startMin + x.durMin)), UCAL_END_MIN);
+              const gTop = (gStart - UCAL_START_MIN) / totalMin * 100;
+              const gH = (gEnd - gStart) / totalMin * 100;
+              const ids = hidden.map(x => x.slotId).join(',');
+              chips.push('<div class="ucal-more" style="top:' + gTop + '%;height:' + gH + '%;left:' + ((MAXCOLS - 1) / MAXCOLS * 100) + '%;width:' + (100 / MAXCOLS) + '%" onclick="openUcalMore(event,\'' + ids + '\')">+' + hidden.length + '</div>');
+            }
+            return;
+          }
+        }
+        const width = 100 / totCols;
+        const left = ev.col * width;
+        chips.push(renderUcalChip(ev, top, height, left, width));
+      });
+      cols.push('<div class="ucal-col' + cls + '" style="height:' + heightPx + 'px">' + chips.join('') + '</div>');
+    }
+
+    return '<div class="ucal-card">'
+      + '<div class="ucal-head-row">' + heads.join('') + '</div>'
+      + '<div class="ucal-body">' + axis + cols.join('') + '</div>'
+      + '</div>';
+  }
+
+  function renderUcalChip(ev, top, height, left, width) {
+    const color = ucalColorFor(ev.terapeutaId);
+    const bg = ucalHexToRgba(color, ev.kind === 'pool' ? 0.10 : 0.14);
+    const s = ev.slot;
+    const pagoDot = (s.estado_pago && s.estado_pago !== 'pagado') || (!s.estado_pago && false)
+      ? '<span class="ev-pago-dot" title="Pago pendiente"></span>' : '';
+    const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
+    const showSvc = height > 7; // solo si el chip tiene altura suficiente
+    return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
+      + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
+      + pagoDot
+      + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
+      + '<div class="ev-cliente">' + escapeHtml(s.cliente || '—') + '</div>'
+      + (showSvc ? '<div class="ev-svc">' + escapeHtml(s.servicios_label || '') + '</div>' : '')
+      + '</div>';
+  }
+
+  function renderUcalAgenda(events, weekStart) {
     const today = new Date();
-    const grid = days.map(d => {
-      const dayItems = mias.filter(m => {
-        const md = parseDateYMD(m.fecha);
-        return md && isSameDay(md, d);
-      }).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
-      const dayHead = '<div class="cal-day-head"><span class="cal-day-num">' + d.getDate() + '</span> <span class="cal-day-name">' + ['lun','mar','mié','jue','vie','sáb','dom'][((d.getDay() + 6) % 7)] + '</span></div>';
-      const itemsHtml = dayItems.length
-        ? '<div class="cal-day-list">' + dayItems.map(s => renderAdminChip(s, 'mine')).join('') + '</div>'
-        : '';
-      const classes = ['cal-day'];
-      if (isSameDay(d, today)) classes.push('is-today');
-      else if (d < today && !isSameDay(d, today)) classes.push('is-past');
-      return '<div class="' + classes.join(' ') + '">' + dayHead + itemsHtml + '</div>';
+    const dias = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+    if (adminState.mobileDayIdx == null) {
+      let idx = 0;
+      for (let i = 0; i < 7; i++) { if (isSameDay(addDays(weekStart, i), today)) { idx = i; break; } }
+      adminState.mobileDayIdx = idx;
+    }
+    const active = adminState.mobileDayIdx;
+
+    const strip = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i);
+      const cnt = events.filter(e => e.dayIdx === i).length;
+      strip.push('<button type="button" class="' + (i === active ? 'active' : '') + '" onclick="ucalSelectDay(' + i + ')">'
+        + dias[i] + '<span class="num">' + d.getDate() + '</span>'
+        + (cnt ? '<span class="cnt">' + cnt + '</span>' : '')
+        + '</button>');
+    }
+
+    const dayEvents = events.filter(e => e.dayIdx === active)
+      .sort((a, b) => a.startMin - b.startMin);
+    const rows = dayEvents.length
+      ? dayEvents.map(ev => {
+          const s = ev.slot;
+          const color = ucalColorFor(ev.terapeutaId);
+          const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
+          return '<div class="ucal-agenda-row' + poolCls + '" style="border-left-color:' + color + '" onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
+            + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
+            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + '</div>'
+            + '<div class="svc">' + escapeHtml(s.servicios_label || '') + '</div></div>'
+            + ucalPagoBadge(s)
+            + '</div>';
+        }).join('')
+      : '<div class="ucal-agenda-empty">Sin citas este día.</div>';
+
+    return '<div class="ucal-daystrip">' + strip.join('') + '</div>'
+      + '<div class="ucal-agenda">' + rows + '</div>';
+  }
+
+  function ucalSelectDay(i) {
+    adminState.mobileDayIdx = i;
+    renderAdminCalendars();
+  }
+  window.ucalSelectDay = ucalSelectDay;
+
+  function ucalPagoBadge(slot) {
+    const e = slot.estado_pago;
+    if (!e) return '';
+    if (e === 'pagado') return '<span class="pago-badge pagado">Pagado</span>';
+    if (e === 'parcial') return '<span class="pago-badge parcial">Parcial</span>';
+    return '<span class="pago-badge pendiente">Pendiente</span>';
+  }
+
+  // ── Popover de detalle ──
+  let _ucalPopoverEl = null;
+
+  function closeUcalPopover() {
+    if (_ucalPopoverEl) { _ucalPopoverEl.remove(); _ucalPopoverEl = null; }
+    document.removeEventListener('click', _ucalOutsideClose, true);
+    document.removeEventListener('keydown', _ucalEscClose, true);
+  }
+  function _ucalOutsideClose(e) {
+    if (_ucalPopoverEl && !_ucalPopoverEl.contains(e.target)) closeUcalPopover();
+  }
+  function _ucalEscClose(e) { if (e.key === 'Escape') closeUcalPopover(); }
+
+  function _ucalShowPopover(html, anchorEvent) {
+    closeUcalPopover();
+    const pop = document.createElement('div');
+    pop.className = 'ucal-popover';
+    pop.innerHTML = html;
+    document.body.appendChild(pop);
+    _ucalPopoverEl = pop;
+    const isMobile = ucalMobileQuery.matches;
+    if (isMobile) {
+      pop.style.left = '12px'; pop.style.right = '12px'; pop.style.bottom = '14px';
+      pop.style.width = 'auto';
+    } else {
+      const r = anchorEvent.currentTarget ? anchorEvent.currentTarget.getBoundingClientRect() : { right: anchorEvent.clientX, top: anchorEvent.clientY, left: anchorEvent.clientX, bottom: anchorEvent.clientY };
+      let x = r.right + 8, y = r.top;
+      const pw = 300, ph = pop.offsetHeight || 220;
+      if (x + pw > window.innerWidth - 10) x = Math.max(10, r.left - pw - 8);
+      if (y + ph > window.innerHeight - 10) y = Math.max(10, window.innerHeight - ph - 12);
+      pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    }
+    setTimeout(() => {
+      document.addEventListener('click', _ucalOutsideClose, true);
+      document.addEventListener('keydown', _ucalEscClose, true);
+    }, 0);
+  }
+
+  function openUcalPopover(ev, slotId) {
+    ev.stopPropagation();
+    const entry = adminState.bookingsById[slotId];
+    if (!entry) return;
+    const s = entry.booking;
+    const isPool = entry.kind === 'pool';
+    const color = ucalColorFor(isPool ? null : (s.terapeuta_id || entry.terapeuta_id));
+    const ts = (adminState.data && adminState.data.terapeutas) || [];
+    const t = ts.find(x => x.id === (s.terapeuta_id || entry.terapeuta_id));
+    const masajista = isPool ? 'Pool — disponible' : ((t && t.nombre) || '—');
+    const sexoInfo = sexoBadgeParts(s.preferencia_sexo);
+    const tipo = s.tipo_cita === 'domicilio' ? 'Domicilio' : 'Sucursal';
+    const dur = s.duracion_min ? (s.duracion_min + ' min') : '';
+    const rows = [
+      '<div class="row"><span class="lbl">Hora</span><b>' + escapeHtml(fmtHora(s.hora)) + '</b> ' + dur + '</div>',
+      '<div class="row"><span class="lbl">Masajista</span>' + escapeHtml(masajista) + '</div>',
+      '<div class="row"><span class="lbl">Servicios</span>' + escapeHtml(s.servicios_label || '—') + '</div>',
+      '<div class="row"><span class="lbl">Lugar</span>' + tipo + '</div>',
+    ];
+    if (sexoInfo.letra) rows.push('<div class="row"><span class="lbl">Pidió</span>' + escapeHtml(sexoInfo.completo) + '</div>');
+    if (s.estado_pago) rows.push('<div class="row"><span class="lbl">Pago</span>' + ucalPagoBadge(s) + '</div>');
+    const html = '<h4><span class="dot" style="background:' + color + '"></span>' + escapeHtml(s.cliente || '—') + '</h4>'
+      + rows.join('')
+      + '<div class="pop-actions"><button type="button" onclick="closeUcalPopoverAndOpen(\'' + slotId + '\')">Ver completo</button></div>';
+    _ucalShowPopover(html, ev);
+  }
+  window.openUcalPopover = openUcalPopover;
+
+  function closeUcalPopoverAndOpen(slotId) {
+    closeUcalPopover();
+    openAdminCitaModal(slotId);
+  }
+  window.closeUcalPopoverAndOpen = closeUcalPopoverAndOpen;
+
+  function openUcalMore(ev, idsCsv) {
+    ev.stopPropagation();
+    const ids = idsCsv.split(',');
+    const rows = ids.map(id => {
+      const entry = adminState.bookingsById[id];
+      if (!entry) return '';
+      const s = entry.booking;
+      const color = ucalColorFor(entry.kind === 'pool' ? null : (s.terapeuta_id || entry.terapeuta_id));
+      return '<div class="mini-row" onclick="closeUcalPopoverAndOpen(\'' + id + '\')">'
+        + '<span class="dot" style="background:' + color + '"></span>'
+        + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
+        + '<span class="nom">' + escapeHtml(s.cliente || '—') + ' · ' + escapeHtml(s.servicios_label || '') + '</span>'
+        + '</div>';
     }).join('');
-
-    return '<div class="therapist-card">'
-      + '<div class="therapist-card-header">'
-      +   '<div class="therapist-avatar">' + _avatarInitials(t.nombre) + '</div>'
-      +   '<div class="therapist-card-name">' + escapeHtml(t.nombre || '—') + '</div>'
-      +   '<div class="therapist-card-count">' + count + ' citas</div>'
-      +   '<button type="button" class="therapist-card-toggle" title="Colapsar" onclick="toggleTherapistCard(this)">▾</button>'
-      + '</div>'
-      + '<div class="cal-week-grid cal-week-grid-mini">' + grid + '</div>'
-      + '</div>';
+    _ucalShowPopover('<h4>Citas en este horario</h4>' + rows, ev);
   }
-
-  function toggleTherapistCard(btn) {
-    const card = btn.closest('.therapist-card');
-    if (!card) return;
-    card.classList.toggle('is-collapsed');
-    btn.title = card.classList.contains('is-collapsed') ? 'Expandir' : 'Colapsar';
-  }
-  window.toggleTherapistCard = toggleTherapistCard;
-
-  function renderAdminChip(slot, kind) {
-    const isMine = kind === 'mine';
-    const cls = isMine ? 'cal-chip cal-chip-mine' : 'cal-chip cal-chip-pool';
-    const stateLabel = isMine ? 'Tomada' : 'Disponible';
-    const stateStyle = isMine
-      ? 'background:rgba(255,255,255,0.22);color:#fff;'
-      : 'background:rgba(154,152,84,0.15);color:var(--olive-dark);';
-    const tipoTag = slot.tipo_cita === 'domicilio'
-      ? '<span class="chip-pill chip-pill-tipo-domicilio">Dom</span>'
-      : slot.tipo_cita === 'sucursal'
-      ? '<span class="chip-pill chip-pill-tipo-sucursal">Suc</span>'
-      : '';
-    const sexoInfo = sexoBadgeParts(slot.preferencia_sexo);
-    const sexoTag = sexoInfo.letra
-      ? '<span class="chip-sexo chip-sexo-' + sexoInfo.cls + '" title="Cliente pide: ' + escapeHtml(sexoInfo.completo) + '">' + sexoInfo.letra + '</span>'
-      : '';
-    return '<div class="' + cls + '" data-slot-id="' + (slot.slot_id || slot.id) + '" data-kind="' + kind + '" onclick="openAdminCitaModal(\'' + (slot.slot_id || slot.id) + '\')">'
-      + '<span class="cal-chip-state" style="' + stateStyle + '">' + stateLabel + '</span>'
-      + sexoTag
-      + '<div class="cal-chip-time">' + escapeHtml(fmtHora(slot.hora)) + '</div>'
-      + (tipoTag ? '<div class="cal-chip-meta">' + tipoTag + '</div>' : '')
-      + '<div class="cal-chip-cliente">' + escapeHtml(slot.cliente || '—') + '</div>'
-      + '<div class="cal-chip-svc">' + escapeHtml(slot.servicios_label || '') + '</div>'
-      + '</div>';
-  }
+  window.openUcalMore = openUcalMore;
 
   function openAdminCitaModal(slotId) {
     const entry = adminState.bookingsById[slotId];
@@ -5080,7 +5074,6 @@
       if (current && ts.find(t => t.id === current)) sel.value = current;
     };
     fill('stats-terapeuta', 'Todas');
-    fill('citas-terapeuta', 'Todas');
     fill('cc-asignar', 'Dejar en el pool');
   }
 
@@ -5224,6 +5217,7 @@
   const CLAIM_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-claim';
   const RELEASE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-release';
   const SLOT_STATUS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-slot-status';
+  const PAGO_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-pago';
   const RELEASE_MIN_HOURS = 2;   // mismo valor que la RPC
 
   const calState = {
@@ -5813,6 +5807,7 @@
     }
     const totalFinal = (Number(precioSvc) || 0) + (Number(costoTraslado) || 0);
     document.getElementById('cita-precio-total').textContent = totalFinal > 0 ? '$' + totalFinal.toLocaleString('es-MX') : '—';
+    renderPagoSection(b, totalFinal);
 
     // ─── Sección 4: Lugar ───
     document.getElementById('cita-modalidad').textContent = modTxt || 'Individual';
