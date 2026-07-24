@@ -1268,16 +1268,29 @@
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1.4fr 1fr;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.4fr) minmax(0, 1fr);
     grid-template-areas:
-      "tendencia tendencia"
-      "mezcla servicios";
+      "tendencia proyeccion"
+      "abajo     proyeccion";
     gap: 12px;
   }
+  .dash-area-abajo {
+    grid-area: abajo;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    min-height: 0;
+  }
+  .dash-area-abajo > .dash-card { min-height: 0; }
   .dash-area-tendencia  { grid-area: tendencia; }
-  .dash-area-mezcla     { grid-area: mezcla; }
-  .dash-area-servicios  { grid-area: servicios; }
+  .dash-area-proyeccion { grid-area: proyeccion; overflow: hidden; }
+  .dash-proyeccion-body {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    margin: 0;
+  }
+  .dash-area-proyeccion .stats-comp-table {
+    width: 100%; border-collapse: collapse; font: 12.5px 'Inter', sans-serif;
+  }
   .dash-card {
     background: #fff; border-radius: 12px;
     padding: 12px 16px 14px;
@@ -1322,14 +1335,20 @@
   @media (max-width: 1100px) {
     .dash-wrap { height: auto; }
     .dash-kpis { grid-template-columns: repeat(3, 1fr); }
+    .dash-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        "tendencia"
+        "abajo"
+        "proyeccion";
+    }
     .dash-chart-wrap { min-height: 220px; }
+    .dash-area-proyeccion { min-height: 380px; }
   }
   @media (max-width: 640px) {
     .dash-kpis { grid-template-columns: repeat(2, 1fr); }
-    .dash-grid {
-      grid-template-columns: 1fr;
-      grid-template-areas: "tendencia" "mezcla" "servicios";
-    }
+    .dash-area-abajo { grid-template-columns: 1fr; }
   }
 
   /* ── Calendario unificado (admin) ── */
@@ -2154,7 +2173,6 @@
   </div>
   <nav class="admin-tabs" id="admin-tabs" role="tablist">
     <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
-    <button type="button" class="admin-tab" data-tab="proyeccion"  role="tab">Proyección</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
   </nav>
 
@@ -2209,33 +2227,25 @@
           </div>
           <div class="dash-chart-wrap"><canvas id="chart-tendencia"></canvas></div>
         </div>
-        <div class="dash-card dash-area-mezcla">
+        <div class="dash-area-abajo"><div class="dash-card dash-area-mezcla">
           <div class="dash-card-title">Dónde se atiende</div>
           <div class="dash-chart-wrap dash-chart-donut"><canvas id="chart-tipo"></canvas></div>
         </div>
         <div class="dash-card dash-area-servicios">
           <div class="dash-card-title">Qué se vende más <small>top 6 servicios</small></div>
           <div class="dash-chart-wrap"><canvas id="chart-servicios"></canvas></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab: Proyección (histórico + predicción anual) -->
-  <div class="admin-tab-panel" id="tab-proyeccion" style="display:none">
-    <div class="panel-wrap panel-wrap-cal">
-      <div class="panel-header cal-header">
-        <h1>Proyección <em>anual</em></h1>
-        <p class="cal-subtitle">Ventas del año anterior contra el año en curso, con predicción de los meses que faltan.</p>
-      </div>
-
-      <div class="stats-comparativa" id="stats-prediccion" style="max-width:720px;">
-        <div class="stats-comp-table-wrap">
-          <table class="stats-comp-table" id="stats-comp-table">
-            <thead><tr><th>Mes</th></tr></thead>
-            <tbody></tbody>
-            <tfoot><tr class="stats-comp-totales"><th>Totales</th></tr></tfoot>
-          </table>
+        </div></div>
+        <div class="dash-card dash-area-proyeccion">
+          <div class="dash-card-title">Proyección anual <small>vs. año anterior</small></div>
+          <div class="stats-comparativa dash-proyeccion-body" id="stats-prediccion">
+            <div class="stats-comp-table-wrap">
+              <table class="stats-comp-table" id="stats-comp-table">
+                <thead><tr><th>Mes</th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr class="stats-comp-totales"><th>Totales</th></tr></tfoot>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -2560,7 +2570,6 @@
         // Ya se inicializa en showAdminPanel, no re-hacer nada
       } else if (name === 'resumen') {
         initStatsTab();
-      } else if (name === 'proyeccion') {
         initComparativa();
       }
     }
