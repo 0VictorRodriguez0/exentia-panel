@@ -1136,22 +1136,7 @@
     font: 11.5px 'Inter', sans-serif;
     color: var(--gray-soft);
   }
-  .comp-badge-pred {
-    display: inline-block; margin-left: 8px;
-    padding: 2px 7px; border-radius: 999px;
-    background: rgba(233,30,99,0.12); color: #b91d67;
-    font: 600 9.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.4px;
-    vertical-align: middle;
-  }
-  .comp-badge-real {
-    display: inline-block; margin-left: 8px;
-    padding: 2px 7px; border-radius: 999px;
-    background: rgba(37,99,235,0.12); color: #1e4bc9;
-    font: 600 9.5px 'Lato', sans-serif;
-    text-transform: uppercase; letter-spacing: 0.4px;
-    vertical-align: middle;
-  }
+  .comp-monto-pred { font-style: italic; color: #9a8d75 !important; }
 
   /* Modal editar histórico */
   .hist-grid-item {
@@ -1285,11 +1270,39 @@
   .dash-area-proyeccion { grid-area: proyeccion; overflow: hidden; }
   .dash-proyeccion-body {
     flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column;
     overflow-y: auto;
     margin: 0;
   }
+  .dash-proyeccion-body .stats-comp-table-wrap {
+    flex: 1 1 auto; min-height: 0;
+    display: flex;
+    overflow-x: hidden;
+    border: none; border-radius: 0;
+  }
   .dash-area-proyeccion .stats-comp-table {
-    width: 100%; border-collapse: collapse; font: 12.5px 'Inter', sans-serif;
+    width: 100%; height: 100%;
+    border-collapse: collapse;
+    font: 13px 'Inter', sans-serif;
+    min-width: 0;
+  }
+  .dash-area-proyeccion .stats-comp-table th {
+    padding: 7px 10px;
+    font-size: 10.5px;
+  }
+  .dash-area-proyeccion .stats-comp-table td {
+    padding: 4px 10px;
+  }
+  .dash-area-proyeccion .stats-comp-totales th,
+  .dash-area-proyeccion .stats-comp-totales td {
+    padding: 8px 10px;
+    font-size: 15px;
+  }
+  .dash-proyeccion-note {
+    flex: 0 0 auto;
+    font: italic 11px 'Inter', sans-serif;
+    color: var(--gray-soft);
+    padding: 6px 2px 0;
   }
   .dash-card {
     background: #fff; border-radius: 12px;
@@ -1343,18 +1356,46 @@
         "abajo"
         "proyeccion";
     }
-    .dash-chart-wrap { min-height: 220px; }
-    .dash-area-proyeccion { min-height: 380px; }
+    .dash-chart-wrap { min-height: 240px; }
+    /* En columna la tabla no necesita estirarse: altura natural */
+    .dash-area-proyeccion .stats-comp-table { height: auto; }
   }
   @media (max-width: 640px) {
-    .dash-kpis { grid-template-columns: repeat(2, 1fr); }
+    .dash-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .dash-area-abajo { grid-template-columns: 1fr; }
+    .dash-topbar { flex-direction: column; align-items: stretch; gap: 10px; }
+    /* Filtros en una tira deslizable: nada se encima ni se corta */
+    .dash-filters {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .dash-filters::-webkit-scrollbar { display: none; }
+    .dash-filters input[type="date"],
+    .dash-filters select { flex: 0 0 auto; }
+    .dash-presets { flex: 0 0 auto; flex-wrap: nowrap; }
+    .dash-chart-wrap { min-height: 220px; }
+    .dash-card { padding: 10px 12px 12px; }
+    .stats-kpi-value { font-size: 20px; }
   }
 
   /* ── Calendario unificado (admin) ── */
   .ucal-legend {
     display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
     margin-bottom: 12px;
+  }
+  @media (max-width: 600px) {
+    .ucal-legend {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+    .ucal-legend::-webkit-scrollbar { display: none; }
+    .ucal-legend-chip { flex: 0 0 auto; }
   }
   .ucal-legend-chip {
     display: inline-flex; align-items: center; gap: 7px;
@@ -1575,6 +1616,9 @@
   .ucal-daystrip {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
     margin-bottom: 12px;
+    position: sticky; top: 0; z-index: 5;
+    background: var(--off-white);
+    padding: 8px 0 6px;
   }
   .ucal-daystrip button {
     padding: 8px 2px 7px; border-radius: 10px; cursor: pointer;
@@ -1901,13 +1945,23 @@
     .cal-day { min-height: 160px; }
   }
   @media (max-width: 600px) {
-    .panel-wrap-cal { padding: 16px 12px; }
+    .panel-wrap-cal { padding: 12px 10px; }
     .cal-week-grid { grid-template-columns: 1fr; }
     .cal-day { min-height: auto; }
     .cita-modal-box { padding: 26px 20px 18px; }
     .cita-modal-grid { grid-template-columns: 1fr; }
-    .cal-toolbar { flex-wrap: wrap; }
-    .cal-range { width: 100%; order: -1; }
+    .cal-toolbar {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 10px;
+      row-gap: 8px;
+    }
+    .cal-range { width: auto; flex: 1; order: 0; min-width: 0; font-size: 14px; }
+    .cal-today-btn { margin-left: 0; padding: 7px 12px; }
+    #admin-view-as-wrap { flex-basis: 100%; display: flex; align-items: center; }
+    #admin-view-as-wrap select { flex: 1; }
+    .cal-header h1 { font-size: 24px; }
+    .cal-subtitle { font-size: 12.5px; }
   }
 
   /* ============ intl-tel-input dentro del SMS fallback del login (#code-sms-box) ============
@@ -2245,6 +2299,7 @@
                 <tfoot><tr class="stats-comp-totales"><th>Totales</th></tr></tfoot>
               </table>
             </div>
+            <div class="dash-proyeccion-note">Los montos en gris itálica son predicción de los meses que faltan.</div>
           </div>
         </div>
       </div>
@@ -3051,21 +3106,24 @@
     tbl.querySelector('tbody').innerHTML = meses.map(m => {
       const va = Number(m.historico || 0);
       const vb = Number(m.target || 0);
-      const badge = m.es_prediccion
-        ? '<span class="comp-badge-pred">predicción</span>'
-        : (vb > 0 ? '<span class="comp-badge-real">real</span>' : '');
+      // Sin badges: los meses de predicción se muestran en itálica gris
+      const predCls = m.es_prediccion ? ' comp-monto-pred' : '';
       return `<tr>
-        <td class="comp-mes">${escapeHtml(m.nombre)}${badge}</td>
-        <td class="comp-monto ${va === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(va)}</td>
-        <td class="comp-monto ${vb === 0 ? 'comp-monto-zero' : ''}">${fmtMoneyDec(vb)}</td>
+        <td class="comp-mes">${escapeHtml(m.nombre)}</td>
+        <td class="comp-monto ${va === 0 ? 'comp-monto-zero' : ''}">${fmtMoney(va)}</td>
+        <td class="comp-monto${predCls} ${vb === 0 ? 'comp-monto-zero' : ''}">${fmtMoney(vb)}</td>
       </tr>`;
     }).join('');
 
-    tbl.querySelector('tfoot tr').innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoneyDec(totBase)}</td><td class="comp-monto">${fmtMoneyDec(totTarget)}</td>`;
+    tbl.querySelector('tfoot tr').innerHTML = `<th>Totales</th><td class="comp-monto">${fmtMoney(totBase)}</td><td class="comp-monto">${fmtMoney(totTarget)}</td>`;
   }
 
   function fmtMoneyDec(n) {
     return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function fmtMoney(n) {
+    return '$' + Math.round(Number(n || 0)).toLocaleString('es-MX');
   }
 
   function closeHistoricoModal() {
