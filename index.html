@@ -1515,6 +1515,52 @@
   }
   .cita-pago-form button:hover { background: var(--olive-dark); }
   .cita-pago-msg { grid-column: 1 / -1; font: 12px 'Inter', sans-serif; color: #942e2e; }
+  .cita-modal-actions.admin-mode {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cita-modal-actions.admin-mode > button {
+    flex: 0 0 auto;
+    align-self: stretch;
+  }
+  .admin-reassign-wrap {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+    padding: 8px 10px; background: rgba(154,152,84,0.06); border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .admin-reassign-label {
+    font: 600 12px 'Inter', sans-serif; color: var(--olive-dark);
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .admin-reassign-select {
+    padding: 8px 10px; border-radius: 8px;
+    border: 1.5px solid rgba(154,138,117,0.28);
+    background: #fffefa; color: var(--brown); font: 13px 'Inter', sans-serif;
+    width: 100%; box-sizing: border-box;
+  }
+  .admin-reassign-select:focus { border-color: var(--olive); outline: none; }
+  .admin-reassign-status {
+    font: 500 11.5px 'Inter', sans-serif; color: var(--gray-soft);
+    min-width: 78px; text-align: right;
+  }
+  .admin-reassign-status.pending { color: var(--olive-dark); }
+  .admin-reassign-status.ok { color: #1b5e20; }
+  .admin-reassign-status.err { color: #942e2e; }
+  .admin-action-row {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch;
+    margin-top: 2px;
+  }
+  .admin-action-row > button { flex: 1 1 140px; }
+  .admin-delete-confirm {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1 1 100%;
+    padding: 6px 10px 6px 12px; border-radius: 10px;
+    background: rgba(181,59,59,0.08); border: 1.5px dashed rgba(181,59,59,0.35);
+    font: 600 12.5px 'Inter', sans-serif; color: #942e2e;
+    animation: adminConfirmIn .12s ease-out;
+  }
+  @keyframes adminConfirmIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
   /* Móvil: tira de días + agenda */
   .ucal-daystrip {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
@@ -3128,6 +3174,90 @@
     return { letra: '', completo: 'Sin especificar', cls: '' };
   }
 
+  function showAdminPanel(payload) {
+    document.getElementById('view-login').style.display = 'none';
+    document.getElementById('view-panel').style.display = 'none';
+    const v = document.getElementById('view-admin');
+    v.style.display = 'flex';
+    hideBootLoader();
+    adminState.payload = payload;
+    adminState.weekStart = startOfWeek(new Date());
+    bindAdminTabs();
+    switchAdminTab('calendarios');
+    adminState.tabsLoaded['calendarios'] = true;
+    bindAdminToolbar();
+    fetchAdminCitas();
+    subscribeAdminRealtime();
+    if (adminState.pollTimer) clearInterval(adminState.pollTimer);
+    adminState.pollTimer = setInterval(() => fetchAdminCitas({ silent: true }), 180000);
+  }
+
+  function bindAdminToolbar() {
+    const prev = document.getElementById('admin-cal-prev');
+    const next = document.getElementById('admin-cal-next');
+    const today = document.getElementById('admin-cal-today');
+    const refresh = document.getElementById('admin-cal-refresh');
+    if (prev && !prev._bound) { prev.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, -7); renderAdminCalendars(); }); prev._bound = true; }
+    if (next && !next._bound) { next.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, 7); renderAdminCalendars(); }); next._bound = true; }
+    if (today && !today._bound) { today.addEventListener('click', () => { adminState.weekStart = startOfWeek(new Date()); renderAdminCalendars(); }); today._bound = true; }
+    if (refresh && !refresh._bound) { refresh.addEventListener('click', () => fetchAdminCitas()); refresh._bound = true; }
+  }
+
+  async function fetchAdminCitas(opts) {
+    opts = opts || {};
+    const grid = document.getElementById('admin-grid');
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { showLogin(); return; }
+    if (!opts.silent) {
+      grid.innerHTML = '<div class="admin-empty"><div class="spinner sm"></div><span>Cargando vista de administrador...</span></div>';
+    }
+    try {
+      const res = await fetch(ADMIN_CITAS_ENDPOINT, {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(STORAGE_KEY);
+        showLogin('Tu sesión expiró. Vuelve a iniciar como admin.');
+        return;
+      }
+      const data = await res.json();
+      if (!data || !data.ok) {
+        grid.innerHTML = '<div class="admin-empty"><span>No pudimos cargar los datos. Intenta refrescar.</span></div>';
+        return;
+      }
+      adminState.data = data;
+      adminState.bookingsById = {};
+      (data.mias || []).forEach(b => { adminState.bookingsById[b.slot_id || b.id] = { kind: 'mine', booking: b, terapeuta_id: b.terapeuta_id }; });
+      (data.pool || []).forEach(b => { adminState.bookingsById[b.slot_id || b.id] = { kind: 'pool', booking: b }; });
+      renderAdminCalendars();
+    } catch (err) {
+      grid.innerHTML = '<div class="admin-empty"><span>Error de conexión. Reintentaremos solos en unos segundos.</span></div>';
+    }
+  }
+
+  function debouncedAdminRefresh() {
+    if (adminState.refreshTimer) clearTimeout(adminState.refreshTimer);
+    adminState.refreshTimer = setTimeout(() => fetchAdminCitas({ silent: true }), 400);
+  }
+
+  function subscribeAdminRealtime() {
+    if (!window.supabase || !window.supabase.createClient) return;
+    if (adminState.realtimeChannel) return;
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      adminState.realtimeChannel = sb.channel('exentia-admin-changes')
+        .on('postgres_changes', { event: '*', schema: 'exentia', table: 'booking_slots' }, () => debouncedAdminRefresh())
+        .on('postgres_changes', { event: '*', schema: 'exentia', table: 'bookings' }, () => debouncedAdminRefresh())
+        .subscribe(status => {
+          const dot = document.getElementById('admin-cal-realtime-dot');
+          if (!dot) return;
+          if (status === 'SUBSCRIBED') { dot.style.background = '#34a853'; dot.title = 'Conexión en vivo activa'; }
+          else { dot.style.background = '#c8a04f'; dot.title = 'Esperando conexión en vivo…'; }
+        });
+    } catch (_) {}
+  }
+
   // ── Estado de pago en el modal de cita (masajista y admin) ──
   const pagoState = { bookingId: null, restante: 0, open: false };
 
@@ -4426,19 +4556,30 @@
       close.addEventListener('click', closeCitaModal);
       actions.appendChild(close);
 
-      // En modo admin agregar botones de acción (Cambiar horario / Eliminar)
+      // En modo admin: acciones CRUD (reasignar + reagendar + eliminar con confirmación inline)
       if (adminMode) {
+        actions.classList.add('admin-mode');
+        const slotId = b.slot_id || b.id;
+        const currentTid = opts.terapeuta_id || b.terapeuta_id || null;
+        // Reasignar masajista (dropdown)
+        const reassignWrap = document.createElement('div');
+        reassignWrap.className = 'admin-reassign-wrap';
+        reassignWrap.innerHTML = renderReassignRow(slotId, currentTid);
+        actions.appendChild(reassignWrap);
+        // Fila de botones
+        const btnRow = document.createElement('div');
+        btnRow.className = 'admin-action-row';
         const reschedule = document.createElement('button');
         reschedule.className = 'cita-btn-primary';
         reschedule.textContent = 'Cambiar horario';
         reschedule.addEventListener('click', () => openAdminRescheduleModal(b, opts.terapeuta_id));
-        actions.appendChild(reschedule);
-
+        btnRow.appendChild(reschedule);
         const del = document.createElement('button');
         del.className = 'cita-btn-danger';
         del.textContent = 'Eliminar cita';
-        del.addEventListener('click', () => adminDeleteBooking(b));
-        actions.appendChild(del);
+        del.addEventListener('click', () => showAdminDeleteConfirm(b, del, btnRow));
+        btnRow.appendChild(del);
+        actions.appendChild(btnRow);
       }
       document.getElementById('cita-modal').style.display = 'flex';
       return;
@@ -4715,6 +4856,7 @@
   }
 
   function closeCitaModal() {
+    const _act=document.getElementById('cita-actions'); if(_act) _act.classList.remove('admin-mode');
     document.getElementById('cita-modal').style.display = 'none';
   }
   // expongo al onclick inline del backdrop/cerrar
@@ -4844,16 +4986,74 @@
   }
   window.submitAdminReschedule = submitAdminReschedule;
 
-  async function adminDeleteBooking(booking) {
+  function renderReassignRow(slotId, currentTid) {
+    const ts = (adminState.data && adminState.data.terapeutas) || [];
+    const opts = ['<option value="">Sin asignar (pool)</option>']
+      .concat(ts.filter(t => t.activo !== false).map(t =>
+        '<option value="' + t.id + '"' + (t.id === currentTid ? ' selected' : '') + '>' + escapeHtml(t.nombre || '—') + '</option>'));
+    return '<label class="admin-reassign-label">Masajista</label>'
+      + '<select class="admin-reassign-select" id="admin-reassign-select" data-slot-id="' + slotId + '" onchange="submitAdminReassign(this)">' + opts.join('') + '</select>'
+      + '<span class="admin-reassign-status" id="admin-reassign-status"></span>';
+  }
+
+  async function submitAdminReassign(sel) {
+    const slotId = sel.dataset.slotId;
+    const newTid = sel.value || null;
+    const status = document.getElementById('admin-reassign-status');
+    const original = sel.dataset.originalValue || '';
+    if (!sel.dataset.originalValue) sel.dataset.originalValue = sel.value;
+    status.textContent = 'Guardando…'; status.className = 'admin-reassign-status pending';
+    sel.disabled = true;
+    try {
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ action: 'reassign_slot', slot_id: slotId, terapeuta_id: newTid })
+      });
+      const data = await res.json().catch(() => ({}));
+      const st = data && data.result && data.result.status;
+      if (!res.ok || (st !== 'reassigned' && st !== 'pool')) {
+        const reason = (data.result && (data.result.slot && data.result.slot.reason || data.result.slot && data.result.slot.terapeuta_nombre)) || data.error || 'no se pudo';
+        throw new Error('No se pudo reasignar (' + reason + ')');
+      }
+      status.textContent = st === 'pool' ? 'Devuelta al pool' : 'Reasignada';
+      status.className = 'admin-reassign-status ok';
+      sel.dataset.originalValue = newTid || '';
+      if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+    } catch (err) {
+      status.textContent = err.message;
+      status.className = 'admin-reassign-status err';
+      sel.value = original;
+    } finally {
+      sel.disabled = false;
+      setTimeout(() => { if (status.classList.contains('ok')) { status.textContent=''; status.className='admin-reassign-status'; } }, 2200);
+    }
+  }
+  window.submitAdminReassign = submitAdminReassign;
+
+  function showAdminDeleteConfirm(booking, deleteBtn, row) {
+    if (row.querySelector('.admin-delete-confirm')) return;
+    deleteBtn.style.display = 'none';
+    const wrap = document.createElement('div');
+    wrap.className = 'admin-delete-confirm';
+    wrap.innerHTML = '<span>¿Seguro?</span>'
+      + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
+      + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
+    row.appendChild(wrap);
+    wrap.querySelector('.admin-del-no').addEventListener('click', () => { wrap.remove(); deleteBtn.style.display = ''; });
+    wrap.querySelector('.admin-del-yes').addEventListener('click', () => adminDeleteBooking(booking, wrap));
+  }
+  window.showAdminDeleteConfirm = showAdminDeleteConfirm;
+
+  async function adminDeleteBooking(booking, confirmWrap) {
     if (!booking) return;
     const bookingId = booking.booking_id || booking.id;
     if (!bookingId) { showToast('No se encontró el ID de la cita.', 'warn'); return; }
-    const cliente = (booking.cliente || booking.cliente_nombre || 'esta cita').trim();
-
-    // Doble confirmación
-    if (!window.confirm(`¿Eliminar la cita de ${cliente}?\n\nSe borrarán todos los cupos y notificaciones asociados. Esta acción no se puede deshacer.`)) return;
-    if (!window.confirm('Confirmación final: ¿estás seguro de eliminar esta cita?')) return;
-
+    if (confirmWrap) {
+      const yes = confirmWrap.querySelector('.admin-del-yes');
+      if (yes) { yes.disabled = true; yes.textContent = 'Eliminando…'; }
+    }
     const jwt = localStorage.getItem(STORAGE_KEY);
     try {
       const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
