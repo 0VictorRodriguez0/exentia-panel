@@ -1209,7 +1209,7 @@
 
   .dash-kpis {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     flex: 0 0 auto;
   }
@@ -2826,7 +2826,6 @@
     const domicilio = porTipo.domicilio || 0;
     const sucursal = porTipo.sucursal || 0;
     const totalTipo = domicilio + sucursal;
-    const pctDomicilio = totalTipo ? Math.round(100 * domicilio / totalTipo) : 0;
     const tasaCancel = total ? Math.round(100 * canceladas / total) : 0;
 
     // KPIs compactos — sin redundancia con las gráficas
@@ -2835,7 +2834,6 @@
       kpiCard('Citas', total, `${completadas} completada${completadas === 1 ? '' : 's'}`, ''),
       kpiCard('Ticket promedio', fmtMoney(ticket), 'por cita', ''),
       kpiCard('Cancelación', `${tasaCancel}%`, `${canceladas} cancelada${canceladas === 1 ? '' : 's'}`, ''),
-      kpiCard('Domicilio', `${pctDomicilio}%`, `${domicilio} dom · ${sucursal} suc`, ''),
     ].join('');
 
     renderInsights(s);
