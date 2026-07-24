@@ -103,6 +103,19 @@
     font: 600 12px 'Inter', sans-serif; transition: all .15s ease;
   }
   .topbar-logout:hover { background: rgba(255,255,255,.22); }
+  @media (max-width: 600px) {
+    .topbar {
+      padding: 10px 14px;
+      flex-wrap: nowrap;
+      gap: 8px;
+    }
+    .topbar-brand { font-size: 19px; flex: 1 1 auto; min-width: 0; }
+    .topbar-brand .sub { display: none; }
+    .topbar-user { gap: 8px; }
+    .topbar-user-role { display: none; }
+    .topbar-user-name { font-size: 12px; white-space: nowrap; }
+    .topbar-logout { padding: 6px 10px; font-size: 11px; white-space: nowrap; }
+  }
 
   /* ── Login ── */
   .login-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
@@ -322,7 +335,7 @@
     .panel-wrap { padding: 22px 16px; }
     .panel-header h1 { font-size: 26px; }
     .panel-grid { grid-template-columns: 1fr; }
-    .topbar { padding: 12px 16px; flex-direction: column; gap: 8px; }
+    .topbar { padding: 10px 14px; }
     .login-card { padding: 32px 24px; }
     .boot-logo { font-size: 36px; }
     .google-btn-skeleton { width: 280px; }
@@ -1363,22 +1376,39 @@
   @media (max-width: 640px) {
     .dash-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .dash-area-abajo { grid-template-columns: 1fr; }
-    .dash-topbar { flex-direction: column; align-items: stretch; gap: 10px; }
-    /* Filtros en una tira deslizable: nada se encima ni se corta */
+    .dash-topbar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .dash-title h1 { font-size: 21px; }
+    /* Filtros: presets deslizables en su fila; fechas y selects en fila aparte a lo ancho */
     .dash-filters {
-      flex-wrap: nowrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .dash-filters .dash-presets {
+      grid-column: 1 / -1;
+      display: flex; flex-wrap: nowrap;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 4px;
       scrollbar-width: none;
+      padding-bottom: 2px;
     }
-    .dash-filters::-webkit-scrollbar { display: none; }
+    .dash-filters .dash-presets::-webkit-scrollbar { display: none; }
+    .dash-filters .dash-presets button { flex: 0 0 auto; }
     .dash-filters input[type="date"],
-    .dash-filters select { flex: 0 0 auto; }
-    .dash-presets { flex: 0 0 auto; flex-wrap: nowrap; }
-    .dash-chart-wrap { min-height: 220px; }
+    .dash-filters select {
+      width: 100%; box-sizing: border-box;
+      min-width: 0;
+      font-size: 12px; padding: 8px 8px;
+    }
+    .dash-filters .cal-refresh { display: none; }
+    /* KPIs compactos */
+    .stats-kpi { padding: 10px 12px; }
+    .stats-kpi-label { font-size: 9.5px; }
+    .stats-kpi-value { font-size: 19px; }
+    .stats-kpi-sub { font-size: 10.5px; }
+    .dash-insight { font-size: 12.5px; padding: 8px 12px; }
+    .dash-chart-wrap { min-height: 210px; }
     .dash-card { padding: 10px 12px 12px; }
-    .stats-kpi-value { font-size: 20px; }
   }
 
   /* ── Calendario unificado (admin) ── */
