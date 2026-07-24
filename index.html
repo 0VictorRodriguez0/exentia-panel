@@ -1689,6 +1689,27 @@
     font: 700 12px 'Lato', sans-serif; letter-spacing: 1px;
     text-transform: uppercase; color: var(--olive-dark);
   }
+  .pmes-sec-title {
+    display: flex; align-items: center; gap: 8px;
+    font: 700 11px 'Lato', sans-serif; letter-spacing: 0.7px;
+    text-transform: uppercase;
+    padding: 10px 2px 2px;
+  }
+  .pmes-sec-title .cnt {
+    font: 700 10.5px 'Inter', sans-serif;
+    padding: 1px 8px; border-radius: 999px;
+  }
+  .pmes-sec-title.sec-mine { color: var(--olive-dark); }
+  .pmes-sec-title.sec-mine .cnt { background: rgba(154,152,84,0.18); color: var(--olive-dark); }
+  .pmes-sec-title.sec-pool { color: #6d5c48; }
+  .pmes-sec-title.sec-pool .cnt { background: rgba(154,138,117,0.18); color: #6d5c48; }
+  .pmes-sec-title.sec-busy { color: #9a5c48; }
+  .pmes-sec-title.sec-busy .cnt { background: rgba(176,138,122,0.2); color: #9a5c48; }
+  .ucal-agenda-row.is-busy {
+    opacity: 0.62;
+    cursor: default;
+    border-left-style: solid;
+  }
   .ucal-agenda { display: flex; flex-direction: column; gap: 8px; }
   .ucal-agenda-row {
     display: flex; align-items: center; gap: 10px;
@@ -3437,7 +3458,10 @@
   const UCAL_PX_PER_HOUR = 66;
   const ucalMobileQuery = window.matchMedia('(max-width: 768px)');
   if (ucalMobileQuery.addEventListener) {
-    ucalMobileQuery.addEventListener('change', () => { if (adminState.data) renderAdminCalendars(); });
+    ucalMobileQuery.addEventListener('change', () => {
+      if (adminState.data) renderAdminCalendars();
+      if (calState.payload) renderCalendar();
+    });
   }
 
   function ucalColorFor(terapeutaId) {
@@ -4112,9 +4136,24 @@
     const prev = document.getElementById('cal-prev');
     if (prev && !prev.dataset.bound) {
       prev.dataset.bound = '1';
-      prev.addEventListener('click', () => { calState.weekStart = addDays(calState.weekStart, -7); renderCalendar(); });
-      document.getElementById('cal-next').addEventListener('click', () => { calState.weekStart = addDays(calState.weekStart, 7); renderCalendar(); });
-      document.getElementById('cal-today').addEventListener('click', () => { calState.weekStart = startOfWeek(new Date()); fetchCitas(); });
+      const stepPanelCal = (dir) => {
+        if (ucalMobileQuery.matches) {
+          const m = calState.mobileMonth || new Date();
+          calState.mobileMonth = new Date(m.getFullYear(), m.getMonth() + dir, 1);
+        } else {
+          calState.weekStart = addDays(calState.weekStart, dir * 7);
+        }
+        renderCalendar();
+      };
+      prev.addEventListener('click', () => stepPanelCal(-1));
+      document.getElementById('cal-next').addEventListener('click', () => stepPanelCal(1));
+      document.getElementById('cal-today').addEventListener('click', () => {
+        const now = new Date();
+        calState.weekStart = startOfWeek(now);
+        calState.mobileMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        calState.mobileDate = ymd(now);
+        fetchCitas();
+      });
       document.getElementById('cal-refresh').addEventListener('click', () => fetchCitas());
     }
     fetchCitas();
@@ -4302,6 +4341,12 @@
       noFechaSection.appendChild(listEl);
     }
 
+    // Móvil: vista mensual (mismo diseño que el calendario admin)
+    if (ucalMobileQuery.matches) {
+      renderPanelMonth(wrap, range, byDay, sinFecha.length ? noFechaSection : null);
+      return;
+    }
+
     const grid = document.createElement('div');
     grid.className = 'cal-week-grid';
 
@@ -4404,6 +4449,109 @@
     if (futurasSection) wrap.appendChild(futurasSection);
     wrap.appendChild(grid);
   }
+
+  // ── Vista mensual móvil del masajista (mismo diseño que admin) ──
+  function panelBarColor(item) {
+    if (item.kind === 'mine') return '#7d7c3f';
+    if (item.kind === 'busy') return '#b08a7a';
+    const id = (item.booking && (item.booking.booking_id || item.booking.id)) || '';
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return UCAL_POOL_TONES[h % UCAL_POOL_TONES.length];
+  }
+
+  function renderPanelMonth(wrap, rangeEl, byDay, noFechaSection) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const todayYmd = ymd(today);
+    if (!calState.mobileMonth) calState.mobileMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const month = calState.mobileMonth;
+    if (!calState.mobileDate) {
+      calState.mobileDate = (today.getMonth() === month.getMonth() && today.getFullYear() === month.getFullYear())
+        ? todayYmd : ymd(month);
+    }
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    if (rangeEl) rangeEl.textContent = MESES[month.getMonth()] + ' ' + month.getFullYear();
+
+    const gridStart = startOfWeek(month);
+    const dias = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+    const head = dias.map(d => '<div class="ucal-mo-dow">' + d + '</div>').join('');
+
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(gridStart, i);
+      const dYmd = ymd(d);
+      const inMonth = d.getMonth() === month.getMonth();
+      const dayItems = byDay[dYmd] || [];
+      const cls = ['ucal-mo-cell'];
+      if (!inMonth) cls.push('is-out');
+      if (dYmd === todayYmd) cls.push('is-today');
+      if (dYmd === calState.mobileDate) cls.push('is-selected');
+      const bars = dayItems.slice(0, 3).map(it =>
+        '<span class="ucal-mo-bar" style="background:' + panelBarColor(it) + '"></span>').join('');
+      const more = dayItems.length > 3 ? '<span class="ucal-mo-more">+' + (dayItems.length - 3) + '</span>' : '';
+      cells.push('<button type="button" class="' + cls.join(' ') + '" onclick="panelSelectDate(\'' + dYmd + '\')">'
+        + '<span class="ucal-mo-num">' + d.getDate() + '</span>'
+        + '<span class="ucal-mo-bars">' + bars + more + '</span>'
+        + '</button>');
+    }
+
+    // Agenda del día seleccionado, separada por tipo para distinguir de un vistazo
+    const selDate = parseDateYMD(calState.mobileDate) || today;
+    const diasLg = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+    const dayItems = (byDay[calState.mobileDate] || []).slice()
+      .sort((a, b) => (a.booking.hora || '').localeCompare(b.booking.hora || ''));
+
+    const secciones = [
+      { kind: 'mine', titulo: 'Mis citas', cls: 'sec-mine' },
+      { kind: 'pool', titulo: 'Disponibles para tomar', cls: 'sec-pool' },
+      { kind: 'busy', titulo: 'Ocupadas por otra masajista', cls: 'sec-busy' },
+    ];
+    let agendaHtml = '';
+    let hayAlgo = false;
+    secciones.forEach(sec => {
+      const items = dayItems.filter(it => it.kind === sec.kind);
+      if (!items.length) return;
+      hayAlgo = true;
+      agendaHtml += '<div class="pmes-sec-title ' + sec.cls + '">' + sec.titulo + ' <span class="cnt">' + items.length + '</span></div>';
+      agendaHtml += items.map(it => {
+        const b = it.booking;
+        const color = panelBarColor(it);
+        const clickable = it.kind !== 'busy';
+        const poolCls = it.kind === 'pool' ? ' is-pool' : '';
+        const busyCls = it.kind === 'busy' ? ' is-busy' : '';
+        const onclick = clickable ? ' onclick="openCitaModal(\'' + b.id + '\',\'' + it.kind + '\')"' : '';
+        const pago = it.kind !== 'busy' ? ucalPagoBadge(b) : '';
+        return '<div class="ucal-agenda-row' + poolCls + busyCls + '" style="border-left-color:' + color + '"' + onclick + '>'
+          + '<span class="hora">' + escapeHtml(fmtHora(b.hora)) + '</span>'
+          + '<div class="mid"><div class="nom">' + escapeHtml(b.cliente || '—') + '</div>'
+          + '<div class="svc">' + escapeHtml(b.servicios_label || b.persona_label || '') + '</div></div>'
+          + pago
+          + '</div>';
+      }).join('');
+    });
+    if (!hayAlgo) agendaHtml = '<div class="ucal-agenda-empty">Sin citas este día.</div>';
+
+    wrap.innerHTML = '';
+    if (noFechaSection) wrap.appendChild(noFechaSection);
+    const cont = document.createElement('div');
+    cont.innerHTML = '<div class="ucal-month-card">'
+      + '<div class="ucal-mo-grid">' + head + cells.join('') + '</div>'
+      + '</div>'
+      + '<div class="ucal-day-header"><span class="num">' + selDate.getDate() + '</span>'
+      + '<span class="dow">' + diasLg[selDate.getDay()] + '</span></div>'
+      + '<div class="ucal-agenda">' + agendaHtml + '</div>';
+    while (cont.firstChild) wrap.appendChild(cont.firstChild);
+  }
+
+  function panelSelectDate(dYmd) {
+    calState.mobileDate = dYmd;
+    const d = parseDateYMD(dYmd);
+    if (d && calState.mobileMonth && d.getMonth() !== calState.mobileMonth.getMonth()) {
+      calState.mobileMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+    renderCalendar();
+  }
+  window.panelSelectDate = panelSelectDate;
 
   function renderChip(item) {
     const b = item.booking;
