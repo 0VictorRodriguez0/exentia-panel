@@ -1713,10 +1713,16 @@
     cursor: pointer; border-left: 4px solid transparent;
   }
   .ucal-agenda-row.is-pool { border-left-style: dashed; }
-  .ucal-agenda-row .hora { font: 700 13px 'Inter', sans-serif; flex: 0 0 46px; }
+  .ucal-agenda-row .hora {
+    font: 700 14px 'Inter', sans-serif; flex: 0 0 52px;
+    color: var(--brown); line-height: 1.2;
+  }
   .ucal-agenda-row .mid { flex: 1; min-width: 0; }
-  .ucal-agenda-row .mid .nom { font: 600 13px 'Inter', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ucal-agenda-row .mid .svc { font: 11.5px 'Inter', sans-serif; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ucal-agenda-row .mid .nom {
+    font: 700 14.5px 'Inter', sans-serif; color: var(--brown);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ucal-agenda-row .mid .svc { font: 12px 'Inter', sans-serif; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ucal-agenda-empty {
     text-align: center; padding: 32px 10px; color: var(--gray-soft);
     font: 13px 'Inter', sans-serif;
@@ -3506,6 +3512,17 @@
     return UCAL_COLORS[(idx >= 0 ? idx : 0) % UCAL_COLORS.length];
   }
 
+  // Tonos neutros para distinguir citas del pool entre sí (sin parecerse a los
+  // colores de masajista): el estado "sin asignar" lo sigue marcando el borde punteado.
+  const UCAL_POOL_TONES = ['#8d8377', '#a89a83', '#7f8a8c', '#9b8f9c', '#b0a08a', '#75817a'];
+  function ucalEventColor(ev) {
+    if (ev.kind !== 'pool') return ucalColorFor(ev.terapeutaId);
+    const id = (ev.slot && (ev.slot.booking_id || ev.slot.booking_code)) || ev.slotId || '';
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return UCAL_POOL_TONES[h % UCAL_POOL_TONES.length];
+  }
+
   function ucalHexToRgba(hex, alpha) {
     const n = parseInt(hex.slice(1), 16);
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
@@ -3703,7 +3720,7 @@
   }
 
   function renderUcalChip(ev, top, height, left, width) {
-    const color = ucalColorFor(ev.terapeutaId);
+    const color = ucalEventColor(ev);
     const bg = ucalHexToRgba(color, ev.kind === 'pool' ? 0.10 : 0.14);
     const s = ev.slot;
     const pagoDot = (s.estado_pago && s.estado_pago !== 'pagado') || (!s.estado_pago && false)
@@ -3748,7 +3765,7 @@
       if (dYmd === adminState.mobileDate) cls.push('is-selected');
       // Barras de color (máx 3) — una por cita, color del masajista o pool
       const bars = dayEvents.slice(0, 3).map(e =>
-        '<span class="ucal-mo-bar" style="background:' + ucalColorFor(e.terapeutaId) + '"></span>').join('');
+        '<span class="ucal-mo-bar" style="background:' + ucalEventColor(e) + '"></span>').join('');
       const more = dayEvents.length > 3 ? '<span class="ucal-mo-more">+' + (dayEvents.length - 3) + '</span>' : '';
       cells.push('<button type="button" class="' + cls.join(' ') + '" onclick="ucalSelectDate(\'' + dYmd + '\')">'
         + '<span class="ucal-mo-num">' + d.getDate() + '</span>'
@@ -3764,7 +3781,7 @@
     const rows = selEvents.length
       ? selEvents.map(ev => {
           const s = ev.slot;
-          const color = ucalColorFor(ev.terapeutaId);
+          const color = ucalEventColor(ev);
           const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
           return '<div class="ucal-agenda-row' + poolCls + '" style="border-left-color:' + color + '" onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
             + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
