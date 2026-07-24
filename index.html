@@ -1246,21 +1246,6 @@
   }
   .dash-kpi.kpi-hero .dash-kpi-sub { color: rgba(255,255,255,0.8); }
 
-  .dash-insights {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    flex: 0 0 auto;
-  }
-  .dash-insights:empty { display: none; }
-  .dash-insight {
-    background: #fff;
-    border-left: 3px solid var(--olive);
-    border-radius: 8px;
-    padding: 7px 12px;
-    font: 12.5px 'Inter', sans-serif;
-    color: var(--brown);
-    box-shadow: 0 2px 8px rgba(92,58,30,0.05);
-  }
-  .dash-insight strong { color: var(--olive-dark); }
 
   .dash-grid {
     flex: 1 1 auto;
@@ -1406,7 +1391,6 @@
     .stats-kpi-label { font-size: 9.5px; }
     .stats-kpi-value { font-size: 19px; }
     .stats-kpi-sub { font-size: 10.5px; }
-    .dash-insight { font-size: 12.5px; padding: 8px 12px; }
     .dash-chart-wrap { min-height: 210px; }
     .dash-card { padding: 10px 12px 12px; }
   }
@@ -2340,8 +2324,6 @@
         <div class="stats-loading"><div class="spinner sm"></div><span>Cargando resumen…</span></div>
       </div>
 
-      <!-- Fila 3: insights narrativos -->
-      <div class="dash-insights" id="stats-insights"></div>
 
       <!-- Fila 4: grid de gráficas -->
       <div class="dash-grid">
@@ -2836,7 +2818,6 @@
       kpiCard('Cancelación', `${tasaCancel}%`, `${canceladas} cancelada${canceladas === 1 ? '' : 's'}`, ''),
     ].join('');
 
-    renderInsights(s);
     renderChartTendencia(s.citas_por_dia || [], s.ventas_por_dia || []);
     renderChartTipo(sucursal, domicilio);
     renderChartServicios(s.top_servicios || []);
@@ -2848,50 +2829,6 @@
       <div class="dash-kpi-value">${value}</div>
       <div class="dash-kpi-sub">${escapeHtml(sub || '')}</div>
     </div>`;
-  }
-
-  // Insights narrativos — solo los que aportan algo, se ocultan sin datos
-  function renderInsights(s) {
-    const cont = document.getElementById('stats-insights');
-    if (!cont) return;
-    const insights = [];
-    const ventas = (s.ventas_por_dia || []).map(x => ({ fecha: x.fecha, monto: Number(x.monto ?? x.ventas ?? 0) }));
-    const totalVentas = ventas.reduce((a, x) => a + x.monto, 0);
-
-    // Mejor día
-    if (totalVentas > 0) {
-      const best = ventas.reduce((a, b) => (b.monto > a.monto ? b : a));
-      if (best.monto > 0) {
-        const pct = Math.round(100 * best.monto / totalVentas);
-        insights.push(`El mejor día fue el <strong>${formatHumanDate(best.fecha)}</strong> con <strong>${fmtMoney(best.monto)}</strong> (${pct}% del periodo).`);
-      }
-      const diasActivos = ventas.filter(x => x.monto > 0).length;
-      if (diasActivos > 1) {
-        insights.push(`Promedio en días con actividad: <strong>${fmtMoney(totalVentas / diasActivos)}</strong> (${diasActivos} días con ventas).`);
-      }
-    }
-
-    // Servicio dominante
-    const svcs = s.top_servicios || [];
-    const totalSvc = svcs.reduce((a, x) => a + Number(x.cnt ?? 0), 0);
-    if (svcs.length && totalSvc > 0) {
-      const topPct = Math.round(100 * Number(svcs[0].cnt ?? 0) / totalSvc);
-      if (topPct >= 30) {
-        insights.push(`<strong>${escapeHtml(svcs[0].nombre || '')}</strong> concentra el <strong>${topPct}%</strong> de los servicios vendidos.`);
-      }
-    }
-
-    // Carga del equipo
-    const mas = s.por_masajista || [];
-    if (mas.length >= 2) {
-      const totalMas = mas.reduce((a, x) => a + Number(x.cnt ?? 0), 0);
-      const topMasPct = totalMas ? Math.round(100 * Number(mas[0].cnt ?? 0) / totalMas) : 0;
-      if (topMasPct >= 50) {
-        insights.push(`<strong>${escapeHtml(mas[0].nombre || '')}</strong> lleva el <strong>${topMasPct}%</strong> de las citas asignadas — revisar distribución de carga.`);
-      }
-    }
-
-    cont.innerHTML = insights.slice(0, 3).map(t => `<div class="dash-insight">${t}</div>`).join('');
   }
 
   function destroyChart(key) {
