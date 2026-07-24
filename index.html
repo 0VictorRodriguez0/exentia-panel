@@ -1268,17 +1268,16 @@
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1.35fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1.4fr 1fr;
     grid-template-areas:
-      "tendencia mezcla"
-      "servicios masajistas";
+      "tendencia tendencia"
+      "mezcla servicios";
     gap: 12px;
   }
   .dash-area-tendencia  { grid-area: tendencia; }
   .dash-area-mezcla     { grid-area: mezcla; }
   .dash-area-servicios  { grid-area: servicios; }
-  .dash-area-masajistas { grid-area: masajistas; }
   .dash-card {
     background: #fff; border-radius: 12px;
     padding: 12px 16px 14px;
@@ -1323,21 +1322,13 @@
   @media (max-width: 1100px) {
     .dash-wrap { height: auto; }
     .dash-kpis { grid-template-columns: repeat(3, 1fr); }
-    .dash-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto;
-      grid-template-areas:
-        "tendencia tendencia"
-        "mezcla masajistas"
-        "servicios servicios";
-    }
     .dash-chart-wrap { min-height: 220px; }
   }
   @media (max-width: 640px) {
     .dash-kpis { grid-template-columns: repeat(2, 1fr); }
     .dash-grid {
       grid-template-columns: 1fr;
-      grid-template-areas: "tendencia" "mezcla" "servicios" "masajistas";
+      grid-template-areas: "tendencia" "mezcla" "servicios";
     }
   }
 
@@ -2226,10 +2217,6 @@
           <div class="dash-card-title">Qué se vende más <small>top 6 servicios</small></div>
           <div class="dash-chart-wrap"><canvas id="chart-servicios"></canvas></div>
         </div>
-        <div class="dash-card dash-area-masajistas">
-          <div class="dash-card-title">Quién lo entrega <small>citas por masajista</small></div>
-          <div class="dash-chart-wrap"><canvas id="chart-masajistas"></canvas></div>
-        </div>
       </div>
     </div>
   </div>
@@ -2717,7 +2704,6 @@
     renderChartTendencia(s.citas_por_dia || [], s.ventas_por_dia || []);
     renderChartTipo(sucursal, domicilio);
     renderChartServicios(s.top_servicios || []);
-    renderChartMasajistas(s.por_masajista || []);
   }
 
   function kpiCard(label, value, sub, variant) {
@@ -2964,10 +2950,6 @@
 
   function renderChartServicios(items) {
     renderHorizontalBars('chart-servicios', 'servicios', (items || []).slice(0, 6), CHART_COLORS.olive);
-  }
-
-  function renderChartMasajistas(items) {
-    renderHorizontalBars('chart-masajistas', 'masajistas', (items || []).slice(0, 6), CHART_COLORS.warn);
   }
 
   function chartBaseOptions(opts) {
