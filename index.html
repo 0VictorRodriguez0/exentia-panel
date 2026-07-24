@@ -1643,30 +1643,68 @@
   }
   @keyframes adminConfirmIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
   /* Móvil: tira de días + agenda */
-  .ucal-daystrip {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+  /* Vista mensual móvil */
+  .ucal-month-card {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(92,58,30,0.07);
+    padding: 10px 8px 12px;
     margin-bottom: 12px;
-    position: sticky; top: 0; z-index: 5;
-    background: var(--off-white);
-    padding: 8px 0 6px;
   }
-  .ucal-daystrip button {
-    padding: 8px 2px 7px; border-radius: 10px; cursor: pointer;
-    border: 1.5px solid rgba(154,138,117,0.22); background: #fff;
-    font: 600 10.5px 'Lato', sans-serif; color: var(--olive-dark);
-    text-transform: uppercase; letter-spacing: 0.3px;
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  .ucal-mo-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
   }
-  .ucal-daystrip button .num { font: 700 15px 'Inter', sans-serif; color: var(--brown); }
-  .ucal-daystrip button .cnt {
-    font-size: 9px; background: rgba(154,152,84,0.16); color: var(--olive-dark);
-    border-radius: 999px; padding: 1px 6px; min-width: 14px;
+  .ucal-mo-dow {
+    text-align: center;
+    font: 700 10px 'Lato', sans-serif; letter-spacing: 0.5px;
+    color: var(--olive-dark);
+    padding: 4px 0 8px;
   }
-  .ucal-daystrip button.active {
-    background: var(--olive); border-color: var(--olive);
+  .ucal-mo-cell {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 0 5px;
+    min-height: 52px;
+    background: transparent; border: 1.5px solid transparent; border-radius: 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
-  .ucal-daystrip button.active .num, .ucal-daystrip button.active { color: var(--off-white); }
-  .ucal-daystrip button.active .cnt { background: rgba(255,255,255,0.25); color: #fff; }
+  .ucal-mo-num {
+    font: 600 14px 'Inter', sans-serif; color: var(--brown);
+    width: 26px; height: 26px; line-height: 24px;
+    border-radius: 50%; text-align: center;
+  }
+  .ucal-mo-cell.is-out .ucal-mo-num { color: rgba(154,138,117,0.4); }
+  .ucal-mo-cell.is-today .ucal-mo-num {
+    background: var(--olive); color: var(--off-white); font-weight: 700;
+  }
+  .ucal-mo-cell.is-selected {
+    border-color: var(--olive);
+    background: rgba(154,152,84,0.08);
+  }
+  .ucal-mo-bars {
+    display: flex; flex-direction: column; gap: 2px;
+    align-items: center; width: 100%;
+    min-height: 12px;
+  }
+  .ucal-mo-bar {
+    display: block; width: 70%; height: 3px; border-radius: 2px;
+  }
+  .ucal-mo-more {
+    font: 700 8.5px 'Inter', sans-serif; color: var(--gray-soft);
+    line-height: 1;
+  }
+  .ucal-day-header {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 2px 4px 8px;
+  }
+  .ucal-day-header .num {
+    font: 700 30px 'Cormorant Garamond', serif; color: var(--brown);
+  }
+  .ucal-day-header .dow {
+    font: 700 12px 'Lato', sans-serif; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--olive-dark);
+  }
   .ucal-agenda { display: flex; flex-direction: column; gap: 8px; }
   .ucal-agenda-row {
     display: flex; align-items: center; gap: 10px;
@@ -3276,9 +3314,24 @@
     const next = document.getElementById('admin-cal-next');
     const today = document.getElementById('admin-cal-today');
     const refresh = document.getElementById('admin-cal-refresh');
-    if (prev && !prev._bound) { prev.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, -7); renderAdminCalendars(); }); prev._bound = true; }
-    if (next && !next._bound) { next.addEventListener('click', () => { adminState.weekStart = addDays(adminState.weekStart, 7); renderAdminCalendars(); }); next._bound = true; }
-    if (today && !today._bound) { today.addEventListener('click', () => { adminState.weekStart = startOfWeek(new Date()); renderAdminCalendars(); }); today._bound = true; }
+    const stepCal = (dir) => {
+      if (ucalMobileQuery.matches) {
+        const m = adminState.mobileMonth || new Date();
+        adminState.mobileMonth = new Date(m.getFullYear(), m.getMonth() + dir, 1);
+      } else {
+        adminState.weekStart = addDays(adminState.weekStart, dir * 7);
+      }
+      renderAdminCalendars();
+    };
+    if (prev && !prev._bound) { prev.addEventListener('click', () => stepCal(-1)); prev._bound = true; }
+    if (next && !next._bound) { next.addEventListener('click', () => stepCal(1)); next._bound = true; }
+    if (today && !today._bound) { today.addEventListener('click', () => {
+      const now = new Date();
+      adminState.weekStart = startOfWeek(now);
+      adminState.mobileMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      adminState.mobileDate = ymd(now);
+      renderAdminCalendars();
+    }); today._bound = true; }
     if (refresh && !refresh._bound) { refresh.addEventListener('click', () => fetchAdminCitas()); refresh._bound = true; }
   }
 
@@ -3466,15 +3519,16 @@
     return h * 60 + m;
   }
 
-  function ucalBuildEvents(weekStart) {
+  function ucalBuildEvents(rangeStart, rangeDays) {
     const data = adminState.data;
-    const weekEnd = addDays(weekStart, 7);
+    const days = rangeDays || 7;
+    const rangeEnd = addDays(rangeStart, days);
     const filter = adminState.calFilter; // Set de terapeuta_ids + 'pool' visibles (null = todos)
     const evs = [];
     function push(slot, kind) {
       if (!slot.fecha) return;
       const d = parseDateYMD(slot.fecha);
-      if (!d || d < weekStart || d >= weekEnd) return;
+      if (!d || d < rangeStart || d >= rangeEnd) return;
       const key = kind === 'pool' ? 'pool' : (slot.terapeuta_id || 'pool');
       if (filter && !filter.has(key)) return;
       const startMin = ucalMinutes(slot.hora);
@@ -3482,7 +3536,8 @@
         slotId: slot.slot_id || slot.id,
         kind,
         terapeutaId: kind === 'pool' ? null : slot.terapeuta_id,
-        dayIdx: Math.round((d - weekStart) / 86400000),
+        dayIdx: Math.round((d - rangeStart) / 86400000),
+        fechaYmd: slot.fecha,
         startMin: startMin == null ? UCAL_START_MIN : startMin,
         durMin: Math.max(30, parseInt(slot.duracion_min, 10) || 60),
         slot,
@@ -3526,7 +3581,7 @@
     if (!data) return;
     const grid = document.getElementById('admin-grid');
     const rangeEl = document.getElementById('admin-cal-range');
-    if (rangeEl) rangeEl.textContent = fmtRange(adminState.weekStart);
+    if (rangeEl && !ucalMobileQuery.matches) rangeEl.textContent = fmtRange(adminState.weekStart);
     closeUcalPopover();
 
     const weekStart = adminState.weekStart;
@@ -3537,11 +3592,24 @@
       terapeutas.forEach(t => { if (!adminState._calFilterTouched) adminState.calFilter.add(t.id); });
     }
 
-    const events = ucalBuildEvents(weekStart);
     const legend = renderUcalLegend(terapeutas);
-    const body = ucalMobileQuery.matches
-      ? renderUcalAgenda(events, weekStart)
-      : renderUcalWeek(events, weekStart);
+    let body;
+    if (ucalMobileQuery.matches) {
+      if (!adminState.mobileMonth) {
+        const now = new Date();
+        adminState.mobileMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      const gridStart = startOfWeek(adminState.mobileMonth);
+      const events = ucalBuildEvents(gridStart, 42);
+      if (rangeEl) {
+        const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        rangeEl.textContent = MESES[adminState.mobileMonth.getMonth()] + ' ' + adminState.mobileMonth.getFullYear();
+      }
+      body = renderUcalMonth(events, gridStart);
+    } else {
+      const events = ucalBuildEvents(weekStart, 7);
+      body = renderUcalWeek(events, weekStart);
+    }
     grid.innerHTML = legend + body;
     populateViewAsDropdown();
     populateTerapeutaDropdowns();
@@ -3651,30 +3719,50 @@
       + '</div>';
   }
 
-  function renderUcalAgenda(events, weekStart) {
+  // Vista mensual móvil (estilo calendario de teléfono):
+  // mes completo con marcadores por día + agenda del día seleccionado abajo.
+  function renderUcalMonth(events, gridStart) {
     const today = new Date();
-    const dias = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
-    if (adminState.mobileDayIdx == null) {
-      let idx = 0;
-      for (let i = 0; i < 7; i++) { if (isSameDay(addDays(weekStart, i), today)) { idx = i; break; } }
-      adminState.mobileDayIdx = idx;
+    const todayYmd = ymd(today);
+    const month = adminState.mobileMonth;
+    if (!adminState.mobileDate) {
+      adminState.mobileDate = (today.getMonth() === month.getMonth() && today.getFullYear() === month.getFullYear())
+        ? todayYmd : ymd(month);
     }
-    const active = adminState.mobileDayIdx;
+    const dias = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+    const head = dias.map(d => '<div class="ucal-mo-dow">' + d + '</div>').join('');
 
-    const strip = [];
-    for (let i = 0; i < 7; i++) {
-      const d = addDays(weekStart, i);
-      const cnt = events.filter(e => e.dayIdx === i).length;
-      strip.push('<button type="button" class="' + (i === active ? 'active' : '') + '" onclick="ucalSelectDay(' + i + ')">'
-        + dias[i] + '<span class="num">' + d.getDate() + '</span>'
-        + (cnt ? '<span class="cnt">' + cnt + '</span>' : '')
+    // Index de eventos por fecha
+    const byDate = {};
+    events.forEach(e => { (byDate[e.fechaYmd] = byDate[e.fechaYmd] || []).push(e); });
+
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(gridStart, i);
+      const dYmd = ymd(d);
+      const inMonth = d.getMonth() === month.getMonth();
+      const dayEvents = byDate[dYmd] || [];
+      const cls = ['ucal-mo-cell'];
+      if (!inMonth) cls.push('is-out');
+      if (dYmd === todayYmd) cls.push('is-today');
+      if (dYmd === adminState.mobileDate) cls.push('is-selected');
+      // Barras de color (máx 3) — una por cita, color del masajista o pool
+      const bars = dayEvents.slice(0, 3).map(e =>
+        '<span class="ucal-mo-bar" style="background:' + ucalColorFor(e.terapeutaId) + '"></span>').join('');
+      const more = dayEvents.length > 3 ? '<span class="ucal-mo-more">+' + (dayEvents.length - 3) + '</span>' : '';
+      cells.push('<button type="button" class="' + cls.join(' ') + '" onclick="ucalSelectDate(\'' + dYmd + '\')">'
+        + '<span class="ucal-mo-num">' + d.getDate() + '</span>'
+        + '<span class="ucal-mo-bars">' + bars + more + '</span>'
         + '</button>');
     }
 
-    const dayEvents = events.filter(e => e.dayIdx === active)
+    // Agenda del día seleccionado
+    const selDate = parseDateYMD(adminState.mobileDate) || today;
+    const diasLg = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+    const selEvents = (byDate[adminState.mobileDate] || []).slice()
       .sort((a, b) => a.startMin - b.startMin);
-    const rows = dayEvents.length
-      ? dayEvents.map(ev => {
+    const rows = selEvents.length
+      ? selEvents.map(ev => {
           const s = ev.slot;
           const color = ucalColorFor(ev.terapeutaId);
           const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
@@ -3687,15 +3775,24 @@
         }).join('')
       : '<div class="ucal-agenda-empty">Sin citas este día.</div>';
 
-    return '<div class="ucal-daystrip">' + strip.join('') + '</div>'
+    return '<div class="ucal-month-card">'
+      + '<div class="ucal-mo-grid">' + head + cells.join('') + '</div>'
+      + '</div>'
+      + '<div class="ucal-day-header"><span class="num">' + selDate.getDate() + '</span>'
+      + '<span class="dow">' + diasLg[selDate.getDay()] + '</span></div>'
       + '<div class="ucal-agenda">' + rows + '</div>';
   }
 
-  function ucalSelectDay(i) {
-    adminState.mobileDayIdx = i;
+  function ucalSelectDate(dYmd) {
+    adminState.mobileDate = dYmd;
+    // Si tocó un día de otro mes, brincar a ese mes
+    const d = parseDateYMD(dYmd);
+    if (d && adminState.mobileMonth && d.getMonth() !== adminState.mobileMonth.getMonth()) {
+      adminState.mobileMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
     renderAdminCalendars();
   }
-  window.ucalSelectDay = ucalSelectDay;
+  window.ucalSelectDate = ucalSelectDate;
 
   function ucalPagoBadge(slot) {
     const e = slot.estado_pago;
