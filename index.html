@@ -2435,89 +2435,7 @@
 </div>
 
 <!-- ── MODAL detalle de cita ── -->
-<div id="cita-modal" class="cita-modal" style="display:none">
-  <div class="cita-modal-backdrop" onclick="closeCitaModal()"></div>
-  <div class="cita-modal-box">
-    <button class="cita-modal-close" onclick="closeCitaModal()" aria-label="Cerrar">×</button>
-    <div class="cita-modal-badge" id="cita-badge">—</div>
-    <h2 class="cita-modal-title" id="cita-title">—</h2>
-    <p class="cita-modal-when" id="cita-when">—</p>
-    <!-- Sección 1: Contacto del cliente -->
-    <div class="cita-modal-section" id="cita-sec-contacto">
-      <div class="cita-modal-section-title">Datos del cliente</div>
-      <div class="cita-modal-grid">
-        <div><div class="cita-modal-label">Cliente</div><div class="cita-modal-val" id="cita-cliente">—</div></div>
-        <div><div class="cita-modal-label">Teléfono</div><div class="cita-modal-val" id="cita-tel">—</div></div>
-        <div><div class="cita-modal-label">Email</div><div class="cita-modal-val" id="cita-email">—</div></div>
-        <div><div class="cita-modal-label">Preferencia</div><div class="cita-modal-val" id="cita-pref">—</div></div>
-      </div>
-    </div>
 
-    <!-- Sección 2: Servicios -->
-    <div class="cita-modal-section">
-      <div class="cita-modal-section-title">Servicios contratados</div>
-      <div id="cita-services">—</div>
-    </div>
-
-    <!-- Sección 3: Pago -->
-    <div class="cita-modal-section">
-      <div class="cita-modal-section-title">Cobro</div>
-      <div class="cita-modal-precio-grid">
-        <div class="cita-precio-row"><span>Servicios</span><span id="cita-precio-svc">—</span></div>
-        <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
-        <div class="cita-precio-row cita-precio-total"><span>TOTAL A COBRAR</span><span id="cita-precio-total">—</span></div>
-        <div class="cita-pago-estado" id="cita-pago-estado" style="display:none">
-          <span id="cita-pago-badge"></span>
-          <span id="cita-pago-detalle" style="font-size:12px;color:var(--gray-soft);"></span>
-          <button type="button" id="cita-pago-btn" class="cita-pago-btn" onclick="toggleRegistrarPago()">Registrar pago</button>
-        </div>
-        <div class="cita-pago-form" id="cita-pago-form" style="display:none">
-          <label><span>Monto (MXN)</span><input type="number" id="cita-pago-monto" min="1" step="1"></label>
-          <label><span>Método</span>
-            <select id="cita-pago-metodo">
-              <option value="efectivo">Efectivo</option>
-              <option value="tarjeta">Tarjeta</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="otro">Otro</option>
-            </select>
-          </label>
-          <button type="button" id="cita-pago-submit" onclick="submitRegistrarPago()">Guardar</button>
-          <div class="cita-pago-msg" id="cita-pago-msg"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sección 4: Lugar -->
-    <div class="cita-modal-section">
-      <div class="cita-modal-section-title">Lugar de la cita</div>
-      <div class="cita-modal-grid">
-        <div><div class="cita-modal-label">Modalidad</div><div class="cita-modal-val" id="cita-modalidad">—</div></div>
-        <div><div class="cita-modal-label">Duración total</div><div class="cita-modal-val" id="cita-dur">—</div></div>
-      </div>
-      <div id="cita-direccion-wrap" style="display:none;margin-top:10px;">
-        <div class="cita-modal-label">Dirección</div>
-        <div class="cita-modal-val" id="cita-direccion">—</div>
-      </div>
-      <div id="cita-zona-wrap" style="margin-top:10px;">
-        <div class="cita-modal-label">Zona</div>
-        <div class="cita-modal-val" id="cita-zona">—</div>
-      </div>
-    </div>
-
-    <!-- Sección 5: Notas -->
-    <div class="cita-modal-section" id="cita-notas-wrap" style="display:none">
-      <div class="cita-modal-section-title">Notas del cliente</div>
-      <div class="cita-modal-val" id="cita-notas-cliente" style="white-space:pre-wrap;font-style:italic;">—</div>
-    </div>
-    <div class="cita-modal-section" id="cita-notas-int-wrap" style="display:none">
-      <div class="cita-modal-section-title">Notas internas (equipo)</div>
-      <div class="cita-modal-val" id="cita-notas-internas" style="white-space:pre-wrap;font-style:italic;color:#9a4c00;">—</div>
-    </div>
-
-    <div class="cita-modal-actions" id="cita-actions"></div>
-    <p class="cita-modal-note" id="cita-note"></p>
-  </div>
-</div>
 
 <!-- ── SUB-MODAL: Reagendar (solo admin) ── -->
 <div id="admin-reschedule-modal" class="cita-modal" style="display:none">
@@ -4245,8 +4163,21 @@
       const data = await res.json();
       calState.payload = data;
       calState.bookingsById = {};
-      (data.mias || []).forEach(b => calState.bookingsById[b.id] = { kind: 'mine', booking: b });
-      (data.pool || []).forEach(b => calState.bookingsById[b.id] = { kind: 'pool', booking: b });
+      // Indexar por CADA id posible (id, booking_id, slot_id) — la API puede devolver
+      // cualquiera y el chip usa b.id. Sin este spread, si b.id es undefined todo colapsa
+      // en la clave "undefined" y solo sobrevive el último write.
+      (data.mias || []).forEach(b => {
+        const ref = { kind: 'mine', booking: b };
+        if (b.id)         calState.bookingsById[b.id] = ref;
+        if (b.booking_id) calState.bookingsById[b.booking_id] = ref;
+        if (b.slot_id)    calState.bookingsById[b.slot_id] = ref;
+      });
+      (data.pool || []).forEach(b => {
+        const ref = { kind: 'pool', booking: b };
+        if (b.id)         calState.bookingsById[b.id] = ref;
+        if (b.booking_id) calState.bookingsById[b.booking_id] = ref;
+        if (b.slot_id)    calState.bookingsById[b.slot_id] = ref;
+      });
       const banner = document.getElementById('cal-needs-calendar-banner');
       if (banner) banner.style.display = data.needs_calendar ? '' : 'none';
       calState.needsCalendar = data.needs_calendar === true;
@@ -4678,8 +4609,25 @@
     opts = opts || {};
     const adminMode = !!opts.adminMode;
     const readOnly = !!opts.readOnly || adminMode;  // admin no ve botones de tomar/liberar del flujo masajista
-    const ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
-    if (!ref) return;
+    let ref = calState.bookingsById[bookingId] || (window._modalExtraRef && window._modalExtraRef[bookingId]);
+    // Fallback: si el store no tiene la entrada (por desincronía o cambio de
+    // key entre render e index), buscar directo en el payload por id/booking_id/slot_id.
+    if (!ref) {
+      const finder = (arr) => (arr || []).find(x =>
+        x.id === bookingId || x.booking_id === bookingId || x.slot_id === bookingId);
+      const p = calState.payload || {};
+      const inMias = finder(p.mias);
+      const inPool = inMias ? null : finder(p.pool);
+      if (inMias) ref = { kind: kind || 'mine', booking: inMias };
+      else if (inPool) ref = { kind: kind || 'pool', booking: inPool };
+    }
+    if (!ref) {
+      console.warn('[openCitaModal] sin ref para', bookingId,
+        '· keys:', Object.keys(calState.bookingsById || {}),
+        '· payload mias:', (calState.payload && calState.payload.mias || []).length,
+        'pool:', (calState.payload && calState.payload.pool || []).length);
+      return;
+    }
     const b = ref.booking;
     const isReoffer = b.estado_asignacion === 'release_window';
     const finalKind = kind || ref.kind;
@@ -6157,5 +6105,89 @@
   }
 </script>
 
+
+<div id="cita-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeCitaModal()"></div>
+  <div class="cita-modal-box">
+    <button class="cita-modal-close" onclick="closeCitaModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge" id="cita-badge">—</div>
+    <h2 class="cita-modal-title" id="cita-title">—</h2>
+    <p class="cita-modal-when" id="cita-when">—</p>
+    <!-- Sección 1: Contacto del cliente -->
+    <div class="cita-modal-section" id="cita-sec-contacto">
+      <div class="cita-modal-section-title">Datos del cliente</div>
+      <div class="cita-modal-grid">
+        <div><div class="cita-modal-label">Cliente</div><div class="cita-modal-val" id="cita-cliente">—</div></div>
+        <div><div class="cita-modal-label">Teléfono</div><div class="cita-modal-val" id="cita-tel">—</div></div>
+        <div><div class="cita-modal-label">Email</div><div class="cita-modal-val" id="cita-email">—</div></div>
+        <div><div class="cita-modal-label">Preferencia</div><div class="cita-modal-val" id="cita-pref">—</div></div>
+      </div>
+    </div>
+
+    <!-- Sección 2: Servicios -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Servicios contratados</div>
+      <div id="cita-services">—</div>
+    </div>
+
+    <!-- Sección 3: Pago -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Cobro</div>
+      <div class="cita-modal-precio-grid">
+        <div class="cita-precio-row"><span>Servicios</span><span id="cita-precio-svc">—</span></div>
+        <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
+        <div class="cita-precio-row cita-precio-total"><span>TOTAL A COBRAR</span><span id="cita-precio-total">—</span></div>
+        <div class="cita-pago-estado" id="cita-pago-estado" style="display:none">
+          <span id="cita-pago-badge"></span>
+          <span id="cita-pago-detalle" style="font-size:12px;color:var(--gray-soft);"></span>
+          <button type="button" id="cita-pago-btn" class="cita-pago-btn" onclick="toggleRegistrarPago()">Registrar pago</button>
+        </div>
+        <div class="cita-pago-form" id="cita-pago-form" style="display:none">
+          <label><span>Monto (MXN)</span><input type="number" id="cita-pago-monto" min="1" step="1"></label>
+          <label><span>Método</span>
+            <select id="cita-pago-metodo">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <button type="button" id="cita-pago-submit" onclick="submitRegistrarPago()">Guardar</button>
+          <div class="cita-pago-msg" id="cita-pago-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 4: Lugar -->
+    <div class="cita-modal-section">
+      <div class="cita-modal-section-title">Lugar de la cita</div>
+      <div class="cita-modal-grid">
+        <div><div class="cita-modal-label">Modalidad</div><div class="cita-modal-val" id="cita-modalidad">—</div></div>
+        <div><div class="cita-modal-label">Duración total</div><div class="cita-modal-val" id="cita-dur">—</div></div>
+      </div>
+      <div id="cita-direccion-wrap" style="display:none;margin-top:10px;">
+        <div class="cita-modal-label">Dirección</div>
+        <div class="cita-modal-val" id="cita-direccion">—</div>
+      </div>
+      <div id="cita-zona-wrap" style="margin-top:10px;">
+        <div class="cita-modal-label">Zona</div>
+        <div class="cita-modal-val" id="cita-zona">—</div>
+      </div>
+    </div>
+
+    <!-- Sección 5: Notas -->
+    <div class="cita-modal-section" id="cita-notas-wrap" style="display:none">
+      <div class="cita-modal-section-title">Notas del cliente</div>
+      <div class="cita-modal-val" id="cita-notas-cliente" style="white-space:pre-wrap;font-style:italic;">—</div>
+    </div>
+    <div class="cita-modal-section" id="cita-notas-int-wrap" style="display:none">
+      <div class="cita-modal-section-title">Notas internas (equipo)</div>
+      <div class="cita-modal-val" id="cita-notas-internas" style="white-space:pre-wrap;font-style:italic;color:#9a4c00;">—</div>
+    </div>
+
+    <div class="cita-modal-actions" id="cita-actions"></div>
+    <p class="cita-modal-note" id="cita-note"></p>
+  </div>
+</div>
 </body>
 </html>
