@@ -1560,6 +1560,18 @@
   .ucal-live-badge.live-done { background: rgba(30,105,45,0.14); color: #1b5e20; }
   .ucal-live-badge .live-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
   @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+  /* Badge compacto de sexo pedido por el cliente (M/H/I) en chips del calendario admin */
+  .ucal-sexo-badge {
+    display: inline-grid; place-items: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    font: 800 9px 'Lato', sans-serif; line-height: 1;
+    margin-left: 4px; vertical-align: middle;
+    cursor: help; flex-shrink: 0;
+  }
+  .ucal-ev .ucal-sexo-badge { position: absolute; top: 2px; right: 3px; margin: 0; }
+  .ucal-sexo-badge.sx-mujer      { background: #f6c6d8; color: #9d3163; }
+  .ucal-sexo-badge.sx-hombre     { background: #cfdcff; color: #1e4bc9; }
+  .ucal-sexo-badge.sx-indistinto { background: #d9d9d9; color: #4a4a4a; }
   .pop-live-banner {
     padding: 8px 12px; border-radius: 8px; margin-bottom: 8px;
     font: 12.5px 'Inter', sans-serif;
@@ -3636,6 +3648,7 @@
     return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
       + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
       + pagoDot
+      + ucalSexoBadge(s)
       + ucalLiveDot(s)
       + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
       + '<div class="ev-cliente">' + escapeHtml(s.cliente || '—') + '</div>'
@@ -3654,6 +3667,13 @@
     const est = ucalServicioEstado(slot);
     if (!est) return '';
     return '<span class="ucal-live-badge live-' + est.key + '" title="' + est.label + '">' + est.icon + '<span class="live-lbl">' + est.label + '</span></span>';
+  }
+  // Badge compacto de preferencia de sexo (M/H/I) para chips del calendario admin
+  function ucalSexoBadge(slot) {
+    if (!slot) return '';
+    const info = sexoBadgeParts(slot.preferencia_sexo);
+    if (!info.letra) return '';
+    return '<span class="ucal-sexo-badge sx-' + info.cls + '" title="Cliente pide: ' + escapeHtml(info.completo) + '">' + info.letra + '</span>';
   }
 
   // Vista mensual móvil (estilo calendario de teléfono):
@@ -3705,7 +3725,7 @@
           const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
           return '<div class="ucal-agenda-row' + poolCls + '" style="border-left-color:' + color + '" onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
             + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
-            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + ucalLiveDot(s) + '</div>'
+            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + ucalSexoBadge(s) + ucalLiveDot(s) + '</div>'
             + '<div class="svc">' + escapeHtml(s.servicios_label || '') + '</div></div>'
             + ucalPagoBadge(s)
             + '</div>';
