@@ -1473,11 +1473,6 @@
   .ucal-ev .ev-cliente { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ucal-ev .ev-svc { opacity: 0.8; font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ucal-ev.is-pool { border-left-style: dashed; }
-  .ucal-ev .ev-pago-dot {
-    position: absolute; top: 4px; right: 4px;
-    width: 7px; height: 7px; border-radius: 50%;
-    background: #c8a04f;
-  }
   .ucal-more {
     position: absolute; z-index: 2;
     border-radius: 7px; cursor: pointer;
@@ -1547,8 +1542,6 @@
     padding: 3px 9px; border-radius: 999px;
     font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
   }
-  .pago-badge.pendiente { background: rgba(200,160,79,0.18); color: #7a5b1e; }
-  .pago-badge.parcial { background: rgba(63,110,125,0.15); color: #2c5460; }
   .pago-badge.pagado { background: rgba(30,105,45,0.13); color: #1b5e20; }
   .ucal-live-badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -1588,36 +1581,90 @@
   .cita-btn-primary:disabled, .cita-btn-danger:disabled {
     opacity: 0.45; cursor: not-allowed;
   }
-  .cita-pago-estado {
-    display: flex; align-items: center; gap: 10px;
-    padding-top: 8px; margin-top: 6px;
+  /* Fila con el pill "Pagado en línea" bajo el total */
+  .cita-servicio-pagado-row {
+    display: flex; justify-content: flex-end;
+    padding-top: 8px; margin-top: 4px;
     border-top: 1px dashed rgba(154,138,117,0.3);
   }
-  .cita-pago-btn {
-    margin-left: auto; padding: 6px 12px; border-radius: 8px; cursor: pointer;
-    border: 1.5px solid var(--olive); background: transparent; color: var(--olive-dark);
-    font: 600 12px 'Inter', sans-serif;
+  /* Sección Pagos extras */
+  .cita-extras-title {
+    display: flex; align-items: center; gap: 8px;
   }
+  .cita-extras-count {
+    font: 600 12px 'Inter', sans-serif; color: var(--gray-soft);
+    text-transform: none; letter-spacing: 0;
+  }
+  .cita-extras-list { display: flex; flex-direction: column; gap: 8px; }
+  .cita-extras-empty {
+    padding: 12px 14px; border-radius: 10px;
+    background: rgba(154,138,117,0.06); color: var(--gray-soft);
+    font: 13px 'Inter', sans-serif; text-align: center;
+  }
+  .cita-extra-item {
+    padding: 10px 12px; border-radius: 10px;
+    background: #fdfbf4; border: 1px solid rgba(154,152,84,0.18);
+  }
+  .cita-extra-item .extra-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .cita-extra-item .extra-concepto {
+    font: 700 13px 'Inter', sans-serif; color: var(--brown);
+  }
+  .cita-extra-item .extra-monto {
+    font: 800 15px 'Inter', sans-serif; color: var(--olive-dark);
+  }
+  .cita-extra-item .extra-meta {
+    font: 12px 'Inter', sans-serif; color: var(--gray-soft); margin-top: 3px;
+  }
+  .cita-extra-item .extra-notas {
+    font: 12.5px 'Inter', sans-serif; color: var(--brown);
+    margin-top: 6px; padding-top: 6px;
+    border-top: 1px dashed rgba(154,138,117,0.2);
+  }
+  .cita-extras-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; margin-top: 4px; border-radius: 8px;
+    background: rgba(154,152,84,0.08);
+    font: 700 13px 'Inter', sans-serif; color: var(--olive-dark);
+  }
+  .cita-extras-action { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .cita-pago-btn {
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    border: 1.5px dashed var(--olive); background: transparent; color: var(--olive-dark);
+    font: 600 12.5px 'Inter', sans-serif;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .cita-pago-btn .btn-plus { font-size: 15px; line-height: 1; font-weight: 800; }
   .cita-pago-btn:hover { background: rgba(154,152,84,0.12); }
   .cita-pago-form {
-    display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end;
-    margin-top: 8px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end;
+    margin-top: 10px; padding: 12px; border-radius: 10px;
+    background: rgba(243,228,199,0.35);
   }
-  .cita-pago-form label { display: flex; flex-direction: column; gap: 3px; }
+  .cita-pago-form .cita-pago-full { grid-column: 1 / -1; }
+  .cita-pago-form label { display: flex; flex-direction: column; gap: 4px; }
   .cita-pago-form label span { font: 600 11px 'Inter', sans-serif; color: var(--olive-dark); }
   .cita-pago-form input, .cita-pago-form select {
-    padding: 8px 9px; border-radius: 8px;
+    padding: 9px 10px; border-radius: 8px;
     border: 1.5px solid rgba(154,138,117,0.28);
     background: #fffefa; color: var(--brown); font: 13px 'Inter', sans-serif;
     width: 100%; box-sizing: border-box;
   }
   .cita-pago-form button {
-    padding: 9px 14px; border-radius: 8px; cursor: pointer;
+    padding: 10px 16px; border-radius: 8px; cursor: pointer;
     border: none; background: var(--olive); color: var(--off-white);
-    font: 600 12.5px 'Inter', sans-serif;
+    font: 600 13px 'Inter', sans-serif;
   }
   .cita-pago-form button:hover { background: var(--olive-dark); }
-  .cita-pago-msg { grid-column: 1 / -1; font: 12px 'Inter', sans-serif; color: #942e2e; }
+  .cita-pago-form .cita-pago-cancel {
+    background: transparent; color: var(--gray-soft); border: 1.5px solid rgba(154,138,117,0.28);
+  }
+  .cita-pago-form .cita-pago-cancel:hover { background: rgba(154,138,117,0.08); color: var(--brown); }
+  .cita-pago-msg { grid-column: 1 / -1; font: 12px 'Inter', sans-serif; color: #942e2e; min-height: 15px; }
+  @media (max-width: 480px) {
+    .cita-pago-form { grid-template-columns: 1fr; }
+  }
   .cita-modal-actions.admin-mode {
     flex-direction: column;
     align-items: stretch;
@@ -3311,36 +3358,71 @@
     } catch (_) {}
   }
 
-  // ── Estado de pago en el modal de cita (masajista y admin) ──
-  const pagoState = { bookingId: null, restante: 0, open: false };
+  // ── Pagos extras en el modal de cita (masajista y admin) ──
+  // Todas las citas de la página llegan ya pagadas por Stripe.
+  // El bloque "Pagos extras" registra propinas, productos y servicios
+  // adicionales cobrados durante o después del servicio.
+  const pagoState = { bookingId: null, open: false };
 
-  function renderPagoSection(b, totalFinal) {
-    const wrap = document.getElementById('cita-pago-estado');
+  const CONCEPTO_LABEL = {
+    propina: 'Propina',
+    producto: 'Producto vendido',
+    servicio_adicional: 'Servicio adicional',
+    otro: 'Otro'
+  };
+  const METODO_LABEL = {
+    efectivo: 'Efectivo',
+    tarjeta: 'Tarjeta',
+    transferencia: 'Transferencia',
+    otro: 'Otro'
+  };
+
+  function fmtFechaCorta(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+        + ' · ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    } catch (_) { return ''; }
+  }
+
+  function renderExtrasSection(b) {
+    const list = document.getElementById('cita-extras-list');
+    const countEl = document.getElementById('cita-extras-count');
+    const totalRow = document.getElementById('cita-extras-total-row');
+    const totalEl = document.getElementById('cita-extras-total');
+    if (!list) return;
+    // Cerrar form al re-renderizar
     const form = document.getElementById('cita-pago-form');
-    const badge = document.getElementById('cita-pago-badge');
-    const det = document.getElementById('cita-pago-detalle');
-    const btn = document.getElementById('cita-pago-btn');
-    if (!wrap) return;
-    form.style.display = 'none';
+    if (form) form.style.display = 'none';
     pagoState.open = false;
-    const estado = b.estado_pago || null;
-    if (!estado || !b.booking_id) { wrap.style.display = 'none'; return; }
-    wrap.style.display = 'flex';
-    pagoState.bookingId = b.booking_id;
-    const pagado = Number(b.total_pagado || 0);
-    pagoState.restante = Math.max(0, totalFinal - pagado);
-    if (estado === 'pagado') {
-      badge.innerHTML = '<span class="pago-badge pagado">Pagado</span>';
-      det.textContent = '';
-      btn.style.display = 'none';
-    } else if (estado === 'parcial') {
-      badge.innerHTML = '<span class="pago-badge parcial">Parcial</span>';
-      det.textContent = '$' + pagado.toLocaleString('es-MX') + ' de $' + totalFinal.toLocaleString('es-MX');
-      btn.style.display = '';
+    pagoState.bookingId = b.booking_id || null;
+    const extras = Array.isArray(b.extras) ? b.extras : [];
+    const total = Number(b.extras_total || 0);
+    if (!extras.length) {
+      list.innerHTML = '<div class="cita-extras-empty">Aún no hay pagos extras registrados.</div>';
+      countEl.textContent = '';
+      totalRow.style.display = 'none';
     } else {
-      badge.innerHTML = '<span class="pago-badge pendiente">Pendiente</span>';
-      det.textContent = '';
-      btn.style.display = '';
+      list.innerHTML = extras.map(e => {
+        const concepto = CONCEPTO_LABEL[e.concepto] || 'Pago';
+        const metodo = METODO_LABEL[e.metodo] || (e.metodo || '');
+        const monto = '$' + Number(e.monto || 0).toLocaleString('es-MX');
+        const fecha = fmtFechaCorta(e.created_at);
+        const notas = e.notas ? '<div class="extra-notas">' + escapeHtml(e.notas) + '</div>' : '';
+        const quien = e.registrado_por ? ' · ' + escapeHtml(e.registrado_por) : '';
+        return '<div class="cita-extra-item">'
+          +   '<div class="extra-head">'
+          +     '<span class="extra-concepto">' + escapeHtml(concepto) + '</span>'
+          +     '<span class="extra-monto">' + monto + '</span>'
+          +   '</div>'
+          +   '<div class="extra-meta">' + escapeHtml(metodo) + ' · ' + fecha + quien + '</div>'
+          +   notas
+          + '</div>';
+      }).join('');
+      countEl.textContent = '(' + extras.length + ')';
+      totalRow.style.display = '';
+      totalEl.textContent = '$' + total.toLocaleString('es-MX');
     }
   }
 
@@ -3350,7 +3432,10 @@
     form.style.display = pagoState.open ? 'grid' : 'none';
     if (pagoState.open) {
       const monto = document.getElementById('cita-pago-monto');
-      monto.value = pagoState.restante > 0 ? pagoState.restante : '';
+      monto.value = '';
+      document.getElementById('cita-pago-notas').value = '';
+      document.getElementById('cita-pago-concepto').value = 'propina';
+      document.getElementById('cita-pago-metodo').value = 'efectivo';
       document.getElementById('cita-pago-msg').textContent = '';
       setTimeout(() => monto.focus(), 30);
     }
@@ -3358,10 +3443,13 @@
   window.toggleRegistrarPago = toggleRegistrarPago;
 
   async function submitRegistrarPago() {
+    const concepto = document.getElementById('cita-pago-concepto').value;
     const monto = Number(document.getElementById('cita-pago-monto').value);
     const metodo = document.getElementById('cita-pago-metodo').value;
+    const notas = (document.getElementById('cita-pago-notas').value || '').trim();
     const msg = document.getElementById('cita-pago-msg');
     const btn = document.getElementById('cita-pago-submit');
+    if (!concepto) { msg.textContent = 'Elige un concepto.'; return; }
     if (!monto || monto <= 0) { msg.textContent = 'Escribe un monto válido.'; return; }
     if (!pagoState.bookingId) return;
     btn.disabled = true; btn.textContent = 'Guardando…'; msg.textContent = '';
@@ -3370,34 +3458,27 @@
       const res = await fetch(PAGO_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ bookingId: pagoState.bookingId, monto, metodo })
+        body: JSON.stringify({ bookingId: pagoState.bookingId, monto, metodo, concepto, notas })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.detail || 'No se pudo registrar el pago.');
-      // Actualizar badge sin recargar
-      const badge = document.getElementById('cita-pago-badge');
-      const det = document.getElementById('cita-pago-detalle');
-      const btnReg = document.getElementById('cita-pago-btn');
-      const totalPagado = Number(data.total_pagado || 0);
-      if (data.estado_pago === 'pagado') {
-        badge.innerHTML = '<span class="pago-badge pagado">Pagado</span>';
-        det.textContent = '';
-        btnReg.style.display = 'none';
-      } else {
-        badge.innerHTML = '<span class="pago-badge parcial">Parcial</span>';
-        det.textContent = '$' + totalPagado.toLocaleString('es-MX') + ' registrados';
-        pagoState.restante = Math.max(0, pagoState.restante - monto);
-      }
       document.getElementById('cita-pago-form').style.display = 'none';
       pagoState.open = false;
-      showToast('Pago registrado.', 'ok');
-      // Refrescar datos de fondo (admin o masajista)
+      showToast('Pago extra registrado.', 'ok');
+      // Refresca datos de fondo — el modal se re-pinta cuando llega la respuesta
       if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
       else if (typeof fetchCitas === 'function') { try { fetchCitas({ silent: true }); } catch (_) {} }
+      // Refresco optimista inmediato de la sección con el nuevo total
+      const totalRow = document.getElementById('cita-extras-total-row');
+      const totalEl = document.getElementById('cita-extras-total');
+      if (totalRow && totalEl && data.extras_total != null) {
+        totalRow.style.display = '';
+        totalEl.textContent = '$' + Number(data.extras_total).toLocaleString('es-MX');
+      }
     } catch (err) {
       msg.textContent = err.message || 'Error al registrar.';
     } finally {
-      btn.disabled = false; btn.textContent = 'Guardar';
+      btn.disabled = false; btn.textContent = 'Guardar pago';
     }
   }
   window.submitRegistrarPago = submitRegistrarPago;
@@ -3641,13 +3722,10 @@
     const color = ucalEventColor(ev);
     const bg = ucalHexToRgba(color, ev.kind === 'pool' ? 0.10 : 0.14);
     const s = ev.slot;
-    const pagoDot = (s.estado_pago && s.estado_pago !== 'pagado') || (!s.estado_pago && false)
-      ? '<span class="ev-pago-dot" title="Pago pendiente"></span>' : '';
     const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
     const showSvc = height > 7; // solo si el chip tiene altura suficiente
     return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
       + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
-      + pagoDot
       + ucalSexoBadge(s)
       + ucalLiveDot(s)
       + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
@@ -3751,12 +3829,13 @@
   }
   window.ucalSelectDate = ucalSelectDate;
 
+  // Badge sutil que aparece SOLO cuando la cita tiene pagos extras registrados
+  // (propinas, productos, servicios adicionales cobrados en cabina).
   function ucalPagoBadge(slot) {
-    const e = slot.estado_pago;
-    if (!e) return '';
-    if (e === 'pagado') return '<span class="pago-badge pagado">Pagado</span>';
-    if (e === 'parcial') return '<span class="pago-badge parcial">Parcial</span>';
-    return '<span class="pago-badge pendiente">Pendiente</span>';
+    const t = Number(slot.extras_total || 0);
+    if (!t) return '';
+    return '<span class="pago-badge pagado" title="Pagos extras registrados">+$'
+      + t.toLocaleString('es-MX') + ' extras</span>';
   }
 
   // ── Popover de detalle ──
@@ -3834,8 +3913,8 @@
     _rowsExtra.forEach(r => rows.push(r));
     if (sexoInfo.letra) rows.push('<div class="row"><span class="lbl">Pidió</span>' + escapeHtml(sexoInfo.completo) + '</div>');
     const total = (Number(s.precio_total || s.precio_mxn) || 0) + (Number(s.costo_traslado) || 0);
-    if (total > 0) rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + '</div>');
-    if (s.estado_pago) rows.push('<div class="row"><span class="lbl">Pago</span>' + ucalPagoBadge(s) + (Number(s.total_pagado || 0) > 0 ? ' <span style="color:var(--gray-soft);font-size:11.5px">($' + Number(s.total_pagado).toLocaleString('es-MX') + ')</span>' : '') + '</div>');
+    if (total > 0) rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + ' <span class="pago-badge pagado" style="font-size:9.5px;padding:2px 7px;">Pagado en línea</span></div>');
+    if (Number(s.extras_total || 0) > 0) rows.push('<div class="row"><span class="lbl">Extras</span>+$' + Number(s.extras_total).toLocaleString('es-MX') + ' <span style="color:var(--gray-soft);font-size:11.5px">(' + (s.extras_count || 0) + ')</span></div>');
     // Breakdown por persona si aplica
     let personasHtml = '';
     if (Array.isArray(s.personas_servicios) && s.personas_servicios.length > 1) {
@@ -4791,7 +4870,7 @@
     }
     const totalFinal = (Number(precioSvc) || 0) + (Number(costoTraslado) || 0);
     document.getElementById('cita-precio-total').textContent = totalFinal > 0 ? '$' + totalFinal.toLocaleString('es-MX') : '—';
-    renderPagoSection(b, totalFinal);
+    renderExtrasSection(b);
 
     // ─── Sección 4: Lugar ───
     document.getElementById('cita-modalidad').textContent = modTxt || 'Individual';
@@ -6219,31 +6298,63 @@
       <div id="cita-services">—</div>
     </div>
 
-    <!-- Sección 3: Pago -->
+    <!-- Sección 3: Cobro del servicio -->
     <div class="cita-modal-section">
-      <div class="cita-modal-section-title">Cobro</div>
+      <div class="cita-modal-section-title">Cobro del servicio</div>
       <div class="cita-modal-precio-grid">
         <div class="cita-precio-row"><span>Servicios</span><span id="cita-precio-svc">—</span></div>
         <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
-        <div class="cita-precio-row cita-precio-total"><span>TOTAL A COBRAR</span><span id="cita-precio-total">—</span></div>
-        <div class="cita-pago-estado" id="cita-pago-estado" style="display:none">
-          <span id="cita-pago-badge"></span>
-          <span id="cita-pago-detalle" style="font-size:12px;color:var(--gray-soft);"></span>
-          <button type="button" id="cita-pago-btn" class="cita-pago-btn" onclick="toggleRegistrarPago()">Registrar pago</button>
+        <div class="cita-precio-row cita-precio-total"><span>Total del servicio</span><span id="cita-precio-total">—</span></div>
+        <div class="cita-servicio-pagado-row">
+          <span class="pago-badge pagado">Pagado en línea</span>
         </div>
-        <div class="cita-pago-form" id="cita-pago-form" style="display:none">
-          <label><span>Monto (MXN)</span><input type="number" id="cita-pago-monto" min="1" step="1"></label>
-          <label><span>Método</span>
-            <select id="cita-pago-metodo">
-              <option value="efectivo">Efectivo</option>
-              <option value="tarjeta">Tarjeta</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="otro">Otro</option>
-            </select>
-          </label>
-          <button type="button" id="cita-pago-submit" onclick="submitRegistrarPago()">Guardar</button>
-          <div class="cita-pago-msg" id="cita-pago-msg"></div>
-        </div>
+      </div>
+    </div>
+
+    <!-- Sección 3b: Pagos extras -->
+    <div class="cita-modal-section" id="cita-extras-section">
+      <div class="cita-modal-section-title cita-extras-title">
+        <span>Pagos extras</span>
+        <span class="cita-extras-count" id="cita-extras-count"></span>
+      </div>
+      <div id="cita-extras-list" class="cita-extras-list">
+        <div class="cita-extras-empty">Aún no hay pagos extras registrados.</div>
+      </div>
+      <div class="cita-extras-total-row" id="cita-extras-total-row" style="display:none">
+        <span>Total extras</span>
+        <span id="cita-extras-total">$0</span>
+      </div>
+      <div class="cita-extras-action">
+        <button type="button" id="cita-pago-btn" class="cita-pago-btn" onclick="toggleRegistrarPago()">
+          <span class="btn-plus">+</span> Registrar pago extra
+        </button>
+      </div>
+      <div class="cita-pago-form" id="cita-pago-form" style="display:none">
+        <label class="cita-pago-full">
+          <span>Concepto</span>
+          <select id="cita-pago-concepto">
+            <option value="propina">Propina</option>
+            <option value="producto">Producto vendido</option>
+            <option value="servicio_adicional">Servicio adicional</option>
+            <option value="otro">Otro</option>
+          </select>
+        </label>
+        <label><span>Monto (MXN)</span><input type="number" id="cita-pago-monto" min="1" step="1" placeholder="Ej. 100"></label>
+        <label><span>Método</span>
+          <select id="cita-pago-metodo">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="otro">Otro</option>
+          </select>
+        </label>
+        <label class="cita-pago-full">
+          <span>Notas (opcional)</span>
+          <input type="text" id="cita-pago-notas" maxlength="140" placeholder="Detalle breve">
+        </label>
+        <button type="button" id="cita-pago-submit" onclick="submitRegistrarPago()">Guardar pago</button>
+        <button type="button" class="cita-pago-cancel" onclick="toggleRegistrarPago()">Cancelar</button>
+        <div class="cita-pago-msg cita-pago-full" id="cita-pago-msg"></div>
       </div>
     </div>
 
