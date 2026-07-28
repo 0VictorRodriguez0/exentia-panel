@@ -1782,6 +1782,8 @@
     z-index: 1000;
     animation: fadeIn 180ms ease-out;
   }
+  /* Sub-modales (se abren desde encima del cita-modal): siempre por delante */
+  #admin-reschedule-modal, #historico-modal, #terapeuta-modal { z-index: 1200; }
   .cita-modal-backdrop {
     position: absolute; inset: 0;
     background: rgba(92,58,30,0.45);
