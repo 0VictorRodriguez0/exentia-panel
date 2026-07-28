@@ -1550,6 +1550,32 @@
   .pago-badge.pendiente { background: rgba(200,160,79,0.18); color: #7a5b1e; }
   .pago-badge.parcial { background: rgba(63,110,125,0.15); color: #2c5460; }
   .pago-badge.pagado { background: rgba(30,105,45,0.13); color: #1b5e20; }
+  .ucal-live-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 6px; border-radius: 999px;
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .ucal-live-badge.live-live { background: rgba(200,110,20,0.15); color: #8a4b00; animation: livePulse 1.6s ease-in-out infinite; }
+  .ucal-live-badge.live-done { background: rgba(30,105,45,0.14); color: #1b5e20; }
+  .ucal-live-badge .live-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+  .pop-live-banner {
+    padding: 8px 12px; border-radius: 8px; margin-bottom: 8px;
+    font: 12.5px 'Inter', sans-serif;
+  }
+  .pop-live-banner.live-live { background: rgba(200,110,20,0.12); color: #8a4b00; border-left: 3px solid #c8621b; }
+  .pop-live-banner.live-done { background: rgba(30,105,45,0.10); color: #1b5e20; border-left: 3px solid #2e7d32; }
+  .admin-serv-banner {
+    padding: 10px 14px; border-radius: 10px;
+    font: 13px 'Inter', sans-serif; line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .admin-serv-banner.live-live { background: rgba(200,110,20,0.10); color: #8a4b00; border-left: 4px solid #c8621b; }
+  .admin-serv-banner.live-done { background: rgba(30,105,45,0.10); color: #1b5e20; border-left: 4px solid #2e7d32; }
+  .cita-btn-primary:disabled, .cita-btn-danger:disabled {
+    opacity: 0.45; cursor: not-allowed;
+  }
   .cita-pago-estado {
     display: flex; align-items: center; gap: 10px;
     padding-top: 8px; margin-top: 6px;
@@ -3608,10 +3634,24 @@
     return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
       + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
       + pagoDot
+      + ucalLiveDot(s)
       + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
       + '<div class="ev-cliente">' + escapeHtml(s.cliente || '—') + '</div>'
       + (showSvc ? '<div class="ev-svc">' + escapeHtml(s.servicios_label || '') + '</div>' : '')
       + '</div>';
+  }
+
+  // Estado visual del servicio (iniciado / finalizado) para chips y agenda
+  function ucalServicioEstado(slot) {
+    if (!slot) return null;
+    if (slot.servicio_terminado_at) return { key: 'done', label: 'Finalizada', icon: '✔', color: '#1b5e20', bg: 'rgba(30,105,45,0.14)' };
+    if (slot.servicio_iniciado_at) return { key: 'live', label: 'En curso', icon: '●', color: '#8a4b00', bg: 'rgba(200,110,20,0.14)' };
+    return null;
+  }
+  function ucalLiveDot(slot) {
+    const est = ucalServicioEstado(slot);
+    if (!est) return '';
+    return '<span class="ucal-live-badge live-' + est.key + '" title="' + est.label + '">' + est.icon + '<span class="live-lbl">' + est.label + '</span></span>';
   }
 
   // Vista mensual móvil (estilo calendario de teléfono):
@@ -3663,7 +3703,7 @@
           const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
           return '<div class="ucal-agenda-row' + poolCls + '" style="border-left-color:' + color + '" onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
             + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
-            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + '</div>'
+            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + ucalLiveDot(s) + '</div>'
             + '<div class="svc">' + escapeHtml(s.servicios_label || '') + '</div></div>'
             + ucalPagoBadge(s)
             + '</div>';
@@ -3753,13 +3793,23 @@
     const telHtml = tel
       ? '<a href="https://wa.me/' + telDigits + '" target="_blank" rel="noopener" class="pop-cliente-tel">' + escapeHtml(tel) + ' · WhatsApp ↗</a>'
       : '—';
-    const rows = [
-      '<div class="row"><span class="lbl">Hora</span><b>' + escapeHtml(fmtHora(s.hora)) + '</b> ' + dur + '</div>',
+    const estServ = ucalServicioEstado(s);
+    const rows = [];
+    if (estServ) {
+      rows.push('<div class="pop-live-banner live-' + estServ.key + '"><b>' + estServ.icon + ' ' + estServ.label + '</b>'
+        + (estServ.key === 'live' && s.servicio_iniciado_at ? ' · desde ' + fmtHora((new Date(s.servicio_iniciado_at)).toTimeString().slice(0,5)) : '')
+        + (estServ.key === 'done' && s.servicio_terminado_at ? ' · ' + fmtHora((new Date(s.servicio_iniciado_at || s.servicio_terminado_at)).toTimeString().slice(0,5)) + ' – ' + fmtHora((new Date(s.servicio_terminado_at)).toTimeString().slice(0,5)) : '')
+        + '</div>');
+    }
+    rows.push('<div class="row"><span class="lbl">Hora</span><b>' + escapeHtml(fmtHora(s.hora)) + '</b> ' + dur + '</div>');
+    const _rowsExtra = [
       '<div class="row"><span class="lbl">Cupo</span>' + escapeHtml(masajista) + '</div>',
       '<div class="row"><span class="lbl">Teléfono</span>' + telHtml + '</div>',
       '<div class="row"><span class="lbl">Servicios</span>' + escapeHtml(s.servicios_label || '—') + '</div>',
       '<div class="row"><span class="lbl">Lugar</span>' + tipo + (s.direccion_libre ? ' · ' + escapeHtml(s.direccion_libre) : '') + '</div>',
     ];
+    // (rows completa se ensambla más abajo)
+    _rowsExtra.forEach(r => rows.push(r));
     if (sexoInfo.letra) rows.push('<div class="row"><span class="lbl">Pidió</span>' + escapeHtml(sexoInfo.completo) + '</div>');
     const total = (Number(s.precio_total || s.precio_mxn) || 0) + (Number(s.costo_traslado) || 0);
     if (total > 0) rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + '</div>');
@@ -4785,11 +4835,23 @@
       if (adminMode) {
         actions.classList.add('admin-mode');
         const slotId = b.slot_id || b.id;
+        const _servEst = (typeof ucalServicioEstado === 'function') ? ucalServicioEstado(b) : null;
+        const _bloqueado = !!_servEst;  // si ya inició o terminó, el admin NO puede editar
+        if (_servEst) {
+          const banner = document.createElement('div');
+          banner.className = 'admin-serv-banner live-' + _servEst.key;
+          const hIni = b.servicio_iniciado_at ? fmtHora(new Date(b.servicio_iniciado_at).toTimeString().slice(0,5)) : '';
+          const hFin = b.servicio_terminado_at ? fmtHora(new Date(b.servicio_terminado_at).toTimeString().slice(0,5)) : '';
+          banner.innerHTML = '<b>' + _servEst.icon + ' ' + _servEst.label + '</b>'
+            + (_servEst.key === 'live' ? ' — el masajista inició el servicio' + (hIni ? ' a las ' + hIni : '') + '. No se puede cambiar ni eliminar.' : '')
+            + (_servEst.key === 'done' ? ' — el servicio terminó' + (hIni && hFin ? ' (' + hIni + ' – ' + hFin + ')' : '') + '. Solo lectura.' : '');
+          actions.appendChild(banner);
+        }
         const currentTid = opts.terapeuta_id || b.terapeuta_id || null;
         // Reasignar masajista (dropdown)
         const reassignWrap = document.createElement('div');
         reassignWrap.className = 'admin-reassign-wrap';
-        reassignWrap.innerHTML = renderReassignRow(slotId, currentTid);
+        reassignWrap.innerHTML = renderReassignRow(slotId, currentTid, _bloqueado);
         actions.appendChild(reassignWrap);
         // Fila de botones
         const btnRow = document.createElement('div');
@@ -4797,12 +4859,16 @@
         const reschedule = document.createElement('button');
         reschedule.className = 'cita-btn-primary';
         reschedule.textContent = 'Cambiar horario';
-        reschedule.addEventListener('click', () => openAdminRescheduleModal(b, opts.terapeuta_id));
+        reschedule.disabled = _bloqueado;
+        if (_bloqueado) reschedule.title = 'No se puede — el servicio ya inició';
+        reschedule.addEventListener('click', () => { if (!_bloqueado) openAdminRescheduleModal(b, opts.terapeuta_id); });
         btnRow.appendChild(reschedule);
         const del = document.createElement('button');
         del.className = 'cita-btn-danger';
         del.textContent = 'Eliminar cita';
-        del.addEventListener('click', () => showAdminDeleteConfirm(b, del, btnRow));
+        del.disabled = _bloqueado;
+        if (_bloqueado) del.title = 'No se puede — el servicio ya inició';
+        del.addEventListener('click', () => { if (!_bloqueado) showAdminDeleteConfirm(b, del, btnRow); });
         btnRow.appendChild(del);
         actions.appendChild(btnRow);
       }
@@ -5211,14 +5277,14 @@
   }
   window.submitAdminReschedule = submitAdminReschedule;
 
-  function renderReassignRow(slotId, currentTid) {
+  function renderReassignRow(slotId, currentTid, disabled) {
     const ts = (adminState.data && adminState.data.terapeutas) || [];
     const opts = ['<option value="">Sin asignar (pool)</option>']
       .concat(ts.filter(t => t.activo !== false).map(t =>
         '<option value="' + t.id + '"' + (t.id === currentTid ? ' selected' : '') + '>' + escapeHtml(t.nombre || '—') + '</option>'));
     return '<label class="admin-reassign-label">Masajista</label>'
-      + '<select class="admin-reassign-select" id="admin-reassign-select" data-slot-id="' + slotId + '" onchange="submitAdminReassign(this)">' + opts.join('') + '</select>'
-      + '<span class="admin-reassign-status" id="admin-reassign-status"></span>';
+      + '<select class="admin-reassign-select" id="admin-reassign-select" data-slot-id="' + slotId + '" onchange="submitAdminReassign(this)"' + (disabled ? ' disabled' : '') + '>' + opts.join('') + '</select>'
+      + '<span class="admin-reassign-status" id="admin-reassign-status">' + (disabled ? 'Bloqueado' : '') + '</span>';
   }
 
   async function submitAdminReassign(sel) {
