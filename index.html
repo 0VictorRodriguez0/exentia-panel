@@ -1578,6 +1578,42 @@
   }
   .admin-serv-banner.live-live { background: rgba(200,110,20,0.10); color: #8a4b00; border-left: 4px solid #c8621b; }
   .admin-serv-banner.live-done { background: rgba(30,105,45,0.10); color: #1b5e20; border-left: 4px solid #2e7d32; }
+  /* Banner + badge: cita fuera del área de cobertura */
+  .zona-banner {
+    padding: 12px 16px; border-radius: 10px;
+    background: rgba(201,138,122,0.14); border-left: 4px solid #c98a7a;
+    font: 13px 'Inter', sans-serif; color: #7a4033; line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .zona-banner b { display: block; margin-bottom: 4px; font-size: 13.5px; }
+  .zona-banner .zona-body { color: #5c3a1e; font-size: 12.5px; }
+  .zona-banner .zona-actions {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .zona-banner .zona-btn-ok, .zona-banner .zona-btn-cancel {
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    font: 600 12.5px 'Inter', sans-serif; border: 1.5px solid;
+  }
+  .zona-banner .zona-btn-ok {
+    background: #b5b062; color: #fdfbf4; border-color: #b5b062;
+  }
+  .zona-banner .zona-btn-ok:hover { background: #7d7c3f; border-color: #7d7c3f; }
+  .zona-banner .zona-btn-cancel {
+    background: transparent; color: #a03a2a; border-color: #d18072;
+  }
+  .zona-banner .zona-btn-cancel:hover { background: rgba(160,58,42,0.08); }
+  .zona-banner .zona-msg { font: 12px 'Inter', sans-serif; margin-top: 8px; min-height: 15px; color: #a03a2a; }
+  .zona-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 999px;
+    background: rgba(201,138,122,0.18); color: #7a4033;
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.3px;
+    margin-left: 4px; vertical-align: middle;
+  }
+  .ucal-ev .zona-badge {
+    position: absolute; bottom: 3px; right: 3px;
+    padding: 1px 5px; font-size: 8.5px; margin: 0;
+  }
   .cita-btn-primary:disabled, .cita-btn-danger:disabled {
     opacity: 0.45; cursor: not-allowed;
   }
@@ -3483,6 +3519,94 @@
   }
   window.submitRegistrarPago = submitRegistrarPago;
 
+  // ── Banner "Fuera de zona con tarifa" en el modal de cita ──
+  // Aparece cuando b.en_area_cobertura === false. Masajista lo ve informativo.
+  // Admin (Yaz) ve dos botones: "Sí atendemos" o "Cancelar y reembolsar".
+  const zonaState = { bookingId: null, adminMode: false };
+
+  function renderZonaBanner(b, adminMode) {
+    const wrap = document.getElementById('cita-zona-banner');
+    if (!wrap) return;
+    if (!b || b.en_area_cobertura !== false) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    zonaState.bookingId = b.booking_id || b.id;
+    zonaState.adminMode = !!adminMode;
+    wrap.style.display = '';
+    if (adminMode) {
+      wrap.innerHTML = ''
+        + '<div class="zona-banner">'
+        +   '<b>Cita fuera del área de cobertura</b>'
+        +   '<div class="zona-body">Esta dirección quedó fuera de las zonas con tarifa fija (Z1/Z2/Z3). '
+        +     'Antes de mandar a una masajista decide si el equipo la atiende o si se cancela y se reembolsa al cliente.</div>'
+        +   '<div class="zona-actions">'
+        +     '<button type="button" class="zona-btn-ok" onclick="submitAprobarZona()">Sí atendemos</button>'
+        +     '<button type="button" class="zona-btn-cancel" onclick="submitCancelarFueraCobertura()">Cancelar y reembolsar</button>'
+        +   '</div>'
+        +   '<div class="zona-msg" id="zona-msg"></div>'
+        + '</div>';
+    } else {
+      wrap.innerHTML = ''
+        + '<div class="zona-banner">'
+        +   '<b>Cita fuera del área de cobertura</b>'
+        +   '<div class="zona-body">Esta dirección quedó fuera de las zonas con tarifa fija. '
+        +     'Yaz está evaluando si se atiende. No tomes esta cita hasta que sea aprobada.</div>'
+        + '</div>';
+    }
+  }
+
+  async function submitAprobarZona() {
+    if (!zonaState.bookingId) return;
+    const msg = document.getElementById('zona-msg');
+    const btns = document.querySelectorAll('#cita-zona-banner button');
+    btns.forEach(b => b.disabled = true);
+    if (msg) msg.textContent = '';
+    try {
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ action: 'approve_zona', booking_id: zonaState.bookingId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error((data.result && data.result.status) || 'Error');
+      showToast('Zona aprobada. La cita continúa el flujo normal.', 'ok');
+      // Ocultar banner
+      const wrap = document.getElementById('cita-zona-banner');
+      if (wrap) { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+      // Refrescar datos
+      if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
+    } catch (err) {
+      if (msg) msg.textContent = 'No se pudo aprobar la zona. Reintenta.';
+      btns.forEach(b => b.disabled = false);
+    }
+  }
+  window.submitAprobarZona = submitAprobarZona;
+
+  async function submitCancelarFueraCobertura() {
+    if (!zonaState.bookingId) return;
+    if (!confirm('¿Cancelar la cita y disparar reembolso?\n\n• El cliente recibirá un correo con la política de 5 a 10 días hábiles.\n• Se te avisará por WhatsApp para que emitas el reembolso en Stripe manualmente.\n• Los cupos y appointments GHL se eliminan.')) return;
+    const msg = document.getElementById('zona-msg');
+    const btns = document.querySelectorAll('#cita-zona-banner button');
+    btns.forEach(b => b.disabled = true);
+    if (msg) msg.textContent = 'Cancelando…';
+    try {
+      const jwt = localStorage.getItem(STORAGE_KEY);
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ action: 'cancel_booking', booking_id: zonaState.bookingId, motivo: 'fuera_de_cobertura' })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error((data.result && data.result.status) || 'Error');
+      showToast('Cita cancelada. Correo enviado al cliente y aviso a Yaz por WhatsApp.', 'ok');
+      closeCitaModal();
+      if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
+    } catch (err) {
+      if (msg) msg.textContent = 'No se pudo cancelar. Reintenta.';
+      btns.forEach(b => b.disabled = false);
+    }
+  }
+  window.submitCancelarFueraCobertura = submitCancelarFueraCobertura;
+
   // ── Calendario unificado: todas las masajistas + pool en una sola vista ──
   function _avatarInitials(nombre) {
     const parts = (nombre || '').split(/\s+/).filter(Boolean);
@@ -3726,6 +3850,7 @@
     const showSvc = height > 7; // solo si el chip tiene altura suficiente
     return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
       + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
+      + ucalZonaBadge(s)
       + ucalSexoBadge(s)
       + ucalLiveDot(s)
       + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
@@ -3745,6 +3870,12 @@
     const est = ucalServicioEstado(slot);
     if (!est) return '';
     return '<span class="ucal-live-badge live-' + est.key + '" title="' + est.label + '">' + est.icon + '<span class="live-lbl">' + est.label + '</span></span>';
+  }
+  // Badge para cita cuya dirección quedó FUERA del área con tarifa (canela en el mapa).
+  // Sirve al masajista/admin para saber que la zona requiere confirmación.
+  function ucalZonaBadge(slot) {
+    if (!slot || slot.en_area_cobertura !== false) return '';
+    return '<span class="zona-badge" title="Fuera de la zona con tarifa — Yaz debe confirmar">Fuera zona</span>';
   }
   // Badge compacto de preferencia de sexo (M/H/I) para chips del calendario admin
   function ucalSexoBadge(slot) {
@@ -3803,7 +3934,7 @@
           const poolCls = ev.kind === 'pool' ? ' is-pool' : '';
           return '<div class="ucal-agenda-row' + poolCls + '" style="border-left-color:' + color + '" onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
             + '<span class="hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
-            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + ucalSexoBadge(s) + ucalLiveDot(s) + '</div>'
+            + '<div class="mid"><div class="nom">' + escapeHtml(s.cliente || '—') + ucalZonaBadge(s) + ucalSexoBadge(s) + ucalLiveDot(s) + '</div>'
             + '<div class="svc">' + escapeHtml(s.servicios_label || '') + '</div></div>'
             + ucalPagoBadge(s)
             + '</div>';
@@ -4896,6 +5027,7 @@
       direccionWrap.style.display = 'none';
     }
     document.getElementById('cita-zona').textContent = b.zona || '—';
+    renderZonaBanner(b, adminMode);
 
     // ─── Sección 5: Notas ───
     const notasCliWrap = document.getElementById('cita-notas-wrap');
@@ -6373,6 +6505,7 @@
         <div class="cita-modal-label">Zona</div>
         <div class="cita-modal-val" id="cita-zona">—</div>
       </div>
+      <div id="cita-zona-banner" style="display:none;margin-top:14px;"></div>
     </div>
 
     <!-- Sección 5: Notas -->
