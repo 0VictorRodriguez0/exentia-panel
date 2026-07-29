@@ -1748,13 +1748,31 @@
   }
   .admin-action-row > button { flex: 1 1 140px; }
   .admin-delete-confirm {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
     flex: 1 1 100%;
     padding: 6px 10px 6px 12px; border-radius: 10px;
     background: rgba(181,59,59,0.08); border: 1.5px dashed rgba(181,59,59,0.35);
     font: 600 12.5px 'Inter', sans-serif; color: #942e2e;
     animation: adminConfirmIn .12s ease-out;
   }
+  .admin-delete-confirm.is-group { align-items: stretch; flex-direction: column; padding: 12px; }
+  .admin-delete-confirm.is-group .del-header {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .admin-delete-confirm .del-title { flex: 1 1 auto; }
+  .admin-delete-confirm .del-list {
+    width: 100%; margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.55); border: 1px solid rgba(181,59,59,0.18);
+    font: 500 11.5px 'Inter', sans-serif; color: #5c3a1e;
+  }
+  .admin-delete-confirm .del-list-item {
+    display: flex; justify-content: space-between; gap: 12px; padding: 3px 0;
+  }
+  .admin-delete-confirm .del-list-item + .del-list-item {
+    border-top: 1px dashed rgba(181,59,59,0.15);
+  }
+  .admin-delete-confirm .del-list-item .del-hora { font-weight: 700; }
+  .admin-delete-confirm .del-list-item .del-tera { opacity: 0.78; font-size: 11px; }
   @keyframes adminConfirmIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
   /* Móvil: tira de días + agenda */
   /* Vista mensual móvil */
@@ -5501,14 +5519,62 @@
   }
   window.submitAdminReassign = submitAdminReassign;
 
+  // Devuelve lista de slots hermanos (mismo booking_id) — para el confirm de eliminación grupal
+  function _hermanosDelBooking(bookingId) {
+    if (!bookingId || !adminState || !adminState.bookingsById) return [];
+    const seen = new Set();
+    const out = [];
+    Object.values(adminState.bookingsById).forEach(entry => {
+      const b = entry && entry.booking;
+      if (!b || b.booking_id !== bookingId) return;
+      const key = b.slot_id || b.id;
+      if (seen.has(key)) return;
+      seen.add(key);
+      // resolver nombre de la masajista si está asignada
+      let tera = null;
+      const tid = entry.terapeuta_id || b.terapeuta_id;
+      if (tid && adminState.data && Array.isArray(adminState.data.terapeutas)) {
+        const t = adminState.data.terapeutas.find(x => x.id === tid);
+        if (t) tera = t.nombre;
+      }
+      out.push({ hora: b.hora, persona: b.persona_label || '', tera: tera || (entry.kind === 'pool' ? 'Sin asignar' : '') });
+    });
+    return out.sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+  }
+
   function showAdminDeleteConfirm(booking, deleteBtn, row) {
     if (row.querySelector('.admin-delete-confirm')) return;
     deleteBtn.style.display = 'none';
     const wrap = document.createElement('div');
     wrap.className = 'admin-delete-confirm';
-    wrap.innerHTML = '<span>¿Seguro?</span>'
-      + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
-      + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
+
+    const cuposTotal = Number(booking && booking.cupos_total) || 1;
+    const hermanos = cuposTotal > 1 ? _hermanosDelBooking(booking && booking.booking_id) : [];
+    const esGrupo = hermanos.length > 1;
+
+    if (esGrupo) {
+      wrap.classList.add('is-group');
+      const listaHtml = hermanos.map(h => {
+        const hora = h.hora ? fmtHora(h.hora) : '—';
+        const nombre = h.persona ? h.persona : 'Persona';
+        const tera = h.tera ? '<span class="del-tera">' + escapeHtml(h.tera) + '</span>' : '';
+        return '<div class="del-list-item">'
+          + '<span><span class="del-hora">' + hora + '</span> · ' + escapeHtml(nombre) + '</span>'
+          + tera
+          + '</div>';
+      }).join('');
+      wrap.innerHTML = ''
+        + '<div class="del-header">'
+        +   '<span class="del-title">Esta cita es de un grupo de <b>' + hermanos.length + '</b> personas. Al eliminar se borrarán <b>todas</b>:</span>'
+        +   '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar las ' + hermanos.length + '</button>'
+        +   '<button type="button" class="cita-btn-secondary admin-del-no">No</button>'
+        + '</div>'
+        + '<div class="del-list">' + listaHtml + '</div>';
+    } else {
+      wrap.innerHTML = '<span>¿Seguro?</span>'
+        + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
+        + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
+    }
     row.appendChild(wrap);
     wrap.querySelector('.admin-del-no').addEventListener('click', () => { wrap.remove(); deleteBtn.style.display = ''; });
     wrap.querySelector('.admin-del-yes').addEventListener('click', () => adminDeleteBooking(booking, wrap));
