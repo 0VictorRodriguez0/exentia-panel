@@ -1603,17 +1603,26 @@
   }
   .zona-banner .zona-btn-cancel:hover { background: rgba(160,58,42,0.08); }
   .zona-banner .zona-msg { font: 12px 'Inter', sans-serif; margin-top: 8px; min-height: 15px; color: #a03a2a; }
+  /* Badge grande e inconfundible: cita fuera del área de cobertura.
+     Mismo patrón visual que .ucal-live-badge (En curso / Finalizada). */
   .zona-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 7px; border-radius: 999px;
-    background: rgba(201,138,122,0.18); color: #7a4033;
-    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.3px;
-    margin-left: 4px; vertical-align: middle;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 999px;
+    background: rgba(201,138,122,0.22); color: #7a4033;
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px;
+    margin-left: 6px; vertical-align: middle;
+    border: 1px solid rgba(201,138,122,0.45);
+    animation: zonaPulse 2.4s ease-in-out infinite;
   }
+  .zona-badge .zona-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  @keyframes zonaPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+  /* En el chip del calendario semanal el badge va abajo a la derecha como
+     una pill completa (no un dot chiquito). */
   .ucal-ev .zona-badge {
-    position: absolute; bottom: 3px; right: 3px;
-    padding: 1px 5px; font-size: 8.5px; margin: 0;
+    position: absolute; bottom: 3px; left: 4px;
+    padding: 1px 6px; margin: 0;
   }
+  .ucal-ev .zona-badge .zona-lbl { font-size: 8.5px; }
   .cita-btn-primary:disabled, .cita-btn-danger:disabled {
     opacity: 0.45; cursor: not-allowed;
   }
@@ -3875,7 +3884,7 @@
   // Sirve al masajista/admin para saber que la zona requiere confirmación.
   function ucalZonaBadge(slot) {
     if (!slot || slot.en_area_cobertura !== false) return '';
-    return '<span class="zona-badge" title="Fuera de la zona con tarifa — Yaz debe confirmar">Fuera zona</span>';
+    return '<span class="zona-badge" title="Fuera de la zona con tarifa — Yaz debe confirmar">●<span class="zona-lbl">Fuera zona</span></span>';
   }
   // Badge compacto de preferencia de sexo (M/H/I) para chips del calendario admin
   function ucalSexoBadge(slot) {
