@@ -3543,7 +3543,7 @@
     // Aviso informativo idéntico para admin y masajista (los botones de eliminar
     // ya existen abajo en el modal admin; el flujo se dispara desde ahí).
     const bodyExtra = adminMode
-      ? 'Si decides no atender, elimina la cita desde el botón de abajo. Se cancelará, se enviará el correo al cliente y llegará el aviso de REEMBOLSAR EN STRIPE al grupo.'
+      ? 'Si decides no atender, elimina la cita desde el botón de abajo. Se le enviará un correo al cliente informándole que su cita no pudo tomarse y que se le hará el reembolso.'
       : 'Yaz está evaluando si se atiende. No tomes esta cita hasta que sea aprobada.';
     wrap.innerHTML = ''
       + '<div class="zona-banner">'
@@ -5506,11 +5506,7 @@
     deleteBtn.style.display = 'none';
     const wrap = document.createElement('div');
     wrap.className = 'admin-delete-confirm';
-    const esFuera = booking && booking.en_area_cobertura === false;
-    const msgConfirm = esFuera
-      ? '¿Eliminar y disparar reembolso?'
-      : '¿Seguro?';
-    wrap.innerHTML = '<span>' + msgConfirm + '</span>'
+    wrap.innerHTML = '<span>¿Seguro?</span>'
       + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
       + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
     row.appendChild(wrap);
