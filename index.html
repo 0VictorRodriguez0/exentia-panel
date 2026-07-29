@@ -1773,6 +1773,27 @@
   }
   .admin-delete-confirm .del-list-item .del-hora { font-weight: 700; }
   .admin-delete-confirm .del-list-item .del-tera { opacity: 0.78; font-size: 11px; }
+  .admin-delete-confirm .del-motivo-label {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-top: 10px;
+  }
+  .admin-delete-confirm .del-motivo-label span {
+    font: 500 11.5px 'Inter', sans-serif; color: #6c4a34; letter-spacing: 0.1px;
+  }
+  .admin-delete-confirm .del-motivo {
+    width: 100%; box-sizing: border-box;
+    padding: 8px 10px; border-radius: 8px;
+    border: 1.5px solid rgba(181,59,59,0.25);
+    background: #fffefa; color: var(--brown, #5c3a1e);
+    font: 13px 'Inter', sans-serif; resize: vertical; min-height: 46px;
+  }
+  .admin-delete-confirm .del-motivo:focus {
+    outline: none; border-color: rgba(181,59,59,0.55);
+    box-shadow: 0 0 0 3px rgba(181,59,59,0.10);
+  }
+  .admin-delete-confirm .del-actions {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap;
+  }
   @keyframes adminConfirmIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
   /* Móvil: tira de días + agenda */
   /* Vista mensual móvil */
@@ -5061,7 +5082,7 @@
         btnRow.appendChild(reschedule);
         const del = document.createElement('button');
         del.className = 'cita-btn-danger';
-        del.textContent = 'Eliminar cita';
+        del.textContent = 'Cancelar cita';
         del.disabled = _bloqueado;
         if (_bloqueado) del.title = 'No se puede — el servicio ya inició';
         del.addEventListener('click', () => { if (!_bloqueado) showAdminDeleteConfirm(b, del, btnRow); });
@@ -5546,15 +5567,20 @@
     if (row.querySelector('.admin-delete-confirm')) return;
     deleteBtn.style.display = 'none';
     const wrap = document.createElement('div');
-    wrap.className = 'admin-delete-confirm';
+    wrap.className = 'admin-delete-confirm is-group';
 
     const cuposTotal = Number(booking && booking.cupos_total) || 1;
     const hermanos = cuposTotal > 1 ? _hermanosDelBooking(booking && booking.booking_id) : [];
     const esGrupo = hermanos.length > 1;
 
+    const tituloBase = esGrupo
+      ? 'Esta cita es de un grupo de <b>' + hermanos.length + '</b> personas. Se cancelarán <b>todas</b>. Se le enviará al cliente un correo avisando y del reembolso.'
+      : 'Se cancelará la cita y se le enviará al cliente un correo avisando y del reembolso.';
+    const btnLabel = esGrupo ? ('Sí, cancelar las ' + hermanos.length) : 'Sí, cancelar';
+
+    let listaHtml = '';
     if (esGrupo) {
-      wrap.classList.add('is-group');
-      const listaHtml = hermanos.map(h => {
+      listaHtml = '<div class="del-list">' + hermanos.map(h => {
         const hora = h.hora ? fmtHora(h.hora) : '—';
         const nombre = h.persona ? h.persona : 'Persona';
         const tera = h.tera ? '<span class="del-tera">' + escapeHtml(h.tera) + '</span>' : '';
@@ -5562,61 +5588,69 @@
           + '<span><span class="del-hora">' + hora + '</span> · ' + escapeHtml(nombre) + '</span>'
           + tera
           + '</div>';
-      }).join('');
-      wrap.innerHTML = ''
-        + '<div class="del-header">'
-        +   '<span class="del-title">Esta cita es de un grupo de <b>' + hermanos.length + '</b> personas. Al eliminar se borrarán <b>todas</b>:</span>'
-        +   '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar las ' + hermanos.length + '</button>'
-        +   '<button type="button" class="cita-btn-secondary admin-del-no">No</button>'
-        + '</div>'
-        + '<div class="del-list">' + listaHtml + '</div>';
-    } else {
-      wrap.innerHTML = '<span>¿Seguro?</span>'
-        + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
-        + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
+      }).join('') + '</div>';
     }
+
+    wrap.innerHTML = ''
+      + '<div class="del-header">'
+      +   '<span class="del-title">' + tituloBase + '</span>'
+      + '</div>'
+      + listaHtml
+      + '<label class="del-motivo-label">'
+      +   '<span>Motivo (opcional, solo para historial interno):</span>'
+      +   '<textarea class="del-motivo" rows="2" maxlength="240" placeholder="Ej. cliente no contestó, choque de agenda, etc."></textarea>'
+      + '</label>'
+      + '<div class="del-actions">'
+      +   '<button type="button" class="cita-btn-secondary admin-del-no">No</button>'
+      +   '<button type="button" class="cita-btn-danger admin-del-yes">' + btnLabel + '</button>'
+      + '</div>';
+
     row.appendChild(wrap);
     wrap.querySelector('.admin-del-no').addEventListener('click', () => { wrap.remove(); deleteBtn.style.display = ''; });
-    wrap.querySelector('.admin-del-yes').addEventListener('click', () => adminDeleteBooking(booking, wrap));
+    wrap.querySelector('.admin-del-yes').addEventListener('click', () => {
+      const motivoLibre = (wrap.querySelector('.del-motivo').value || '').trim();
+      adminCancelBooking(booking, wrap, motivoLibre);
+    });
   }
   window.showAdminDeleteConfirm = showAdminDeleteConfirm;
 
-  async function adminDeleteBooking(booking, confirmWrap) {
+  async function adminCancelBooking(booking, confirmWrap, motivoLibre) {
     if (!booking) return;
     const bookingId = booking.booking_id || booking.id;
     if (!bookingId) { showToast('No se encontró el ID de la cita.', 'warn'); return; }
     if (confirmWrap) {
       const yes = confirmWrap.querySelector('.admin-del-yes');
-      if (yes) { yes.disabled = true; yes.textContent = 'Eliminando…'; }
+      if (yes) { yes.disabled = true; yes.textContent = 'Cancelando…'; }
     }
+    // Motivo interno: fuera de zona tiene prioridad; sino admin_cancel + texto libre si hay
+    let motivo = (booking && booking.en_area_cobertura === false) ? 'fuera_de_cobertura' : 'admin_cancel';
+    if (motivoLibre) motivo += ': ' + motivoLibre;
     const jwt = localStorage.getItem(STORAGE_KEY);
     try {
       const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({
-          action: 'delete_booking',
-          booking_id: bookingId,
-          motivo: (booking && booking.en_area_cobertura === false) ? 'fuera_de_cobertura' : null
-        }),
+        body: JSON.stringify({ action: 'cancel_booking', booking_id: bookingId, motivo: motivo }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) {
-        throw new Error((data && (data.error || data.message)) || 'No se pudo eliminar la cita.');
+        throw new Error((data && (data.error || data.message)) || 'No se pudo cancelar la cita.');
       }
       const status = data.result && data.result.status;
       if (status === 'not_found') {
         showToast('La cita ya no existía.', 'warn');
       } else {
-        showToast('Cita eliminada.', 'ok');
+        showToast('Cita cancelada. Correo enviado al cliente.', 'ok');
       }
       closeCitaModal();
       if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
     } catch (err) {
-      showToast(err.message || 'Error al eliminar la cita.', 'err');
+      showToast(err.message || 'Error al cancelar la cita.', 'err');
     }
   }
-  window.adminDeleteBooking = adminDeleteBooking;
+  window.adminCancelBooking = adminCancelBooking;
+  // Alias por compat
+  window.adminDeleteBooking = adminCancelBooking;
 
   let _gsiReady = false;
   let _pendingRender = false;
