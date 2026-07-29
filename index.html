@@ -3540,81 +3540,17 @@
     zonaState.bookingId = b.booking_id || b.id;
     zonaState.adminMode = !!adminMode;
     wrap.style.display = '';
-    if (adminMode) {
-      wrap.innerHTML = ''
-        + '<div class="zona-banner">'
-        +   '<b>Cita fuera del área de cobertura</b>'
-        +   '<div class="zona-body">Esta dirección quedó fuera de las zonas con tarifa fija (Z1/Z2/Z3). '
-        +     'Antes de mandar a una masajista decide si el equipo la atiende o si se cancela y se reembolsa al cliente.</div>'
-        +   '<div class="zona-actions">'
-        +     '<button type="button" class="zona-btn-ok" onclick="submitAprobarZona()">Sí atendemos</button>'
-        +     '<button type="button" class="zona-btn-cancel" onclick="submitCancelarFueraCobertura()">Cancelar y reembolsar</button>'
-        +   '</div>'
-        +   '<div class="zona-msg" id="zona-msg"></div>'
-        + '</div>';
-    } else {
-      wrap.innerHTML = ''
-        + '<div class="zona-banner">'
-        +   '<b>Cita fuera del área de cobertura</b>'
-        +   '<div class="zona-body">Esta dirección quedó fuera de las zonas con tarifa fija. '
-        +     'Yaz está evaluando si se atiende. No tomes esta cita hasta que sea aprobada.</div>'
-        + '</div>';
-    }
+    // Aviso informativo idéntico para admin y masajista (los botones de eliminar
+    // ya existen abajo en el modal admin; el flujo se dispara desde ahí).
+    const bodyExtra = adminMode
+      ? 'Si decides no atender, elimina la cita desde el botón de abajo. Se cancelará, se enviará el correo al cliente y llegará el aviso de REEMBOLSAR EN STRIPE al grupo.'
+      : 'Yaz está evaluando si se atiende. No tomes esta cita hasta que sea aprobada.';
+    wrap.innerHTML = ''
+      + '<div class="zona-banner">'
+      +   '<b>Cita fuera del área de cobertura</b>'
+      +   '<div class="zona-body">Esta dirección quedó fuera de las zonas con tarifa fija (Z1/Z2/Z3). ' + bodyExtra + '</div>'
+      + '</div>';
   }
-
-  async function submitAprobarZona() {
-    if (!zonaState.bookingId) return;
-    const msg = document.getElementById('zona-msg');
-    const btns = document.querySelectorAll('#cita-zona-banner button');
-    btns.forEach(b => b.disabled = true);
-    if (msg) msg.textContent = '';
-    try {
-      const jwt = localStorage.getItem(STORAGE_KEY);
-      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ action: 'approve_zona', booking_id: zonaState.bookingId })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) throw new Error((data.result && data.result.status) || 'Error');
-      showToast('Zona aprobada. La cita continúa el flujo normal.', 'ok');
-      // Ocultar banner
-      const wrap = document.getElementById('cita-zona-banner');
-      if (wrap) { wrap.style.display = 'none'; wrap.innerHTML = ''; }
-      // Refrescar datos
-      if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
-    } catch (err) {
-      if (msg) msg.textContent = 'No se pudo aprobar la zona. Reintenta.';
-      btns.forEach(b => b.disabled = false);
-    }
-  }
-  window.submitAprobarZona = submitAprobarZona;
-
-  async function submitCancelarFueraCobertura() {
-    if (!zonaState.bookingId) return;
-    if (!confirm('¿Cancelar la cita y disparar reembolso?\n\n• El cliente recibirá un correo con la política de 5 a 10 días hábiles.\n• Se te avisará por WhatsApp para que emitas el reembolso en Stripe manualmente.\n• Los cupos y appointments GHL se eliminan.')) return;
-    const msg = document.getElementById('zona-msg');
-    const btns = document.querySelectorAll('#cita-zona-banner button');
-    btns.forEach(b => b.disabled = true);
-    if (msg) msg.textContent = 'Cancelando…';
-    try {
-      const jwt = localStorage.getItem(STORAGE_KEY);
-      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ action: 'cancel_booking', booking_id: zonaState.bookingId, motivo: 'fuera_de_cobertura' })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) throw new Error((data.result && data.result.status) || 'Error');
-      showToast('Cita cancelada. Correo enviado al cliente y aviso a Yaz por WhatsApp.', 'ok');
-      closeCitaModal();
-      if (typeof fetchAdminCitas === 'function' && adminState && adminState.data) fetchAdminCitas({ silent: true });
-    } catch (err) {
-      if (msg) msg.textContent = 'No se pudo cancelar. Reintenta.';
-      btns.forEach(b => b.disabled = false);
-    }
-  }
-  window.submitCancelarFueraCobertura = submitCancelarFueraCobertura;
 
   // ── Calendario unificado: todas las masajistas + pool en una sola vista ──
   function _avatarInitials(nombre) {
@@ -5570,7 +5506,11 @@
     deleteBtn.style.display = 'none';
     const wrap = document.createElement('div');
     wrap.className = 'admin-delete-confirm';
-    wrap.innerHTML = '<span>¿Seguro?</span>'
+    const esFuera = booking && booking.en_area_cobertura === false;
+    const msgConfirm = esFuera
+      ? '¿Eliminar y disparar reembolso?'
+      : '¿Seguro?';
+    wrap.innerHTML = '<span>' + msgConfirm + '</span>'
       + '<button type="button" class="cita-btn-danger admin-del-yes">Sí, eliminar</button>'
       + '<button type="button" class="cita-btn-secondary admin-del-no">No</button>';
     row.appendChild(wrap);
@@ -5592,7 +5532,11 @@
       const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-        body: JSON.stringify({ action: 'delete_booking', booking_id: bookingId }),
+        body: JSON.stringify({
+          action: 'delete_booking',
+          booking_id: bookingId,
+          motivo: (booking && booking.en_area_cobertura === false) ? 'fuera_de_cobertura' : null
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) {
