@@ -3277,9 +3277,10 @@
     const chipsHtml = durs.map((d, i) =>
       '<span class="cp-chip' + (i === 0 ? ' on' : '') + '">' + d.min + ' min</span>'
     ).join('');
-    const badges = [];
+    // Sucursal siempre aparece (los productos SIEMPRE se ofrecen en sucursal).
+    // Domicilio se suma solo si el producto está marcado como "También a domicilio".
+    const badges = ['<span class="cp-badge">Sucursal</span>'];
     if (esDom) badges.push('<span class="cp-badge dom">Domicilio</span>');
-    else badges.push('<span class="cp-badge">Sucursal</span>');
     if (durs.some(d => d.pareja)) badges.push('<span class="cp-badge">Pareja</span>');
     const badgesHtml = '<span class="cp-badges">' + badges.join('') + '</span>';
     // Modo Promoción: solo cuando la sección es paquetes
