@@ -812,6 +812,103 @@
     background: rgba(154,152,84,0.09);
   }
   .admin-tab.active:hover { background: rgba(154,152,84,0.12); }
+
+  /* ── Tab Catálogo (CRUD productos) ── */
+  #tab-catalogo { padding: 22px clamp(14px, 4vw, 40px) 60px; overflow-y: auto; }
+  .cat-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .cat-title { font: 400 28px 'Cormorant Garamond', serif; color: var(--brown); margin: 0; }
+  .cat-title em { color: var(--olive-dark); }
+  .cat-sub { font: 13px 'Inter', sans-serif; color: var(--gray-soft); margin: 4px 0 0; max-width: 520px; }
+  .cat-add-btn { white-space: nowrap; }
+  .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cat-chip {
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1.5px solid rgba(154,138,117,0.3); background: #fff;
+    font: 600 12.5px 'Inter', sans-serif; color: var(--brown);
+  }
+  .cat-chip:hover { border-color: var(--olive); }
+  .cat-chip.active { background: var(--olive); border-color: var(--olive); color: var(--off-white); }
+  .cat-chip .n { opacity: 0.65; font-weight: 500; margin-left: 4px; }
+  .cat-toolbar { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .cat-toolbar input[type="search"] {
+    flex: 1 1 220px; max-width: 340px; padding: 9px 12px; border-radius: 9px;
+    border: 1.5px solid rgba(154,138,117,0.28); background: #fffefa;
+    font: 13.5px 'Inter', sans-serif; color: var(--brown);
+  }
+  .cat-show-inactive { font: 12.5px 'Inter', sans-serif; color: var(--gray-soft); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .cat-list { display: flex; flex-direction: column; gap: 8px; }
+  .cat-group-title {
+    font: 700 11.5px 'Lato', sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--olive-dark); margin: 14px 0 4px; padding-bottom: 4px;
+    border-bottom: 1px solid rgba(154,152,84,0.25);
+  }
+  .cat-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #fff; border: 1px solid rgba(154,138,117,0.18);
+    border-radius: 11px; padding: 12px 16px;
+  }
+  .cat-row.inactive { opacity: 0.55; background: rgba(154,138,117,0.05); }
+  .cat-row .info { flex: 1; min-width: 0; }
+  .cat-row .nom { font: 600 14.5px 'Inter', sans-serif; color: var(--brown); }
+  .cat-row .nom .pill-off {
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(154,138,117,0.18); color: #6c5a48;
+    padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle;
+  }
+  .cat-row .det { font: 12.5px 'Inter', sans-serif; color: var(--gray-soft); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-row .precios { font: 600 13.5px 'Inter', sans-serif; color: var(--olive-dark); white-space: nowrap; }
+  .cat-row .acts { display: flex; gap: 8px; flex-shrink: 0; }
+  .cat-row .acts button {
+    padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    font: 600 12px 'Inter', sans-serif;
+  }
+  .cat-btn-edit { border: 1.5px solid var(--olive); background: transparent; color: var(--olive-dark); }
+  .cat-btn-edit:hover { background: rgba(154,152,84,0.1); }
+  .cat-btn-toggle { border: 1.5px solid rgba(154,138,117,0.35); background: transparent; color: var(--gray-soft); }
+  .cat-btn-toggle:hover { border-color: var(--brown); color: var(--brown); }
+  /* Modal producto */
+  .cat-modal-box { max-width: 560px; }
+  .cat-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cat-field { display: flex; flex-direction: column; gap: 4px; }
+  .cat-field-full { grid-column: 1 / -1; }
+  .cat-field > span { font: 600 11.5px 'Inter', sans-serif; color: var(--olive-dark); }
+  .cat-field input[type="text"], .cat-field input[type="number"], .cat-field select, .cat-field textarea {
+    padding: 9px 10px; border-radius: 8px;
+    border: 1.5px solid rgba(154,138,117,0.28); background: #fffefa;
+    font: 13.5px 'Inter', sans-serif; color: var(--brown); width: 100%; box-sizing: border-box;
+  }
+  .cat-check { flex-direction: row; align-items: center; gap: 8px; grid-column: 1 / -1; }
+  .cat-check span { font: 500 13px 'Inter', sans-serif; color: var(--brown); }
+  .cat-dur-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .cat-dur-head > span { font: 600 11.5px 'Inter', sans-serif; color: var(--olive-dark); }
+  .cat-dur-add {
+    border: 1.5px dashed var(--olive); background: transparent; color: var(--olive-dark);
+    padding: 5px 10px; border-radius: 8px; cursor: pointer; font: 600 11.5px 'Inter', sans-serif;
+  }
+  .cat-dur-row { display: grid; grid-template-columns: 90px 1fr 1fr 34px; gap: 8px; margin-bottom: 6px; align-items: center; }
+  .cat-dur-row input {
+    padding: 8px 9px; border-radius: 8px; border: 1.5px solid rgba(154,138,117,0.28);
+    background: #fffefa; font: 13px 'Inter', sans-serif; color: var(--brown); width: 100%; box-sizing: border-box;
+  }
+  .cat-dur-del {
+    border: none; background: rgba(181,59,59,0.1); color: #942e2e;
+    border-radius: 8px; cursor: pointer; height: 34px; font-size: 15px;
+  }
+  .cat-promo-fields { border-top: 1px dashed rgba(154,138,117,0.3); padding-top: 12px; }
+  .cat-promo-title { font: 600 12px 'Inter', sans-serif; color: var(--olive-dark); margin-bottom: 8px; }
+  .cat-promo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .cat-msg { grid-column: 1 / -1; font: 12.5px 'Inter', sans-serif; color: #942e2e; min-height: 16px; }
+  .cat-actions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; }
+  @media (max-width: 640px) {
+    .cat-form, .cat-promo-grid { grid-template-columns: 1fr; }
+    .cat-row { flex-wrap: wrap; }
+    .cat-row .precios { order: 3; }
+    .cat-row .acts { order: 4; width: 100%; justify-content: flex-end; }
+  }
+
   .admin-tab-panel {
     flex: 1;
     display: flex;
@@ -2478,6 +2575,7 @@
   <nav class="admin-tabs" id="admin-tabs" role="tablist">
     <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
+    <button type="button" class="admin-tab" data-tab="catalogo"    role="tab">Catálogo</button>
   </nav>
 
   <!-- Tab: Resumen — dashboard de una sola vista -->
@@ -2555,6 +2653,25 @@
   </div>
 
   <!-- Tab: Calendarios -->
+  <!-- Tab: Catálogo (CRUD de productos de la página pública) -->
+  <div class="admin-tab-panel" id="tab-catalogo" style="display:none">
+    <div class="cat-head">
+      <div>
+        <h2 class="cat-title">Catálogo de <em>servicios</em></h2>
+        <p class="cat-sub">Lo que ves aquí es lo que muestra la página pública. Los cambios aparecen en la página en la siguiente visita de cada cliente.</p>
+      </div>
+      <button type="button" class="cita-btn-primary cat-add-btn" onclick="openCatProductoModal(null)">+ Agregar producto</button>
+    </div>
+    <div class="cat-chips" id="cat-chips"></div>
+    <div class="cat-toolbar">
+      <input type="search" id="cat-search" placeholder="Buscar producto…" oninput="renderCatalogoList()">
+      <label class="cat-show-inactive"><input type="checkbox" id="cat-show-inactive" onchange="renderCatalogoList()"> Mostrar ocultos</label>
+    </div>
+    <div id="cat-list" class="cat-list">
+      <div class="admin-empty"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+    </div>
+  </div>
+
   <div class="admin-tab-panel active" id="tab-calendarios">
     <div class="panel-wrap panel-wrap-cal">
       <div class="panel-header cal-header">
@@ -2793,6 +2910,8 @@
       } else if (name === 'resumen') {
         initStatsTab();
         initComparativa();
+      } else if (name === 'catalogo') {
+        fetchCatalogo();
       }
     }
   }
@@ -2804,6 +2923,261 @@
       btn._bound = true;
     });
   }
+
+  // ── Tab Catálogo: CRUD de productos de la página pública ──
+  // Habla con exentia-panel-admin-actions (action:'catalogo') → RPC exentia_admin_catalogo.
+  const catState = { data: null, seccionId: null, editingId: null, loading: false };
+
+  async function catApi(catAction, payload) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({ action: 'catalogo', cat_action: catAction, payload: payload || {} })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error((data && (data.error || data.message)) || 'Error de conexión');
+    const result = data.result || {};
+    if (result.status !== 'ok') throw new Error(result.detail || 'Error en el catálogo');
+    return result;
+  }
+
+  async function fetchCatalogo() {
+    const list = document.getElementById('cat-list');
+    if (catState.loading) return;
+    catState.loading = true;
+    try {
+      const result = await catApi('list');
+      catState.data = result.data;
+      if (!catState.seccionId && catState.data.secciones.length) {
+        catState.seccionId = catState.data.secciones[0].id;
+      }
+      renderCatChips();
+      renderCatalogoList();
+    } catch (err) {
+      list.innerHTML = '<div class="admin-empty"><span>' + escapeHtml(err.message || 'No pudimos cargar el catálogo.') + '</span></div>';
+    } finally {
+      catState.loading = false;
+    }
+  }
+
+  function renderCatChips() {
+    const wrap = document.getElementById('cat-chips');
+    if (!wrap || !catState.data) return;
+    wrap.innerHTML = catState.data.secciones.map(s => {
+      const n = catState.data.productos.filter(p => p.seccion_id === s.id).length;
+      const act = s.id === catState.seccionId ? ' active' : '';
+      return '<button type="button" class="cat-chip' + act + '" onclick="catSelectSeccion(\'' + s.id + '\')">'
+        + escapeHtml(s.nombre || s.slug) + '<span class="n">' + n + '</span></button>';
+    }).join('');
+  }
+
+  function catSelectSeccion(id) {
+    catState.seccionId = id;
+    renderCatChips();
+    renderCatalogoList();
+  }
+
+  function catFmtPrecios(p) {
+    const durs = p.duraciones || [];
+    if (!durs.length) return '—';
+    if (durs.length === 1) {
+      const d = durs[0];
+      return (d.min ? d.min + ' min · ' : '') + '$' + Number(d.precio_mxn).toLocaleString('es-MX');
+    }
+    const precios = durs.map(d => Number(d.precio_mxn));
+    return durs.length + ' opciones · $' + Math.min(...precios).toLocaleString('es-MX') + ' – $' + Math.max(...precios).toLocaleString('es-MX');
+  }
+
+  function renderCatalogoList() {
+    const list = document.getElementById('cat-list');
+    if (!list || !catState.data) return;
+    const q = (document.getElementById('cat-search').value || '').toLowerCase().trim();
+    const showInactive = document.getElementById('cat-show-inactive').checked;
+    const subById = {};
+    catState.data.subsecciones.forEach(s => { subById[s.id] = s.nombre; });
+
+    let productos = catState.data.productos.filter(p => p.seccion_id === catState.seccionId);
+    if (q) productos = catState.data.productos.filter(p => (p.nombre || '').toLowerCase().includes(q));
+    if (!showInactive) productos = productos.filter(p => p.activo);
+
+    if (!productos.length) {
+      list.innerHTML = '<div class="admin-empty"><span>' + (q ? 'Sin resultados para tu búsqueda.' : 'No hay productos en esta sección.') + '</span></div>';
+      return;
+    }
+
+    // Agrupar por subsección (los sin grupo van al final como "Otros")
+    const grupos = {};
+    const orden = [];
+    productos.forEach(p => {
+      const g = p.subseccion_id ? (subById[p.subseccion_id] || 'Otros') : 'Otros';
+      if (!grupos[g]) { grupos[g] = []; orden.push(g); }
+      grupos[g].push(p);
+    });
+    if (orden.includes('Otros')) { orden.splice(orden.indexOf('Otros'), 1); orden.push('Otros'); }
+
+    list.innerHTML = orden.map(g => {
+      const rows = grupos[g].map(p => {
+        const off = p.activo ? '' : '<span class="pill-off">Oculto</span>';
+        const desc = p.descripcion ? escapeHtml(p.descripcion) : '';
+        const home = p.home_available ? ' · Domicilio' : '';
+        return '<div class="cat-row' + (p.activo ? '' : ' inactive') + '">'
+          + '<div class="info">'
+          +   '<div class="nom">' + escapeHtml(p.nombre) + off + '</div>'
+          +   (desc || home ? '<div class="det">' + desc + home + '</div>' : '')
+          + '</div>'
+          + '<div class="precios">' + catFmtPrecios(p) + '</div>'
+          + '<div class="acts">'
+          +   '<button type="button" class="cat-btn-edit" onclick="openCatProductoModal(\'' + p.id + '\')">Editar</button>'
+          +   '<button type="button" class="cat-btn-toggle" onclick="toggleCatProducto(\'' + p.id + '\')">' + (p.activo ? 'Ocultar' : 'Mostrar') + '</button>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+      const title = (orden.length > 1 || g !== 'Otros') ? '<div class="cat-group-title">' + escapeHtml(g) + '</div>' : '';
+      return title + rows;
+    }).join('');
+  }
+  window.renderCatalogoList = renderCatalogoList;
+  window.catSelectSeccion = catSelectSeccion;
+
+  // ── Modal crear/editar producto ──
+  function catAddDurRow(d) {
+    const wrap = document.getElementById('catf-duraciones');
+    const row = document.createElement('div');
+    row.className = 'cat-dur-row';
+    row.innerHTML = ''
+      + '<input type="number" class="dur-min" min="5" step="5" placeholder="Min" value="' + (d && d.min != null ? d.min : '') + '">'
+      + '<input type="number" class="dur-precio" min="0" step="1" placeholder="Precio $" value="' + (d && d.precio_mxn != null ? d.precio_mxn : '') + '">'
+      + '<input type="number" class="dur-pareja" min="0" step="1" placeholder="Pareja $ (opcional)" value="' + (d && d.precio_pareja_mxn != null ? d.precio_pareja_mxn : '') + '">'
+      + '<button type="button" class="cat-dur-del" title="Quitar">×</button>';
+    row.querySelector('.cat-dur-del').addEventListener('click', () => row.remove());
+    wrap.appendChild(row);
+  }
+  window.catAddDurRow = () => catAddDurRow(null);
+
+  function catSyncSubsecciones() {
+    const secId = document.getElementById('catf-seccion').value;
+    const sel = document.getElementById('catf-subseccion');
+    const subs = (catState.data.subsecciones || []).filter(s => s.seccion_id === secId);
+    sel.innerHTML = '<option value="">Sin grupo</option>'
+      + subs.map(s => '<option value="' + s.id + '">' + escapeHtml(s.nombre) + '</option>').join('');
+    // Mostrar campos de promo solo en la sección Promociones/paquetes
+    const sec = catState.data.secciones.find(s => s.id === secId);
+    const esPaquetes = sec && (sec.slug === 'paquetes');
+    document.getElementById('catf-promo-wrap').style.display = esPaquetes ? '' : 'none';
+  }
+  window.catSyncSubsecciones = catSyncSubsecciones;
+
+  function openCatProductoModal(id) {
+    if (!catState.data) { showToast('Espera a que cargue el catálogo.', 'warn'); return; }
+    catState.editingId = id;
+    const p = id ? catState.data.productos.find(x => x.id === id) : null;
+    document.getElementById('cat-modal-title').textContent = p ? 'Editar producto' : 'Nuevo producto';
+    document.getElementById('cat-delete-btn').style.display = p ? '' : 'none';
+    document.getElementById('cat-modal-msg').textContent = '';
+    // Secciones
+    const selSec = document.getElementById('catf-seccion');
+    selSec.innerHTML = catState.data.secciones.map(s =>
+      '<option value="' + s.id + '">' + escapeHtml(s.nombre || s.slug) + '</option>').join('');
+    selSec.value = p ? p.seccion_id : (catState.seccionId || catState.data.secciones[0].id);
+    catSyncSubsecciones();
+    document.getElementById('catf-subseccion').value = p && p.subseccion_id ? p.subseccion_id : '';
+    // Campos
+    document.getElementById('catf-nombre').value = p ? p.nombre : '';
+    document.getElementById('catf-desc').value = p ? (p.descripcion || '') : '';
+    document.getElementById('catf-home').checked = p ? !!p.home_available : false;
+    document.getElementById('catf-precio-old').value = p && p.precio_old_mxn != null ? p.precio_old_mxn : '';
+    document.getElementById('catf-descuento').value = p && p.descuento_pct != null ? p.descuento_pct : '';
+    document.getElementById('catf-ahorro').value = p && p.ahorro_mxn != null ? p.ahorro_mxn : '';
+    document.getElementById('catf-eyebrow').value = p ? (p.eyebrow || '') : '';
+    document.getElementById('catf-incluye').value = p ? (p.incluye_texto || '') : '';
+    // Duraciones
+    document.getElementById('catf-duraciones').innerHTML = '';
+    const durs = p && p.duraciones && p.duraciones.length ? p.duraciones : [null];
+    durs.forEach(d => catAddDurRow(d));
+    document.getElementById('cat-modal').style.display = 'flex';
+  }
+  window.openCatProductoModal = openCatProductoModal;
+
+  function closeCatModal() {
+    document.getElementById('cat-modal').style.display = 'none';
+    catState.editingId = null;
+  }
+  window.closeCatModal = closeCatModal;
+
+  async function saveCatProducto() {
+    const msg = document.getElementById('cat-modal-msg');
+    const btn = document.getElementById('cat-save-btn');
+    const nombre = (document.getElementById('catf-nombre').value || '').trim();
+    if (!nombre) { msg.textContent = 'Escribe el nombre del producto.'; return; }
+    const duraciones = [];
+    document.querySelectorAll('#catf-duraciones .cat-dur-row').forEach(row => {
+      const min = Number(row.querySelector('.dur-min').value);
+      const precio = Number(row.querySelector('.dur-precio').value);
+      const pareja = row.querySelector('.dur-pareja').value;
+      if (min > 0 && precio > 0) {
+        duraciones.push({ min, precio_mxn: precio, precio_pareja_mxn: pareja ? Number(pareja) : null });
+      }
+    });
+    if (!duraciones.length) { msg.textContent = 'Agrega al menos una duración con precio.'; return; }
+    const secId = document.getElementById('catf-seccion').value;
+    const sec = catState.data.secciones.find(s => s.id === secId);
+    const payload = {
+      id: catState.editingId || null,
+      nombre,
+      descripcion: (document.getElementById('catf-desc').value || '').trim(),
+      seccion_id: secId,
+      subseccion_id: document.getElementById('catf-subseccion').value || null,
+      home_available: document.getElementById('catf-home').checked,
+      is_paquete: !!(sec && sec.slug === 'paquetes'),
+      precio_old_mxn: document.getElementById('catf-precio-old').value || null,
+      descuento_pct: document.getElementById('catf-descuento').value || null,
+      ahorro_mxn: document.getElementById('catf-ahorro').value || null,
+      eyebrow: (document.getElementById('catf-eyebrow').value || '').trim() || null,
+      incluye_texto: (document.getElementById('catf-incluye').value || '').trim() || null,
+      duraciones
+    };
+    btn.disabled = true; btn.textContent = 'Guardando…'; msg.textContent = '';
+    try {
+      await catApi('upsert_producto', payload);
+      closeCatModal();
+      showToast(catState.editingId ? 'Producto actualizado.' : 'Producto agregado.', 'ok');
+      catState.editingId = null;
+      await fetchCatalogo();
+    } catch (err) {
+      msg.textContent = err.message || 'No se pudo guardar.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Guardar';
+    }
+  }
+  window.saveCatProducto = saveCatProducto;
+
+  async function toggleCatProducto(id) {
+    try {
+      const r = await catApi('toggle_producto', { id });
+      showToast(r.activo ? 'Producto visible en la página.' : 'Producto oculto de la página.', 'ok');
+      await fetchCatalogo();
+    } catch (err) {
+      showToast(err.message || 'No se pudo cambiar.', 'err');
+    }
+  }
+  window.toggleCatProducto = toggleCatProducto;
+
+  async function deleteCatProducto() {
+    if (!catState.editingId) return;
+    const p = catState.data.productos.find(x => x.id === catState.editingId);
+    if (!confirm('¿Eliminar "' + (p ? p.nombre : 'este producto') + '" definitivamente?\n\nSi solo quieres que no se vea en la página, usa "Ocultar" en su lugar.')) return;
+    const msg = document.getElementById('cat-modal-msg');
+    try {
+      await catApi('delete_producto', { id: catState.editingId });
+      closeCatModal();
+      showToast('Producto eliminado.', 'ok');
+      await fetchCatalogo();
+    } catch (err) {
+      msg.textContent = err.message || 'No se pudo eliminar.';
+    }
+  }
+  window.deleteCatProducto = deleteCatProducto;
 
   // ── Dashboard Resumen ──
   const statsState = {
@@ -6454,6 +6828,60 @@
   }
 </script>
 
+
+<!-- Modal: editar/crear producto del catálogo (admin) -->
+<div id="cat-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeCatModal()"></div>
+  <div class="cita-modal-box cat-modal-box">
+    <button class="cita-modal-close" onclick="closeCatModal()" aria-label="Cerrar">×</button>
+    <h2 class="cita-modal-title" id="cat-modal-title">Producto</h2>
+    <div class="cat-form">
+      <label class="cat-field cat-field-full">
+        <span>Nombre del producto *</span>
+        <input type="text" id="catf-nombre" maxlength="120" placeholder="Ej. Masaje Relajante">
+      </label>
+      <label class="cat-field">
+        <span>Sección *</span>
+        <select id="catf-seccion" onchange="catSyncSubsecciones()"></select>
+      </label>
+      <label class="cat-field">
+        <span>Grupo (opcional)</span>
+        <select id="catf-subseccion"></select>
+      </label>
+      <label class="cat-field cat-field-full">
+        <span>Descripción</span>
+        <textarea id="catf-desc" rows="2" maxlength="400" placeholder="Descripción corta que ve el cliente"></textarea>
+      </label>
+      <label class="cat-field cat-check">
+        <input type="checkbox" id="catf-home"> <span>Disponible a domicilio</span>
+      </label>
+      <div class="cat-field-full">
+        <div class="cat-dur-head">
+          <span>Duraciones y precios *</span>
+          <button type="button" class="cat-dur-add" onclick="catAddDurRow()">+ Agregar duración</button>
+        </div>
+        <div id="catf-duraciones"></div>
+      </div>
+      <div class="cat-field-full cat-promo-fields" id="catf-promo-wrap" style="display:none">
+        <div class="cat-promo-title">Datos de promoción (solo Promociones)</div>
+        <div class="cat-promo-grid">
+          <label class="cat-field"><span>Precio anterior (tachado)</span><input type="number" id="catf-precio-old" min="0" step="1"></label>
+          <label class="cat-field"><span>Descuento %</span><input type="number" id="catf-descuento" min="0" max="99" step="1"></label>
+          <label class="cat-field"><span>Ahorro $</span><input type="number" id="catf-ahorro" min="0" step="1"></label>
+          <label class="cat-field"><span>Etiqueta superior</span><input type="text" id="catf-eyebrow" maxlength="60" placeholder="Ej. RITUAL · 60 MIN"></label>
+        </div>
+        <label class="cat-field cat-field-full"><span>Qué incluye (texto de la card)</span><textarea id="catf-incluye" rows="2" maxlength="400"></textarea></label>
+      </div>
+      <div class="cat-msg" id="cat-modal-msg"></div>
+      <div class="cat-actions">
+        <button type="button" class="cita-btn-danger" id="cat-delete-btn" style="display:none" onclick="deleteCatProducto()">Eliminar</button>
+        <span style="flex:1"></span>
+        <button type="button" class="cita-btn-secondary" onclick="closeCatModal()">Cancelar</button>
+        <button type="button" class="cita-btn-primary" id="cat-save-btn" onclick="saveCatProducto()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="cita-modal" class="cita-modal" style="display:none">
   <div class="cita-modal-backdrop" onclick="closeCitaModal()"></div>
