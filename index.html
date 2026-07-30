@@ -937,6 +937,73 @@
   }
   .cat-check { flex-direction: row; align-items: center; gap: 8px; grid-column: 1 / -1; }
   .cat-check span { font: 500 13px 'Inter', sans-serif; color: var(--brown); }
+  /* Selector de dónde se ofrece (sucursal / domicilio) */
+  .cat-lugar-wrap { display: block; }
+  .cat-lugar-label { display: block; font: 600 11.5px 'Inter', sans-serif; color: var(--olive-dark); margin-bottom: 8px; }
+  .cat-lugar-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cat-lugar-opts label {
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+    padding: 12px 14px; border-radius: 10px;
+    border: 1.5px solid rgba(154,138,117,0.25); background: #fffefa;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .cat-lugar-opts label:hover { border-color: var(--olive); }
+  .cat-lugar-opts input[type="radio"] { accent-color: var(--olive); margin-top: 3px; }
+  .cat-lugar-opts input[type="radio"]:checked + span { color: var(--olive-dark); }
+  .cat-lugar-opts label:has(input:checked) { border-color: var(--olive); background: rgba(154,152,84,0.08); }
+  .cat-lugar-opts span { display: flex; flex-direction: column; gap: 2px; }
+  .cat-lugar-opts b { font: 600 13px 'Inter', sans-serif; color: var(--brown); }
+  .cat-lugar-opts small { font: 11.5px 'Inter', sans-serif; color: var(--gray-soft); }
+  @media (max-width: 640px) { .cat-lugar-opts { grid-template-columns: 1fr; } }
+  /* Vista previa del producto */
+  .cat-preview-wrap { border-top: 1px dashed rgba(154,138,117,0.3); padding-top: 14px; }
+  .cat-preview-label { margin-bottom: 8px; }
+  .cat-preview-label span { display: block; font: 700 11px 'Lato', sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--olive-dark); }
+  .cat-preview-label small { display: block; font: 12px 'Inter', sans-serif; color: var(--gray-soft); margin-top: 2px; }
+  .cat-preview {
+    background: linear-gradient(135deg, #fdfbf4 0%, #f3e4c7 100%);
+    border-radius: 12px; padding: 20px 22px;
+    border: 1px solid rgba(154,152,84,0.2);
+  }
+  .cp-card {
+    background: #fff; border: 1px solid rgba(154,152,84,0.18);
+    border-radius: 14px; padding: 20px 22px;
+    display: flex; gap: 18px; align-items: flex-start;
+    box-shadow: 0 2px 10px rgba(92,58,30,0.05);
+  }
+  .cp-num { font: 400 34px 'Cormorant Garamond', serif; color: var(--olive-dark); opacity: 0.75; flex-shrink: 0; line-height: 1; padding-top: 4px; }
+  .cp-body { flex: 1; min-width: 0; }
+  .cp-title { font: 400 22px 'Cormorant Garamond', serif; color: var(--brown); margin: 0; }
+  .cp-badges { display: inline-flex; gap: 6px; margin-left: 8px; }
+  .cp-badge {
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(154,152,84,0.15); color: var(--olive-dark);
+    padding: 3px 9px; border-radius: 999px; vertical-align: middle;
+  }
+  .cp-badge.dom { background: rgba(63,110,125,0.15); color: #2c5460; }
+  .cp-desc { font: 13.5px 'Inter', sans-serif; color: var(--gray-soft); margin: 6px 0 0; line-height: 1.45; }
+  .cp-chips { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+  .cp-chip {
+    padding: 6px 12px; border-radius: 999px;
+    border: 1.5px solid rgba(154,138,117,0.25); background: #fdfbf4;
+    font: 600 12px 'Inter', sans-serif; color: var(--brown);
+  }
+  .cp-chip.on { background: var(--olive); border-color: var(--olive); color: var(--off-white); }
+  .cp-price { font: 700 20px 'Inter', sans-serif; color: var(--olive-dark); text-align: right; flex-shrink: 0; padding-top: 6px; }
+  .cp-price small { display: block; font: 11px 'Inter', sans-serif; color: var(--gray-soft); font-weight: 500; margin-top: 2px; }
+  .cp-btn {
+    display: inline-block; margin-top: 12px;
+    padding: 8px 16px; background: var(--olive); color: var(--off-white);
+    border-radius: 8px; font: 600 12px 'Inter', sans-serif; letter-spacing: 0.04em;
+  }
+  .cp-empty {
+    font: italic 13px 'Inter', sans-serif; color: var(--gray-soft); text-align: center; padding: 18px 0;
+  }
+  @media (max-width: 640px) {
+    .cp-card { flex-direction: column; gap: 10px; }
+    .cp-num { display: none; }
+    .cp-price { text-align: left; padding-top: 0; }
+  }
   .cat-dur-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .cat-dur-head > span { font: 600 11.5px 'Inter', sans-serif; color: var(--olive-dark); }
   .cat-dur-add {
@@ -3154,7 +3221,12 @@
     // Campos
     document.getElementById('catf-nombre').value = p ? p.nombre : '';
     document.getElementById('catf-desc').value = p ? (p.descripcion || '') : '';
-    document.getElementById('catf-home').checked = p ? !!p.home_available : false;
+    // Lugar: radios sucursal/domicilio en vez del checkbox viejo
+    const esDom = p ? !!p.home_available : false;
+    const rSuc = document.getElementById('catf-lugar-suc');
+    const rDom = document.getElementById('catf-lugar-dom');
+    if (rSuc) rSuc.checked = !esDom;
+    if (rDom) rDom.checked = esDom;
     document.getElementById('catf-precio-old').value = p && p.precio_old_mxn != null ? p.precio_old_mxn : '';
     document.getElementById('catf-descuento').value = p && p.descuento_pct != null ? p.descuento_pct : '';
     document.getElementById('catf-ahorro').value = p && p.ahorro_mxn != null ? p.ahorro_mxn : '';
@@ -3164,9 +3236,97 @@
     document.getElementById('catf-duraciones').innerHTML = '';
     const durs = p && p.duraciones && p.duraciones.length ? p.duraciones : [null];
     durs.forEach(d => catAddDurRow(d));
+    // Bind preview live (una sola vez) y render inicial
+    catBindPreview();
+    catRenderPreview();
     document.getElementById('cat-modal').style.display = 'flex';
   }
   window.openCatProductoModal = openCatProductoModal;
+
+  // ── Preview en vivo del producto ──
+  function _catLugarValue() {
+    const dom = document.getElementById('catf-lugar-dom');
+    return dom && dom.checked;
+  }
+  function _catCollectDuraciones() {
+    return [...document.querySelectorAll('#catf-duraciones .cat-dur-row')].map(row => ({
+      min: Number(row.querySelector('.dur-min').value),
+      precio: Number(row.querySelector('.dur-precio').value),
+      pareja: row.querySelector('.dur-pareja').value ? Number(row.querySelector('.dur-pareja').value) : null
+    })).filter(d => d.min > 0 && d.precio > 0);
+  }
+  function catRenderPreview() {
+    const wrap = document.getElementById('cat-preview');
+    if (!wrap) return;
+    const nombre = (document.getElementById('catf-nombre').value || '').trim();
+    const desc = (document.getElementById('catf-desc').value || '').trim();
+    const secId = document.getElementById('catf-seccion').value;
+    const sec = catState.data.secciones.find(s => s.id === secId);
+    const esPaquetes = sec && sec.slug === 'paquetes';
+    const esDom = _catLugarValue();
+    const durs = _catCollectDuraciones();
+    if (!nombre) {
+      wrap.innerHTML = '<div class="cp-empty">Empieza a rellenar el nombre y las duraciones para ver la vista previa.</div>';
+      return;
+    }
+    if (!durs.length) {
+      wrap.innerHTML = '<div class="cp-empty">Agrega al menos una duración con precio para ver la vista previa.</div>';
+      return;
+    }
+    const primerPrecio = durs[0].precio;
+    const chipsHtml = durs.map((d, i) =>
+      '<span class="cp-chip' + (i === 0 ? ' on' : '') + '">' + d.min + ' min</span>'
+    ).join('');
+    const badges = [];
+    if (esDom) badges.push('<span class="cp-badge dom">Domicilio</span>');
+    else badges.push('<span class="cp-badge">Sucursal</span>');
+    if (durs.some(d => d.pareja)) badges.push('<span class="cp-badge">Pareja</span>');
+    const badgesHtml = '<span class="cp-badges">' + badges.join('') + '</span>';
+    // Modo Promoción: solo cuando la sección es paquetes
+    if (esPaquetes) {
+      const precioOld = document.getElementById('catf-precio-old').value;
+      const eyebrow = (document.getElementById('catf-eyebrow').value || '').trim();
+      const incluye = (document.getElementById('catf-incluye').value || '').trim();
+      wrap.innerHTML =
+        '<div class="cp-card">'
+        + '<div class="cp-body">'
+        +   (eyebrow ? '<div style="font:700 10.5px Lato,sans-serif;letter-spacing:.18em;color:#7d7c3f;text-transform:uppercase;margin-bottom:6px;">' + escapeHtml(eyebrow) + '</div>' : '')
+        +   '<h3 class="cp-title">' + escapeHtml(nombre) + badgesHtml + '</h3>'
+        +   (incluye ? '<p class="cp-desc">' + escapeHtml(incluye) + '</p>' : (desc ? '<p class="cp-desc">' + escapeHtml(desc) + '</p>' : ''))
+        +   '<span class="cp-btn">Reservar promoción</span>'
+        + '</div>'
+        + '<div class="cp-price">'
+        +   (precioOld ? '<span style="text-decoration:line-through;color:#b8a58f;font-size:14px;font-weight:500;margin-right:6px;">$' + Number(precioOld).toLocaleString('es-MX') + '</span>' : '')
+        +   '$' + primerPrecio.toLocaleString('es-MX')
+        +   '<small>MXN</small>'
+        + '</div>'
+        + '</div>';
+      return;
+    }
+    // Modo producto normal (masajes, faciales, etc.)
+    wrap.innerHTML =
+      '<div class="cp-card">'
+      + '<div class="cp-num">01</div>'
+      + '<div class="cp-body">'
+      +   '<h3 class="cp-title">' + escapeHtml(nombre) + badgesHtml + '</h3>'
+      +   (desc ? '<p class="cp-desc">' + escapeHtml(desc) + '</p>' : '')
+      +   (durs.length > 1 ? '<div class="cp-chips">' + chipsHtml + '</div>' : '')
+      +   '<span class="cp-btn">Reservar</span>'
+      + '</div>'
+      + '<div class="cp-price">$' + primerPrecio.toLocaleString('es-MX') + '<small>MXN' + (durs[0].pareja ? ' · pareja $' + durs[0].pareja.toLocaleString('es-MX') : '') + '</small></div>'
+      + '</div>';
+  }
+  window.catRenderPreview = catRenderPreview;
+  function catBindPreview() {
+    const modal = document.getElementById('cat-modal');
+    if (modal._previewBound) return;
+    modal._previewBound = true;
+    // input/change en cualquier campo del form dispara el preview
+    modal.addEventListener('input', catRenderPreview);
+    modal.addEventListener('change', catRenderPreview);
+    // el select de sección también debe re-mostrar/ocultar badges paquete
+    document.getElementById('catf-seccion').addEventListener('change', catRenderPreview);
+  }
 
   function closeCatModal() {
     document.getElementById('cat-modal').style.display = 'none';
@@ -3197,7 +3357,7 @@
       descripcion: (document.getElementById('catf-desc').value || '').trim(),
       seccion_id: secId,
       subseccion_id: document.getElementById('catf-subseccion').value || null,
-      home_available: document.getElementById('catf-home').checked,
+      home_available: _catLugarValue(),
       is_paquete: !!(sec && sec.slug === 'paquetes'),
       precio_old_mxn: document.getElementById('catf-precio-old').value || null,
       descuento_pct: document.getElementById('catf-descuento').value || null,
@@ -6921,9 +7081,15 @@
         <span>Descripción</span>
         <textarea id="catf-desc" rows="2" maxlength="400" placeholder="Descripción corta que ve el cliente"></textarea>
       </label>
-      <label class="cat-field cat-check">
-        <input type="checkbox" id="catf-home"> <span>Disponible a domicilio</span>
-      </label>
+      <div class="cat-field cat-field-full cat-lugar-wrap">
+        <span class="cat-lugar-label">¿Dónde se ofrece este servicio? *</span>
+        <div class="cat-lugar-opts">
+          <label><input type="radio" name="catf-lugar" value="sucursal" id="catf-lugar-suc" checked>
+            <span><b>Solo en sucursal</b><small>El cliente viene a Plaza Hive</small></span></label>
+          <label><input type="radio" name="catf-lugar" value="domicilio" id="catf-lugar-dom">
+            <span><b>También a domicilio</b><small>Se ofrece en sucursal y a domicilio</small></span></label>
+        </div>
+      </div>
       <div class="cat-field-full">
         <div class="cat-dur-head">
           <span>Duraciones y precios *</span>
@@ -6947,6 +7113,13 @@
           <label class="cat-field"><span>Etiqueta superior</span><input type="text" id="catf-eyebrow" maxlength="60" placeholder="Ej. RITUAL · 60 MIN"></label>
         </div>
         <label class="cat-field cat-field-full"><span>Qué incluye (texto de la card)</span><textarea id="catf-incluye" rows="2" maxlength="400"></textarea></label>
+      </div>
+      <div class="cat-field-full cat-preview-wrap">
+        <div class="cat-preview-label">
+          <span>Vista previa</span>
+          <small>Así se verá el producto en la página del cliente</small>
+        </div>
+        <div id="cat-preview" class="cat-preview"></div>
       </div>
       <div class="cat-msg" id="cat-modal-msg"></div>
       <div class="cat-actions">
