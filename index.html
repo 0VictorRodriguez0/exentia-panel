@@ -924,6 +924,101 @@
   .cat-btn-edit:hover { background: var(--olive); color: var(--off-white); }
   .cat-btn-toggle { border: 1.5px solid rgba(154,138,117,0.3); background: transparent; color: var(--gray-soft); }
   .cat-btn-toggle:hover { border-color: var(--brown); color: var(--brown); background: rgba(154,138,117,0.07); }
+  /* Sub-tabs Productos/Extras */
+  .cat-subtabs {
+    display: flex; gap: 4px; margin-bottom: 18px; padding: 4px;
+    background: rgba(154,138,117,0.10); border-radius: 999px; width: fit-content;
+  }
+  .cat-subtab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 999px; cursor: pointer; border: none;
+    background: transparent; color: var(--gray-soft);
+    font: 600 12.5px 'Inter', sans-serif;
+    transition: background .15s ease, color .15s ease;
+  }
+  .cat-subtab small { font-size: 10.5px; opacity: 0.7; font-weight: 500; }
+  .cat-subtab:hover { color: var(--brown); }
+  .cat-subtab.active { background: #fff; color: var(--olive-dark); box-shadow: 0 1px 4px rgba(92,58,30,0.08); }
+  /* Extras: hint + lista agrupada */
+  .cat-extras-hint {
+    background: rgba(154,152,84,0.08); border-left: 3px solid var(--olive);
+    padding: 12px 14px; border-radius: 8px;
+    font: 13px 'Inter', sans-serif; color: var(--brown); line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .cat-extras-group {
+    margin-bottom: 22px;
+  }
+  .cat-extras-group-title {
+    font: 400 20px 'Cormorant Garamond', serif; color: var(--brown);
+    margin: 0 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid rgba(154,152,84,0.2);
+  }
+  .cat-extras-group-title em { color: var(--olive-dark); font-style: italic; }
+  .cat-extra-card {
+    background: #fff; border: 1px solid rgba(154,138,117,0.16);
+    border-left: 3.5px solid rgba(154,152,84,0.55);
+    border-radius: 11px; padding: 12px 16px; margin-bottom: 8px;
+  }
+  .cat-extra-card.inactive { opacity: 0.55; background: rgba(154,138,117,0.05); border-left-color: rgba(154,138,117,0.4); }
+  .cat-extra-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .cat-extra-nom { font: 600 14px 'Inter', sans-serif; color: var(--brown); flex: 1; min-width: 160px; }
+  .cat-extra-nom .kind {
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(154,152,84,0.15); color: var(--olive-dark);
+    padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle;
+  }
+  .cat-extra-nom .pill-off {
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(154,138,117,0.18); color: #6c5a48;
+    padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle;
+  }
+  .cat-extra-price-wrap {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .cat-extra-price-wrap span { font: 12px 'Inter', sans-serif; color: var(--gray-soft); }
+  .cat-extra-price {
+    width: 90px; padding: 7px 10px; border-radius: 8px;
+    border: 1.5px solid rgba(154,138,117,0.28); background: #fffefa;
+    font: 600 13px 'Inter', sans-serif; color: var(--brown); text-align: right;
+  }
+  .cat-extra-price:focus { outline: none; border-color: var(--olive); box-shadow: 0 0 0 3px rgba(154,152,84,0.15); }
+  .cat-extra-toggle {
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    font: 600 12px 'Inter', sans-serif;
+    border: 1.5px solid rgba(154,138,117,0.3); background: transparent; color: var(--gray-soft);
+    transition: border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .cat-extra-toggle:hover { border-color: var(--brown); color: var(--brown); background: rgba(154,138,117,0.07); }
+  .cat-extra-opts {
+    margin-top: 10px; padding-left: 14px; border-left: 2px solid rgba(154,152,84,0.2);
+  }
+  .cat-extra-opt-row {
+    display: flex; align-items: center; gap: 10px; padding: 6px 0;
+  }
+  .cat-extra-opt-row + .cat-extra-opt-row { border-top: 1px dashed rgba(154,138,117,0.15); }
+  .cat-extra-opt-nom { flex: 1; font: 13px 'Inter', sans-serif; color: var(--brown); }
+  .cat-extra-opt-nom em { color: var(--gray-soft); font-style: italic; font-size: 12px; }
+  /* Bloque "Extras que ofreceremos al cliente" en el modal */
+  .cat-preview-extras {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.7); border: 1px dashed rgba(154,152,84,0.35);
+  }
+  .cat-preview-extras-title {
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--olive-dark); margin-bottom: 8px;
+  }
+  .cat-preview-extras-list {
+    display: flex; flex-direction: column; gap: 5px;
+    font: 12.5px 'Inter', sans-serif; color: var(--brown);
+  }
+  .cat-preview-extras-list div { display: flex; justify-content: space-between; gap: 12px; }
+  .cat-preview-extras-list b { color: var(--olive-dark); font-weight: 700; }
+  .cat-preview-extras-empty {
+    font: italic 12px 'Inter', sans-serif; color: var(--gray-soft);
+  }
   /* Modal producto */
   .cat-modal-box { max-width: 560px; }
   .cat-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -2789,22 +2884,36 @@
   </div>
 
   <!-- Tab: Calendarios -->
-  <!-- Tab: Catálogo (CRUD de productos de la página pública) -->
+  <!-- Tab: Catálogo (CRUD de productos + extras de la página pública) -->
   <div class="admin-tab-panel" id="tab-catalogo" style="display:none">
     <div class="cat-head">
       <div>
         <h2 class="cat-title">Catálogo de <em>servicios</em></h2>
         <p class="cat-sub">Lo que ves aquí es lo que muestra la página pública. Los cambios aparecen en la página en la siguiente visita de cada cliente.</p>
       </div>
-      <button type="button" class="cita-btn-primary cat-add-btn" onclick="openCatProductoModal(null)">+ Agregar producto</button>
+      <button type="button" class="cita-btn-primary cat-add-btn" id="cat-add-btn-header" onclick="openCatProductoModal(null)">+ Agregar producto</button>
     </div>
-    <div class="cat-chips" id="cat-chips"></div>
-    <div class="cat-toolbar">
-      <input type="search" id="cat-search" placeholder="Buscar producto…" oninput="renderCatalogoList()">
-      <label class="cat-show-inactive"><input type="checkbox" id="cat-show-inactive" onchange="renderCatalogoList()"> Mostrar ocultos</label>
+    <div class="cat-subtabs" role="tablist">
+      <button type="button" class="cat-subtab active" data-cat-sub="productos" onclick="catSelectSubtab('productos')">Productos</button>
+      <button type="button" class="cat-subtab" data-cat-sub="extras" onclick="catSelectSubtab('extras')">Extras <small>que ofrecemos al reservar</small></button>
     </div>
-    <div id="cat-list" class="cat-list">
-      <div class="admin-empty"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+
+    <div class="cat-sub-panel" id="cat-sub-productos">
+      <div class="cat-chips" id="cat-chips"></div>
+      <div class="cat-toolbar">
+        <input type="search" id="cat-search" placeholder="Buscar producto…" oninput="renderCatalogoList()">
+        <label class="cat-show-inactive"><input type="checkbox" id="cat-show-inactive" onchange="renderCatalogoList()"> Mostrar ocultos</label>
+      </div>
+      <div id="cat-list" class="cat-list">
+        <div class="admin-empty"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+      </div>
+    </div>
+
+    <div class="cat-sub-panel" id="cat-sub-extras" style="display:none">
+      <p class="cat-extras-hint">Estos extras aparecen en el cajón de reserva. Los de <b>Masajes</b> se ofrecen a todos los masajes, los de <b>Faciales</b> a todos los faciales, los de <b>Uñas</b> tanto a manicuras como a pedicuras. Cambia el precio o oculta uno para que deje de aparecer.</p>
+      <div id="cat-extras-list">
+        <div class="admin-empty"><div class="spinner sm"></div><span>Cargando extras…</span></div>
+      </div>
     </div>
   </div>
 
@@ -3314,6 +3423,8 @@
       return;
     }
     // Modo producto normal (masajes, faciales, etc.)
+    // Debajo de la card mostramos los extras que se ofrecerán al reservar (si aplica).
+    const extrasHtml = _catExtrasHtmlPara(sec && sec.slug);
     wrap.innerHTML =
       '<div class="cp-card">'
       + '<div class="cp-num">01</div>'
@@ -3324,6 +3435,49 @@
       +   '<span class="cp-btn">Reservar</span>'
       + '</div>'
       + '<div class="cp-price">$' + primerPrecio.toLocaleString('es-MX') + '<small>MXN' + (primerPareja ? ' · pareja $' + primerPareja.toLocaleString('es-MX') : '') + '</small></div>'
+      + '</div>'
+      + extrasHtml;
+  }
+
+  // Mapea slug de sección → ámbito de extras. Solo masajes/faciales/manicura/pedicura ofrecen extras.
+  function _seccionAmbito(slug) {
+    if (slug === 'masajes') return 'masaje';
+    if (slug === 'faciales') return 'facial';
+    if (slug === 'manicura' || slug === 'pedicura') return 'nail';
+    return null;
+  }
+  function _catExtrasHtmlPara(secSlug) {
+    const ambito = _seccionAmbito(secSlug);
+    if (!ambito) return '';
+    // Los extras se cargan on-demand cuando el usuario abre el sub-tab Extras.
+    // Aquí los pedimos también en background para poder mostrar la lista en la
+    // vista previa del producto.
+    if (!catState.extras && !catState._extrasFetching) {
+      catState._extrasFetching = true;
+      catApi('list_extras').then(r => {
+        catState.extras = r.data.grupos || [];
+        catState._extrasFetching = false;
+        catRenderPreview();
+      }).catch(() => { catState._extrasFetching = false; });
+      return '<div class="cat-preview-extras"><div class="cat-preview-extras-title">Extras que se le ofrecerán al reservar</div><div class="cat-preview-extras-empty">Cargando extras…</div></div>';
+    }
+    const grupos = (catState.extras || []).filter(g => g.ambito === ambito && g.activo);
+    const items = grupos.map(g => {
+      if (g.tipo === 'bool') {
+        const p = g.precio_mxn != null ? '+ $' + Number(g.precio_mxn).toLocaleString('es-MX') : '';
+        return '<div><span>' + escapeHtml(g.label) + '</span><b>' + p + '</b></div>';
+      }
+      // single: rango del más barato al más caro (ignorando la opción 'none')
+      const paid = (g.opciones || []).filter(o => Number(o.precio_mxn) > 0);
+      if (!paid.length) return '<div><span>' + escapeHtml(g.label) + '</span><b>—</b></div>';
+      const min = Math.min(...paid.map(o => Number(o.precio_mxn)));
+      const max = Math.max(...paid.map(o => Number(o.precio_mxn)));
+      const rango = (min === max) ? ('+ $' + min.toLocaleString('es-MX')) : ('desde + $' + min.toLocaleString('es-MX'));
+      return '<div><span>' + escapeHtml(g.label) + ' <em style="color:var(--gray-soft);font-style:italic">(' + paid.length + ' opciones)</em></span><b>' + rango + '</b></div>';
+    }).join('');
+    return '<div class="cat-preview-extras">'
+      + '<div class="cat-preview-extras-title">Extras que se le ofrecerán al reservar</div>'
+      + (items ? '<div class="cat-preview-extras-list">' + items + '</div>' : '<div class="cat-preview-extras-empty">Ningún extra activo para esta categoría.</div>')
       + '</div>';
   }
   window.catRenderPreview = catRenderPreview;
@@ -3397,6 +3551,112 @@
     }
   }
   window.saveCatProducto = saveCatProducto;
+
+  // ── Sub-tabs Productos / Extras ──
+  function catSelectSubtab(name) {
+    document.querySelectorAll('.cat-subtab').forEach(b => b.classList.toggle('active', b.dataset.catSub === name));
+    document.getElementById('cat-sub-productos').style.display = (name === 'productos') ? '' : 'none';
+    document.getElementById('cat-sub-extras').style.display = (name === 'extras') ? '' : 'none';
+    // El botón "Agregar producto" solo aplica a productos
+    document.getElementById('cat-add-btn-header').style.display = (name === 'productos') ? '' : 'none';
+    if (name === 'extras' && !catState.extras) fetchCatalogoExtras();
+  }
+  window.catSelectSubtab = catSelectSubtab;
+
+  const _ambitoLabel = { masaje: 'Masajes', facial: 'Faciales', nail: 'Uñas (manicura y pedicura)' };
+
+  async function fetchCatalogoExtras() {
+    const wrap = document.getElementById('cat-extras-list');
+    try {
+      const result = await catApi('list_extras');
+      catState.extras = result.data.grupos || [];
+      renderCatalogoExtras();
+    } catch (err) {
+      wrap.innerHTML = '<div class="admin-empty"><span>' + escapeHtml(err.message || 'No pudimos cargar los extras.') + '</span></div>';
+    }
+  }
+
+  function renderCatalogoExtras() {
+    const wrap = document.getElementById('cat-extras-list');
+    if (!wrap || !catState.extras) return;
+    // Agrupar por ámbito
+    const groups = {};
+    catState.extras.forEach(g => { (groups[g.ambito] = groups[g.ambito] || []).push(g); });
+    const orden = ['masaje', 'facial', 'nail'];
+    wrap.innerHTML = orden.filter(a => groups[a]).map(ambito => {
+      const grupos = groups[ambito];
+      const items = grupos.map(g => {
+        const inactive = g.activo ? '' : ' inactive';
+        const offPill = g.activo ? '' : '<span class="pill-off">Oculto</span>';
+        const kindLabel = g.tipo === 'bool' ? 'Sí / No' : 'Elige uno';
+        // Editable price: si es 'bool' (precio único). Si es 'single', mostrar sus opciones.
+        const priceInput = (g.tipo === 'bool')
+          ? '<div class="cat-extra-price-wrap"><span>Precio $</span>'
+              + '<input type="number" class="cat-extra-price" min="0" step="1" data-extra-id="' + g.id + '" data-extra-kind="grupo" value="' + (g.precio_mxn != null ? Number(g.precio_mxn) : '') + '">'
+              + '</div>'
+          : '<span style="font:12px Inter,sans-serif;color:var(--gray-soft)">' + g.opciones.length + ' opciones</span>';
+        const opcionesHtml = (g.tipo === 'single' && g.opciones.length)
+          ? '<div class="cat-extra-opts">' + g.opciones.map(o => {
+              // La opción 'none' es la de "sin extra" — sin editar precio
+              if (o.opt_id === 'none' || String(o.precio_mxn) === '0') {
+                return '<div class="cat-extra-opt-row">'
+                  + '<div class="cat-extra-opt-nom">' + escapeHtml(o.nombre) + ' <em>(sin costo extra)</em></div>'
+                  + '</div>';
+              }
+              return '<div class="cat-extra-opt-row">'
+                + '<div class="cat-extra-opt-nom">' + escapeHtml(o.nombre) + '</div>'
+                + '<div class="cat-extra-price-wrap"><span>+ $</span>'
+                +   '<input type="number" class="cat-extra-price" min="0" step="1" data-extra-id="' + o.id + '" data-extra-kind="opcion" value="' + Number(o.precio_mxn) + '">'
+                + '</div>'
+                + '</div>';
+            }).join('') + '</div>'
+          : '';
+        return '<div class="cat-extra-card' + inactive + '">'
+          + '<div class="cat-extra-head">'
+          +   '<div class="cat-extra-nom">' + escapeHtml(g.label) + '<span class="kind">' + kindLabel + '</span>' + offPill + '</div>'
+          +   priceInput
+          +   '<button type="button" class="cat-extra-toggle" onclick="toggleCatExtra(\'' + g.id + '\')">' + (g.activo ? 'Ocultar' : 'Mostrar') + '</button>'
+          + '</div>'
+          + opcionesHtml
+          + '</div>';
+      }).join('');
+      return '<div class="cat-extras-group">'
+        + '<h3 class="cat-extras-group-title">Extras de <em>' + escapeHtml(_ambitoLabel[ambito] || ambito) + '</em></h3>'
+        + items
+        + '</div>';
+    }).join('');
+  }
+  window.renderCatalogoExtras = renderCatalogoExtras;
+
+  // Debounce los cambios de precio para no spammear la API por cada tecla
+  let _extraSaveTimer = null;
+  document.addEventListener('input', function(e) {
+    if (!e.target.classList || !e.target.classList.contains('cat-extra-price')) return;
+    const id = e.target.getAttribute('data-extra-id');
+    const kind = e.target.getAttribute('data-extra-kind');
+    const val = e.target.value;
+    clearTimeout(_extraSaveTimer);
+    _extraSaveTimer = setTimeout(async () => {
+      if (!val) return;
+      try {
+        await catApi('update_extra_precio', { id, tipo: kind, precio_mxn: val });
+        showToast('Precio del extra actualizado.', 'ok');
+      } catch (err) {
+        showToast(err.message || 'No se pudo guardar el precio.', 'err');
+      }
+    }, 800);
+  });
+
+  async function toggleCatExtra(id) {
+    try {
+      const r = await catApi('toggle_extra', { id });
+      showToast(r.activo ? 'Extra visible.' : 'Extra oculto.', 'ok');
+      await fetchCatalogoExtras();
+    } catch (err) {
+      showToast(err.message || 'No se pudo cambiar.', 'err');
+    }
+  }
+  window.toggleCatExtra = toggleCatExtra;
 
   async function toggleCatProducto(id) {
     try {
