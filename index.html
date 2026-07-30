@@ -3344,7 +3344,12 @@
     catState.editingId = id;
     const p = id ? catState.data.productos.find(x => x.id === id) : null;
     document.getElementById('cat-modal-title').textContent = p ? 'Editar producto' : 'Nuevo producto';
-    document.getElementById('cat-delete-btn').style.display = p ? '' : 'none';
+    const delBtn = document.getElementById('cat-delete-btn');
+    delBtn.style.display = p ? '' : 'none';
+    delBtn.disabled = false;
+    if (delBtn.dataset.original) delBtn.textContent = delBtn.dataset.original;
+    _catDeleteArmed = false;
+    clearTimeout(_catDeleteTimer);
     document.getElementById('cat-modal-msg').textContent = '';
     // Secciones
     const selSec = document.getElementById('catf-seccion');
@@ -3714,18 +3719,55 @@
   }
   window.toggleCatProducto = toggleCatProducto;
 
+  // Confirmación in-app en vez de window.confirm() (que en algunos navegadores queda
+  // bloqueado dentro de modales o al hacer clic muy rápido) — el botón cambia a
+  // "Sí, eliminar" y espera un segundo clic.
+  let _catDeleteArmed = false;
+  let _catDeleteTimer = null;
   async function deleteCatProducto() {
-    if (!catState.editingId) return;
-    const p = catState.data.productos.find(x => x.id === catState.editingId);
-    if (!confirm('¿Eliminar "' + (p ? p.nombre : 'este producto') + '" definitivamente?\n\nSi solo quieres que no se vea en la página, usa "Ocultar" en su lugar.')) return;
+    const btn = document.getElementById('cat-delete-btn');
     const msg = document.getElementById('cat-modal-msg');
+    if (!catState.editingId) {
+      if (msg) msg.textContent = 'Este producto ya no está seleccionado. Cierra el modal y vuelve a abrirlo.';
+      showToast('No hay producto seleccionado para eliminar.', 'err');
+      return;
+    }
+    // Primer clic: armar el botón — segundo clic dentro de 4s dispara el DELETE.
+    if (!_catDeleteArmed) {
+      _catDeleteArmed = true;
+      const original = btn.textContent;
+      btn.textContent = 'Confirmar eliminar';
+      btn.dataset.original = original;
+      if (msg) msg.textContent = 'Toca "Confirmar eliminar" para borrarlo definitivamente. Si querías solo ocultarlo, cierra el modal y usa el botón Ocultar.';
+      clearTimeout(_catDeleteTimer);
+      _catDeleteTimer = setTimeout(() => {
+        _catDeleteArmed = false;
+        btn.textContent = original;
+        if (msg && msg.textContent.startsWith('Toca "Confirmar')) msg.textContent = '';
+      }, 4000);
+      return;
+    }
+    // Segundo clic: ejecutar
+    clearTimeout(_catDeleteTimer);
+    _catDeleteArmed = false;
+    btn.disabled = true;
+    btn.textContent = 'Eliminando…';
+    if (msg) msg.textContent = '';
     try {
-      await catApi('delete_producto', { id: catState.editingId });
+      const idToDelete = catState.editingId;
+      await catApi('delete_producto', { id: idToDelete });
+      btn.textContent = btn.dataset.original || 'Eliminar';
+      btn.disabled = false;
       closeCatModal();
       showToast('Producto eliminado.', 'ok');
       await fetchCatalogo();
     } catch (err) {
-      msg.textContent = err.message || 'No se pudo eliminar.';
+      console.error('[deleteCatProducto] falló:', err);
+      btn.disabled = false;
+      btn.textContent = btn.dataset.original || 'Eliminar';
+      const detail = (err && err.message) ? err.message : 'No se pudo eliminar.';
+      if (msg) msg.textContent = detail;
+      showToast(detail, 'err');
     }
   }
   window.deleteCatProducto = deleteCatProducto;
