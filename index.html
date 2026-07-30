@@ -943,6 +943,17 @@
     border: 1.5px dashed var(--olive); background: transparent; color: var(--olive-dark);
     padding: 5px 10px; border-radius: 8px; cursor: pointer; font: 600 11.5px 'Inter', sans-serif;
   }
+  .cat-dur-hint {
+    font: 12px 'Inter', sans-serif; color: var(--gray-soft);
+    margin: 6px 0 10px; line-height: 1.45;
+    padding: 8px 10px; background: rgba(154,152,84,0.06); border-radius: 8px;
+  }
+  .cat-dur-header-row {
+    display: grid; grid-template-columns: 90px 1fr 1fr 34px; gap: 8px;
+    margin-bottom: 5px; padding: 0 2px;
+    font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--olive-dark);
+  }
   .cat-dur-row { display: grid; grid-template-columns: 90px 1fr 1fr 34px; gap: 8px; margin-bottom: 6px; align-items: center; }
   .cat-dur-row input {
     padding: 8px 9px; border-radius: 8px; border: 1.5px solid rgba(154,138,117,0.28);
@@ -3101,9 +3112,9 @@
     const row = document.createElement('div');
     row.className = 'cat-dur-row';
     row.innerHTML = ''
-      + '<input type="number" class="dur-min" min="5" step="5" placeholder="Min" value="' + (d && d.min != null ? d.min : '') + '">'
-      + '<input type="number" class="dur-precio" min="0" step="1" placeholder="Precio $" value="' + (d && d.precio_mxn != null ? d.precio_mxn : '') + '">'
-      + '<input type="number" class="dur-pareja" min="0" step="1" placeholder="Pareja $ (opcional)" value="' + (d && d.precio_pareja_mxn != null ? d.precio_pareja_mxn : '') + '">'
+      + '<input type="number" class="dur-min" min="5" step="5" placeholder="Ej. 60" value="' + (d && d.min != null ? d.min : '') + '">'
+      + '<input type="number" class="dur-precio" min="0" step="1" placeholder="Ej. 1550" value="' + (d && d.precio_mxn != null ? d.precio_mxn : '') + '">'
+      + '<input type="number" class="dur-pareja" min="0" step="1" placeholder="Dejar vacío" value="' + (d && d.precio_pareja_mxn != null ? d.precio_pareja_mxn : '') + '">'
       + '<button type="button" class="cat-dur-del" title="Quitar">×</button>';
     row.querySelector('.cat-dur-del').addEventListener('click', () => row.remove());
     wrap.appendChild(row);
@@ -6917,6 +6928,13 @@
         <div class="cat-dur-head">
           <span>Duraciones y precios *</span>
           <button type="button" class="cat-dur-add" onclick="catAddDurRow()">+ Agregar duración</button>
+        </div>
+        <div class="cat-dur-hint">Escribe cuántos minutos dura, cuánto cuesta para una persona y, si aplica, el precio total cuando son dos personas juntas. El precio pareja es opcional: si lo dejas vacío, el servicio solo se ofrecerá para una persona.</div>
+        <div class="cat-dur-header-row">
+          <span>Minutos</span>
+          <span>Precio $ (1 persona)</span>
+          <span>Precio $ (pareja, opcional)</span>
+          <span></span>
         </div>
         <div id="catf-duraciones"></div>
       </div>
