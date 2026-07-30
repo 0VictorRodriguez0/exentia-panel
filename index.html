@@ -984,11 +984,14 @@
   .cp-desc { font: 13.5px 'Inter', sans-serif; color: var(--gray-soft); margin: 6px 0 0; line-height: 1.45; }
   .cp-chips { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
   .cp-chip {
-    padding: 6px 12px; border-radius: 999px;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer;
     border: 1.5px solid rgba(154,138,117,0.25); background: #fdfbf4;
     font: 600 12px 'Inter', sans-serif; color: var(--brown);
+    transition: border-color .12s ease, background .12s ease, transform .1s ease;
   }
+  .cp-chip:hover { border-color: var(--olive); transform: translateY(-1px); }
   .cp-chip.on { background: var(--olive); border-color: var(--olive); color: var(--off-white); }
+  .cp-chip.on:hover { transform: translateY(-1px); }
   .cp-price { font: 700 20px 'Inter', sans-serif; color: var(--olive-dark); text-align: right; flex-shrink: 0; padding-top: 6px; }
   .cp-price small { display: block; font: 11px 'Inter', sans-serif; color: var(--gray-soft); font-weight: 500; margin-top: 2px; }
   .cp-btn {
@@ -3236,8 +3239,9 @@
     document.getElementById('catf-duraciones').innerHTML = '';
     const durs = p && p.duraciones && p.duraciones.length ? p.duraciones : [null];
     durs.forEach(d => catAddDurRow(d));
-    // Bind preview live (una sola vez) y render inicial
+    // Bind preview live (una sola vez), reset duración activa y render inicial
     catBindPreview();
+    catState.previewDurIdx = 0;
     catRenderPreview();
     document.getElementById('cat-modal').style.display = 'flex';
   }
@@ -3273,9 +3277,14 @@
       wrap.innerHTML = '<div class="cp-empty">Agrega al menos una duración con precio para ver la vista previa.</div>';
       return;
     }
-    const primerPrecio = durs[0].precio;
+    // Duración activa persiste entre renders del preview mientras el modal esté abierto.
+    // Si el índice guardado ya no existe (borraron esa fila), volver a la primera.
+    if (catState.previewDurIdx == null || catState.previewDurIdx >= durs.length) catState.previewDurIdx = 0;
+    const activeIdx = catState.previewDurIdx;
+    const primerPrecio = durs[activeIdx].precio;
+    const primerPareja = durs[activeIdx].pareja;
     const chipsHtml = durs.map((d, i) =>
-      '<span class="cp-chip' + (i === 0 ? ' on' : '') + '">' + d.min + ' min</span>'
+      '<button type="button" class="cp-chip' + (i === activeIdx ? ' on' : '') + '" data-cp-dur="' + i + '">' + d.min + ' min</button>'
     ).join('');
     // Sucursal siempre aparece (los productos SIEMPRE se ofrecen en sucursal).
     // Domicilio se suma solo si el producto está marcado como "También a domicilio".
@@ -3314,7 +3323,7 @@
       +   (durs.length > 1 ? '<div class="cp-chips">' + chipsHtml + '</div>' : '')
       +   '<span class="cp-btn">Reservar</span>'
       + '</div>'
-      + '<div class="cp-price">$' + primerPrecio.toLocaleString('es-MX') + '<small>MXN' + (durs[0].pareja ? ' · pareja $' + durs[0].pareja.toLocaleString('es-MX') : '') + '</small></div>'
+      + '<div class="cp-price">$' + primerPrecio.toLocaleString('es-MX') + '<small>MXN' + (primerPareja ? ' · pareja $' + primerPareja.toLocaleString('es-MX') : '') + '</small></div>'
       + '</div>';
   }
   window.catRenderPreview = catRenderPreview;
@@ -3327,6 +3336,13 @@
     modal.addEventListener('change', catRenderPreview);
     // el select de sección también debe re-mostrar/ocultar badges paquete
     document.getElementById('catf-seccion').addEventListener('change', catRenderPreview);
+    // click en un chip de duración del preview cambia la duración activa
+    document.getElementById('cat-preview').addEventListener('click', function(e) {
+      const chip = e.target.closest('[data-cp-dur]');
+      if (!chip) return;
+      catState.previewDurIdx = Number(chip.getAttribute('data-cp-dur'));
+      catRenderPreview();
+    });
   }
 
   function closeCatModal() {
