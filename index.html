@@ -3053,7 +3053,10 @@
     row.querySelector('.cat-dur-del').addEventListener('click', () => row.remove());
     wrap.appendChild(row);
   }
-  window.catAddDurRow = () => catAddDurRow(null);
+  // Nota: catAddDurRow es global por declaración top-level; el onclick del botón
+  // la llama sin argumento (d=undefined) y funciona igual. NO envolverla en
+  // window.catAddDurRow = () => catAddDurRow(null) — eso re-liga el nombre global
+  // a la arrow y produce recursión infinita.
 
   function catSyncSubsecciones() {
     const secId = document.getElementById('catf-seccion').value;
