@@ -2914,13 +2914,27 @@
       </div>
       <button type="button" class="cita-btn-primary cat-add-btn" id="cat-add-btn-header" onclick="openCatProductoModal(null)">+ Agregar producto</button>
     </div>
-    <div class="cat-chips" id="cat-chips"></div>
-    <div class="cat-toolbar">
-      <input type="search" id="cat-search" placeholder="Buscar producto…" oninput="renderCatalogoList()">
-      <label class="cat-show-inactive"><input type="checkbox" id="cat-show-inactive" onchange="renderCatalogoList()"> Mostrar ocultos</label>
+    <div class="cat-subtabs" role="tablist">
+      <button type="button" class="cat-subtab active" data-cat-sub="productos" onclick="catSelectSubtab('productos')">Productos</button>
+      <button type="button" class="cat-subtab" data-cat-sub="extras" onclick="catSelectSubtab('extras')">Extras <small>que ofrecemos al reservar</small></button>
     </div>
-    <div id="cat-list" class="cat-list">
-      <div class="admin-empty"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+
+    <div class="cat-sub-panel" id="cat-sub-productos">
+      <div class="cat-chips" id="cat-chips"></div>
+      <div class="cat-toolbar">
+        <input type="search" id="cat-search" placeholder="Buscar producto…" oninput="renderCatalogoList()">
+        <label class="cat-show-inactive"><input type="checkbox" id="cat-show-inactive" onchange="renderCatalogoList()"> Mostrar ocultos</label>
+      </div>
+      <div id="cat-list" class="cat-list">
+        <div class="admin-empty"><div class="spinner sm"></div><span>Cargando catálogo…</span></div>
+      </div>
+    </div>
+
+    <div class="cat-sub-panel" id="cat-sub-extras" style="display:none">
+      <p class="cat-extras-hint">Estos extras aparecen en el cajón de reserva. Los de <b>Masajes</b> se ofrecen a todos los masajes, los de <b>Faciales</b> a todos los faciales, los de <b>Uñas</b> tanto a manicuras como a pedicuras. Cambia el precio o oculta uno para que deje de aparecer.</p>
+      <div id="cat-extras-list">
+        <div class="admin-empty"><div class="spinner sm"></div><span>Cargando extras…</span></div>
+      </div>
     </div>
   </div>
 
@@ -3582,6 +3596,112 @@
     }
   }
   window.saveCatProducto = saveCatProducto;
+
+  // ── Sub-tabs Productos / Extras ──
+  function catSelectSubtab(name) {
+    document.querySelectorAll('.cat-subtab').forEach(b => b.classList.toggle('active', b.dataset.catSub === name));
+    document.getElementById('cat-sub-productos').style.display = (name === 'productos') ? '' : 'none';
+    document.getElementById('cat-sub-extras').style.display = (name === 'extras') ? '' : 'none';
+    // El botón "Agregar producto" solo aplica a productos
+    document.getElementById('cat-add-btn-header').style.display = (name === 'productos') ? '' : 'none';
+    if (name === 'extras' && !catState.extras) fetchCatalogoExtras();
+  }
+  window.catSelectSubtab = catSelectSubtab;
+
+  const _ambitoLabel = { masaje: 'Masajes', facial: 'Faciales', nail: 'Uñas (manicura y pedicura)' };
+
+  async function fetchCatalogoExtras() {
+    const wrap = document.getElementById('cat-extras-list');
+    try {
+      const result = await catApi('list_extras');
+      catState.extras = result.data.grupos || [];
+      renderCatalogoExtras();
+    } catch (err) {
+      wrap.innerHTML = '<div class="admin-empty"><span>' + escapeHtml(err.message || 'No pudimos cargar los extras.') + '</span></div>';
+    }
+  }
+
+  function renderCatalogoExtras() {
+    const wrap = document.getElementById('cat-extras-list');
+    if (!wrap || !catState.extras) return;
+    // Agrupar por ámbito
+    const groups = {};
+    catState.extras.forEach(g => { (groups[g.ambito] = groups[g.ambito] || []).push(g); });
+    const orden = ['masaje', 'facial', 'nail'];
+    wrap.innerHTML = orden.filter(a => groups[a]).map(ambito => {
+      const grupos = groups[ambito];
+      const items = grupos.map(g => {
+        const inactive = g.activo ? '' : ' inactive';
+        const offPill = g.activo ? '' : '<span class="pill-off">Oculto</span>';
+        const kindLabel = g.tipo === 'bool' ? 'Sí / No' : 'Elige uno';
+        // Editable price: si es 'bool' (precio único). Si es 'single', mostrar sus opciones.
+        const priceInput = (g.tipo === 'bool')
+          ? '<div class="cat-extra-price-wrap"><span>Precio $</span>'
+              + '<input type="number" class="cat-extra-price" min="0" step="1" data-extra-id="' + g.id + '" data-extra-kind="grupo" value="' + (g.precio_mxn != null ? Number(g.precio_mxn) : '') + '">'
+              + '</div>'
+          : '<span style="font:12px Inter,sans-serif;color:var(--gray-soft)">' + g.opciones.length + ' opciones</span>';
+        const opcionesHtml = (g.tipo === 'single' && g.opciones.length)
+          ? '<div class="cat-extra-opts">' + g.opciones.map(o => {
+              // La opción 'none' es la de "sin extra" — sin editar precio
+              if (o.opt_id === 'none' || String(o.precio_mxn) === '0') {
+                return '<div class="cat-extra-opt-row">'
+                  + '<div class="cat-extra-opt-nom">' + escapeHtml(o.nombre) + ' <em>(sin costo extra)</em></div>'
+                  + '</div>';
+              }
+              return '<div class="cat-extra-opt-row">'
+                + '<div class="cat-extra-opt-nom">' + escapeHtml(o.nombre) + '</div>'
+                + '<div class="cat-extra-price-wrap"><span>+ $</span>'
+                +   '<input type="number" class="cat-extra-price" min="0" step="1" data-extra-id="' + o.id + '" data-extra-kind="opcion" value="' + Number(o.precio_mxn) + '">'
+                + '</div>'
+                + '</div>';
+            }).join('') + '</div>'
+          : '';
+        return '<div class="cat-extra-card' + inactive + '">'
+          + '<div class="cat-extra-head">'
+          +   '<div class="cat-extra-nom">' + escapeHtml(g.label) + '<span class="kind">' + kindLabel + '</span>' + offPill + '</div>'
+          +   priceInput
+          +   '<button type="button" class="cat-extra-toggle" onclick="toggleCatExtra(\'' + g.id + '\')">' + (g.activo ? 'Ocultar' : 'Mostrar') + '</button>'
+          + '</div>'
+          + opcionesHtml
+          + '</div>';
+      }).join('');
+      return '<div class="cat-extras-group">'
+        + '<h3 class="cat-extras-group-title">Extras de <em>' + escapeHtml(_ambitoLabel[ambito] || ambito) + '</em></h3>'
+        + items
+        + '</div>';
+    }).join('');
+  }
+  window.renderCatalogoExtras = renderCatalogoExtras;
+
+  // Debounce los cambios de precio para no spammear la API por cada tecla
+  let _extraSaveTimer = null;
+  document.addEventListener('input', function(e) {
+    if (!e.target.classList || !e.target.classList.contains('cat-extra-price')) return;
+    const id = e.target.getAttribute('data-extra-id');
+    const kind = e.target.getAttribute('data-extra-kind');
+    const val = e.target.value;
+    clearTimeout(_extraSaveTimer);
+    _extraSaveTimer = setTimeout(async () => {
+      if (!val) return;
+      try {
+        await catApi('update_extra_precio', { id, tipo: kind, precio_mxn: val });
+        showToast('Precio del extra actualizado.', 'ok');
+      } catch (err) {
+        showToast(err.message || 'No se pudo guardar el precio.', 'err');
+      }
+    }, 800);
+  });
+
+  async function toggleCatExtra(id) {
+    try {
+      const r = await catApi('toggle_extra', { id });
+      showToast(r.activo ? 'Extra visible.' : 'Extra oculto.', 'ok');
+      await fetchCatalogoExtras();
+    } catch (err) {
+      showToast(err.message || 'No se pudo cambiar.', 'err');
+    }
+  }
+  window.toggleCatExtra = toggleCatExtra;
 
   async function toggleCatProducto(id) {
     try {
