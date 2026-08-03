@@ -2993,6 +2993,52 @@
 
 
 <!-- ── SUB-MODAL: Reagendar (solo admin) ── -->
+<!-- Modal Reembolsar pago (estilo Stripe) -->
+<div id="admin-refund-modal" class="cita-modal" style="display:none;z-index:1300;">
+  <div class="cita-modal-backdrop" onclick="closeRefundModal()"></div>
+  <div class="cita-modal-box" style="max-width:560px;">
+    <button class="cita-modal-close" onclick="closeRefundModal()" aria-label="Cerrar">×</button>
+    <h2 style="font:600 20px 'Inter',sans-serif;color:var(--brown);margin:0 0 6px;">Reembolsar pago</h2>
+    <div id="rfd-header" style="font:12px 'Inter',sans-serif;color:var(--gray-soft);margin-bottom:14px;">—</div>
+    <div style="background:#eef4ff;border:1px solid #cddaff;border-radius:8px;padding:12px 14px;margin-bottom:16px;color:#1e4bd8;font:13px 'Inter',sans-serif;line-height:1.5;">
+      Los reembolsos tardan entre 5 y 10 días en aparecer en el estado de cuenta del cliente. Las tarifas de Stripe por el pago original no se devuelven, pero no hay cargos adicionales por el reembolso.
+    </div>
+    <div id="rfd-body">
+      <div class="admin-empty" id="rfd-loading"><div class="spinner sm"></div><span>Cargando pagos…</span></div>
+      <div id="rfd-form" style="display:none">
+        <label style="display:block;margin-bottom:14px;">
+          <span style="font:12px 'Inter',sans-serif;color:var(--gray-soft);text-transform:uppercase;letter-spacing:0.05em;">Reembolso</span>
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid rgba(154,138,117,0.35);border-radius:8px;padding:10px 12px;margin-top:4px;">
+            <span style="color:var(--gray-soft);">$</span>
+            <input type="number" id="rfd-monto" step="0.01" min="0" style="flex:1;border:none;outline:none;font:15px 'Inter',sans-serif;color:var(--brown);background:transparent;">
+            <span style="color:var(--gray-soft);font-size:13px;">MXN</span>
+          </div>
+          <div id="rfd-monto-hint" style="font:11px 'Inter',sans-serif;color:var(--gray-soft);margin-top:4px;">Máximo reembolsable: <b id="rfd-max">$0</b></div>
+        </label>
+        <label style="display:block;margin-bottom:16px;">
+          <span style="font:12px 'Inter',sans-serif;color:var(--gray-soft);text-transform:uppercase;letter-spacing:0.05em;">Motivo</span>
+          <select id="rfd-motivo" style="width:100%;padding:10px 12px;margin-top:4px;border:1px solid rgba(154,138,117,0.35);border-radius:8px;font:14px 'Inter',sans-serif;color:var(--brown);background:#fff;">
+            <option value="">Seleccionar un motivo</option>
+            <option value="duplicate">Duplicado</option>
+            <option value="fraudulent">Fraudulento</option>
+            <option value="requested_by_customer">Solicitado por el cliente</option>
+            <option value="other">Otro</option>
+          </select>
+        </label>
+        <div id="rfd-pago-info" style="background:rgba(154,152,84,0.08);border-radius:8px;padding:10px 12px;margin-bottom:12px;font:12px 'Inter',sans-serif;color:var(--gray-soft);"></div>
+      </div>
+      <div id="rfd-no-stripe" style="display:none;background:#fff3cd;border:1px solid #ffe08a;border-radius:8px;padding:12px;font:13px 'Inter',sans-serif;color:#8a6d1a;">
+        Este pago no se puede reembolsar automáticamente por Stripe (no fue con tarjeta o no tenemos el ID del cargo). Para reembolsar, hazlo manualmente desde el dashboard de Stripe.
+      </div>
+      <div id="rfd-msg" style="margin-top:8px;font:12.5px 'Inter',sans-serif;color:#d43535;min-height:16px;"></div>
+    </div>
+    <div class="cita-modal-actions">
+      <button class="cita-btn-secondary" onclick="closeRefundModal()">Cancelar</button>
+      <button class="cita-btn-primary" id="rfd-submit" onclick="submitRefund()" style="background:#635bff;border-color:#635bff;">Emitir reembolso</button>
+    </div>
+  </div>
+</div>
+
 <div id="admin-reschedule-modal" class="cita-modal" style="display:none">
   <div class="cita-modal-backdrop" onclick="closeAdminRescheduleModal()"></div>
   <div class="cita-modal-box" style="max-width:520px;">
@@ -3043,6 +3089,9 @@
   const ADMIN_STATS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-stats';
   const ADMIN_DATA_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-data';
   const ADMIN_CITAS_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-citas';
+  const ADMIN_REFUND_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-refund';
+  const SUPABASE_URL_REFUND = 'https://fneppfjeywhayknrgahe.supabase.co';
+  // anon key ya está en SUPABASE_ANON_KEY más adelante en el archivo — se reusa desde ahí.
   const ADMIN_IMPERSONATE_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-admin-impersonate';
   const ADMIN_USERNAMES = ['exentiamasajista', 'exentiaadmin'];
   let _loginContext = { mode: null };  // 'masajista' | 'admin' — capturado por username escrito
@@ -3718,6 +3767,103 @@
     }
   }
   window.toggleCatProducto = toggleCatProducto;
+
+  // ── Refund Stripe (admin) ──────────────────────────────────────────
+  const refundState = { booking: null, pagos: [], activePago: null };
+
+  async function openRefundModal(booking) {
+    refundState.booking = booking;
+    refundState.pagos = [];
+    refundState.activePago = null;
+    const bookingId = booking.booking_id || booking.id;
+    const bookingCode = booking.booking_code || '';
+    const cliente = booking.cliente || booking.cliente_nombre || 'Cliente';
+    document.getElementById('rfd-header').textContent = `${cliente} · ${bookingCode}`;
+    document.getElementById('rfd-loading').style.display = '';
+    document.getElementById('rfd-form').style.display = 'none';
+    document.getElementById('rfd-no-stripe').style.display = 'none';
+    document.getElementById('rfd-msg').textContent = '';
+    const btn = document.getElementById('rfd-submit');
+    btn.disabled = false; btn.textContent = 'Emitir reembolso';
+    document.getElementById('admin-refund-modal').style.display = 'flex';
+
+    // Traer los pagos del booking desde la vista pública (usa anon key)
+    try {
+      const url = `${SUPABASE_URL_REFUND}/rest/v1/exentia_pagos_admin?booking_id=eq.${bookingId}&select=*&order=created_at.desc`;
+      const res = await fetch(url, { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }});
+      const data = await res.json();
+      refundState.pagos = Array.isArray(data) ? data : [];
+      document.getElementById('rfd-loading').style.display = 'none';
+
+      // Encontrar el primer pago Stripe con saldo reembolsable
+      const stripePago = refundState.pagos.find(p => p.puede_refund_stripe);
+      if (!stripePago) {
+        document.getElementById('rfd-no-stripe').style.display = '';
+        document.getElementById('rfd-submit').disabled = true;
+        return;
+      }
+      refundState.activePago = stripePago;
+      const disponible = Number(stripePago.monto_reembolsable || 0);
+      document.getElementById('rfd-form').style.display = '';
+      document.getElementById('rfd-monto').value = disponible.toFixed(2);
+      document.getElementById('rfd-monto').max = disponible;
+      document.getElementById('rfd-max').textContent = '$' + disponible.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+      document.getElementById('rfd-motivo').value = '';
+      const info = `Pago original: $${Number(stripePago.monto_mxn).toLocaleString('es-MX', {minimumFractionDigits:2})} MXN · Stripe intent: <code style="font-size:11px;">${stripePago.stripe_payment_intent_id}</code>` +
+        (Number(stripePago.refund_amount_mxn||0) > 0 ? ` · Ya reembolsado: $${Number(stripePago.refund_amount_mxn).toLocaleString('es-MX')}` : '');
+      document.getElementById('rfd-pago-info').innerHTML = info;
+    } catch (err) {
+      document.getElementById('rfd-loading').style.display = 'none';
+      document.getElementById('rfd-msg').textContent = 'No pudimos cargar los pagos: ' + (err.message || err);
+    }
+  }
+  window.openRefundModal = openRefundModal;
+
+  function closeRefundModal() {
+    document.getElementById('admin-refund-modal').style.display = 'none';
+    refundState.booking = null;
+    refundState.pagos = [];
+    refundState.activePago = null;
+  }
+  window.closeRefundModal = closeRefundModal;
+
+  async function submitRefund() {
+    const msg = document.getElementById('rfd-msg');
+    const btn = document.getElementById('rfd-submit');
+    const pago = refundState.activePago;
+    if (!pago) { msg.textContent = 'No hay pago Stripe seleccionado.'; return; }
+    const monto = parseFloat(document.getElementById('rfd-monto').value || '0');
+    const motivo = document.getElementById('rfd-motivo').value;
+    if (!monto || monto <= 0) { msg.textContent = 'Escribe un monto válido.'; return; }
+    if (monto > Number(pago.monto_reembolsable)) {
+      msg.textContent = 'El monto excede el máximo reembolsable ($' + Number(pago.monto_reembolsable).toLocaleString('es-MX') + ').';
+      return;
+    }
+    if (!motivo) { msg.textContent = 'Selecciona un motivo.'; return; }
+    if (!confirm(`¿Emitir reembolso de $${monto.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN al cliente?\n\nEsto es irreversible en Stripe.`)) return;
+
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    btn.disabled = true; btn.textContent = 'Enviando…'; msg.textContent = '';
+    try {
+      const res = await fetch(ADMIN_REFUND_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify({ pago_id: pago.pago_id, monto_mxn: monto, motivo })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        const detail = (data && (data.error || data.hint || data.stripe_error || data.detail)) || 'Error';
+        throw new Error(detail);
+      }
+      showToast(`Reembolso emitido: $${monto.toLocaleString('es-MX')} MXN (${data.refund_id}).`, 'ok');
+      closeRefundModal();
+      if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+    } catch (err) {
+      msg.textContent = err.message || 'No se pudo procesar el reembolso.';
+      btn.disabled = false; btn.textContent = 'Emitir reembolso';
+    }
+  }
+  window.submitRefund = submitRefund;
 
   // Confirmación in-app en vez de window.confirm() (que en algunos navegadores queda
   // bloqueado dentro de modales o al hacer clic muy rápido) — el botón cambia a
@@ -6047,6 +6193,14 @@
         if (_bloqueado) reschedule.title = 'No se puede — el servicio ya inició';
         reschedule.addEventListener('click', () => { if (!_bloqueado) openAdminRescheduleModal(b, opts.terapeuta_id); });
         btnRow.appendChild(reschedule);
+        const refund = document.createElement('button');
+        refund.className = 'cita-btn-secondary';
+        refund.textContent = 'Reembolsar';
+        refund.style.background = '#635bff';
+        refund.style.color = '#fff';
+        refund.style.borderColor = '#635bff';
+        refund.addEventListener('click', () => openRefundModal(b));
+        btnRow.appendChild(refund);
         const del = document.createElement('button');
         del.className = 'cita-btn-danger';
         del.textContent = 'Cancelar cita';
