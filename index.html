@@ -688,8 +688,8 @@
     border: 1px solid #f5c896;
   }
   .chip-pill-tipo-sucursal {
-    background: rgba(243,228,199,0.55); color: var(--brown);
-    border: 1px solid rgba(154,152,84,0.35);
+    background: #fff3cd; color: #7a5a00;
+    border: 1px solid #f0d78a;
   }
   .cal-chip-mine .chip-pill-tipo-domicilio,
   .cal-chip-mine .chip-pill-tipo-sucursal {
@@ -709,8 +709,8 @@
     border: 1px solid #f5c896;
   }
   .cita-tipo-badge.is-sucursal {
-    background: rgba(243,228,199,0.55); color: var(--brown);
-    border: 1px solid rgba(154,152,84,0.35);
+    background: #fff3cd; color: #7a5a00;
+    border: 1px solid #f0d78a;
   }
   .chip-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
   .chip-status-dot {
@@ -6307,7 +6307,7 @@
     const tipoPill = b.tipo_cita === 'domicilio'
       ? `<span class="chip-pill chip-pill-tipo-domicilio">Domicilio</span>`
       : (b.tipo_cita === 'sucursal'
-        ? `<span class="chip-pill chip-pill-tipo-sucursal">Sucursal</span>`
+        ? `<span class="chip-pill chip-pill-tipo-sucursal" title="El cliente paga al llegar a la sucursal">Sucursal · pago local</span>`
         : '');
     const _sexoInfo = sexoBadgeParts(b.preferencia_sexo);
     const sexoBadgeChip = _sexoInfo.letra
@@ -6445,7 +6445,8 @@
       tipoBadgeEl.style.display = '';
     } else if (b.tipo_cita === 'sucursal') {
       tipoBadgeEl.className = 'cita-tipo-badge is-sucursal';
-      tipoBadgeEl.textContent = 'Sucursal';
+      tipoBadgeEl.textContent = 'Sucursal · cobrar al llegar';
+      tipoBadgeEl.title = 'El cliente paga en persona al llegar a la sucursal';
       tipoBadgeEl.style.display = '';
     } else {
       tipoBadgeEl.style.display = 'none';
