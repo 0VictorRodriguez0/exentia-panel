@@ -2031,6 +2031,23 @@
     padding: 1px 6px; margin: 0;
   }
   .ucal-ev .zona-badge .zona-lbl { font-size: 8.5px; }
+  /* Badge tipo cita (D domicilio / S sucursal) para chips del admin */
+  .tipo-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 999px;
+    font: 700 9.5px 'Lato', sans-serif; letter-spacing: 0.4px;
+    margin-left: 6px; vertical-align: middle;
+    border: 1px solid transparent;
+  }
+  .tipo-badge .tipo-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tipo-badge.tipo-domicilio { background: #fff5e8; color: #b45309; border-color: #f5c896; }
+  .tipo-badge.tipo-sucursal  { background: #fff3cd; color: #7a5a00; border-color: #f0d78a; }
+  /* En el chip del calendario semanal va abajo a la derecha */
+  .ucal-ev .tipo-badge {
+    position: absolute; bottom: 3px; right: 4px;
+    padding: 1px 6px; margin: 0;
+  }
+  .ucal-ev .tipo-badge .tipo-lbl { font-size: 8.5px; }
   .cita-btn-primary:disabled, .cita-btn-danger:disabled {
     opacity: 0.45; cursor: not-allowed;
   }
@@ -5362,6 +5379,7 @@
     return '<div class="ucal-ev' + poolCls + '" style="top:' + top + '%;height:' + height + '%;left:' + left + '%;width:calc(' + width + '% - 2px);border-left-color:' + color + ';background:' + bg + '"'
       + ' onclick="openUcalPopover(event,\'' + ev.slotId + '\')">'
       + ucalZonaBadge(s)
+      + ucalTipoBadge(s)
       + ucalSexoBadge(s)
       + ucalLiveDot(s)
       + '<span class="ev-hora">' + escapeHtml(fmtHora(s.hora)) + '</span>'
@@ -5381,6 +5399,17 @@
     const est = ucalServicioEstado(slot);
     if (!est) return '';
     return '<span class="ucal-live-badge live-' + est.key + '" title="' + est.label + '">' + est.icon + '<span class="live-lbl">' + est.label + '</span></span>';
+  }
+  // Badge compacto de tipo de cita (Sucursal/Domicilio) para chips del calendario admin
+  function ucalTipoBadge(slot) {
+    if (!slot || !slot.tipo_cita) return '';
+    if (slot.tipo_cita === 'domicilio') {
+      return '<span class="tipo-badge tipo-domicilio" title="Cita a domicilio">D<span class="tipo-lbl">Domicilio</span></span>';
+    }
+    if (slot.tipo_cita === 'sucursal') {
+      return '<span class="tipo-badge tipo-sucursal" title="Cita en sucursal — el cliente paga al llegar">S<span class="tipo-lbl">Sucursal</span></span>';
+    }
+    return '';
   }
   // Badge para cita cuya dirección quedó FUERA del área con tarifa (canela en el mapa).
   // Sirve al masajista/admin para saber que la zona requiere confirmación.
