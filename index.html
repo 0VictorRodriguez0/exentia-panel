@@ -2195,7 +2195,7 @@
     padding: 8px 10px; background: #fff; border-radius: 6px; border: 1px solid #f0e6c8;
   }
   .admin-delete-confirm .del-preview-lbl {
-    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--olive-dark, #7d7c3f); margin-bottom: 4px; font-weight: 600;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--olive-dark, #7d7c3f); margin-bottom: 5px; font-weight: 600; white-space: nowrap;
   }
   .admin-delete-confirm .del-preview-val { font-size: 15px; color: var(--brown, #5c3a1e); }
   .admin-delete-confirm .del-preview-val b { color: #2e5a1e; }
@@ -7192,27 +7192,27 @@
       html += '<div class="del-preview-grid">';
       // Reembolso
       html += '<div class="del-preview-cell">';
-      html += '<div class="del-preview-lbl">Reembolso al cliente</div>';
+      html += '<div class="del-preview-lbl">Reembolso cliente</div>';
       if (pctReemb > 0) {
         html += '<div class="del-preview-val"><b>' + fmt(reembolso) + '</b></div>';
-        html += '<div class="del-preview-sub">' + pctReemb + '% de ' + fmt(precio) + ' &middot; retiene ' + fmt(retenido) + '</div>';
+        html += '<div class="del-preview-sub">' + pctReemb + '% &middot; retiene ' + fmt(retenido) + '</div>';
       } else {
         html += '<div class="del-preview-val del-preview-none">Sin reembolso</div>';
-        html += '<div class="del-preview-sub">Canceló con menos de 3 h</div>';
+        html += '<div class="del-preview-sub">Canceló con menos de 3 h</div>';
       }
       html += '</div>';
       // Comisión
       html += '<div class="del-preview-cell">';
-      html += '<div class="del-preview-lbl">Comisión al masajista' + (varias ? ' (c/u)' : '') + '</div>';
+      html += '<div class="del-preview-lbl">Comisión masajista' + (varias ? ' (c/u)' : '') + '</div>';
       if (nMasajistas === 0) {
-        html += '<div class="del-preview-val del-preview-none">Sin masajista asignada</div>';
-        html += '<div class="del-preview-sub">Nadie tomó la cita aún — no se genera comisión</div>';
+        html += '<div class="del-preview-val del-preview-none">Sin asignar</div>';
+        html += '<div class="del-preview-sub">Nadie tomó la cita — no se genera comisión</div>';
       } else if (pctEscala > 0) {
         html += '<div class="del-preview-val"><b>' + fmt(comisionFinal) + '</b></div>';
         html += '<div class="del-preview-sub">' + fmt(precio) + ' × ' + pctMas + '% × ' + pctEscala + '%</div>';
       } else {
-        html += '<div class="del-preview-val del-preview-none">Sin comisión por la regla</div>';
-        html += '<div class="del-preview-sub">Cancelación con 24 h o más de anticipación</div>';
+        html += '<div class="del-preview-val del-preview-none">Sin comisión</div>';
+        html += '<div class="del-preview-sub">Regla: canceló con 24 h o más</div>';
       }
       html += '</div>';
       html += '</div>';
