@@ -7142,7 +7142,14 @@
       adminCancelBooking(booking, wrap);
     });
 
-    _renderCancelPreview(booking, hermanos.length || 1, wrap.querySelector('#del-preview'));
+    // Contar masajistas asignados: en grupo, cada hermano trae su tera; en individual, mira el booking
+    let nAsignadas = 0;
+    if (esGrupo) {
+      nAsignadas = hermanos.filter(h => h && h.tera).length;
+    } else {
+      nAsignadas = (booking && (booking.terapeuta_id || booking.tera_id || booking.tera)) ? 1 : 0;
+    }
+    _renderCancelPreview(booking, nAsignadas, wrap.querySelector('#del-preview'));
   }
 
   // Preview del reembolso + comisión antes de cancelar (misma escala que el trigger BD)
@@ -7196,7 +7203,10 @@
       // Comisión
       html += '<div class="del-preview-cell">';
       html += '<div class="del-preview-lbl">Comisión al masajista' + (varias ? ' (c/u)' : '') + '</div>';
-      if (pctEscala > 0) {
+      if (nMasajistas === 0) {
+        html += '<div class="del-preview-val del-preview-none">Sin masajista asignada</div>';
+        html += '<div class="del-preview-sub">Nadie tomó la cita aún — no se genera comisión</div>';
+      } else if (pctEscala > 0) {
         html += '<div class="del-preview-val"><b>' + fmt(comisionFinal) + '</b></div>';
         html += '<div class="del-preview-sub">' + fmt(precio) + ' × ' + pctMas + '% × ' + pctEscala + '%</div>';
       } else {
