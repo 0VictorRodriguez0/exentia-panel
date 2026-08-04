@@ -1042,6 +1042,64 @@
   }
   /* Modal producto */
   .cat-modal-box { max-width: 560px; }
+
+  /* ── Tab Comisiones ── */
+  #tab-comisiones { padding: 26px clamp(14px, 4vw, 40px) 60px; overflow-y: auto; }
+  .com-head { display:flex; justify-content:space-between; align-items:start; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .com-title { margin:0 0 4px; font-family:'Cormorant Garamond',serif; font-size:26px; color:var(--brown); font-weight:500; }
+  .com-title em { color:var(--olive-dark); font-style:italic; }
+  .com-sub { margin:0; font-size:13px; color:var(--brown); opacity:.75; max-width:640px; line-height:1.5; }
+  .com-toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:#fff; border:1px solid #e8dfc0; border-radius:8px; }
+  .com-toolbar label { display:inline-flex; align-items:center; gap:8px; font-size:12px; text-transform:uppercase; color:var(--olive-dark); letter-spacing:.4px; margin:0; }
+  .com-toolbar input[type=number], .com-toolbar input[type=date], .com-toolbar select { padding:6px 10px; border:1px solid #e8dfc0; border-radius:6px; font-size:13px; background:#fdfbf4; color:var(--brown); }
+  .com-toolbar input[type=number] { width:80px; }
+  .com-spacer { flex:1; }
+  .com-totales { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-bottom:20px; }
+  .com-total-card { background:#fff; border:1px solid #e8dfc0; border-radius:8px; padding:14px 16px; }
+  .com-total-nombre { font-weight:600; color:var(--brown); margin-bottom:10px; font-size:14px; padding-bottom:6px; border-bottom:1px solid #f0e6c8; }
+  .com-total-row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--brown); }
+  .com-pendiente { color:#b58800; font-weight:600; }
+  .com-pagada { color:#2e7d32; font-weight:600; }
+  .com-anulada { color:#a12626; font-weight:600; }
+  .com-empty { padding:24px; text-align:center; color:var(--brown); opacity:.6; background:#fff; border:1px dashed #e8dfc0; border-radius:8px; }
+  .com-list { display:flex; flex-direction:column; gap:16px; }
+  .com-group { background:#fff; border:1px solid #e8dfc0; border-radius:8px; overflow:hidden; }
+  .com-group-head { padding:12px 16px; background:#f8f0d9; font-weight:600; color:var(--brown); font-size:14px; display:flex; align-items:center; justify-content:space-between; }
+  .com-group-head small { font-weight:400; opacity:.7; margin-left:6px; }
+  .com-group-total { font-size:13px; font-weight:600; color:var(--olive-dark); }
+  .com-table-wrap { overflow-x:auto; }
+  .com-table { width:100%; border-collapse:collapse; min-width:720px; }
+  .com-table th, .com-table td { padding:9px 12px; text-align:left; border-top:1px solid #f0e6c8; font-size:13px; color:var(--brown); vertical-align:middle; }
+  .com-table th { background:#fdfbf4; color:var(--olive-dark); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.5px; border-top:none; }
+  .com-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+  .com-badge-pendiente { background:#fff3cd; color:#856404; }
+  .com-badge-pagada { background:#c8e6c9; color:#1b5e20; }
+  .com-badge-anulada { background:#f8d7da; color:#721c24; }
+  .com-badge-esperando_pago_completo { background:#e1e8ed; color:#4a5866; font-size:9px; padding:3px 7px; }
+  .com-btn { padding:5px 10px; font-size:11px; border-radius:6px; border:1px solid #b5b062; background:#fff; color:var(--olive-dark); cursor:pointer; margin-right:4px; font-family:inherit; }
+  .com-btn:hover { background:#f8f0d9; }
+  .com-btn-pay { background:#c8e6c9; border-color:#2e7d32; color:#1b5e20; }
+  .com-btn-pay:hover { background:#a8d8ab; }
+  .com-btn-del { padding:6px 12px; font-size:11px; border-radius:6px; border:1px solid #d9534f; background:#fff; color:#a12626; cursor:pointer; font-family:inherit; }
+  .com-btn-del:hover { background:#f8d7da; }
+  .com-modal-box { max-width:560px; }
+  .com-context { background:#fdfbf4; border-left:3px solid var(--olive); padding:10px 14px; margin-bottom:14px; border-radius:0 6px 6px 0; }
+  .com-context-row { font-size:13px; color:var(--brown); margin-bottom:2px; }
+  .com-context-formula { font-size:12px; color:var(--olive-dark); font-style:italic; margin-top:6px; }
+  .com-inline { display:grid; grid-template-columns:1fr 90px 1fr; gap:10px; margin-bottom:10px; }
+  .com-inline label { margin-bottom:0; }
+  .com-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid #f0e6c8; }
+  #com-form > label { display:block; margin-bottom:10px; font-size:12px; text-transform:uppercase; color:var(--olive-dark); letter-spacing:.4px; }
+  #com-form label > span { display:block; margin-bottom:4px; }
+  #com-form input, #com-form select { width:100%; padding:8px 10px; border:1px solid #e8dfc0; border-radius:6px; font-size:14px; background:#fdfbf4; color:var(--brown); box-sizing:border-box; font-family:inherit; text-transform:none; letter-spacing:normal; }
+  #com-form input:focus, #com-form select:focus { outline:none; border-color:var(--olive-dark); background:#fff; }
+  #com-form input[readonly] { background:#f5efe0; cursor:not-allowed; }
+  @media (max-width: 600px) {
+    .com-inline { grid-template-columns:1fr; }
+    .com-toolbar { flex-direction:column; align-items:stretch; }
+    .com-toolbar label { justify-content:space-between; }
+    .com-toolbar input[type=number] { width:auto; }
+  }
   .cat-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .cat-field { display: flex; flex-direction: column; gap: 4px; }
   .cat-field-full { grid-column: 1 / -1; }
@@ -2828,6 +2886,7 @@
     <button type="button" class="admin-tab" data-tab="resumen"     role="tab">Resumen</button>
     <button type="button" class="admin-tab active" data-tab="calendarios" role="tab">Calendarios</button>
     <button type="button" class="admin-tab" data-tab="catalogo"    role="tab">Catálogo</button>
+    <button type="button" class="admin-tab" data-tab="comisiones"  role="tab">Comisiones</button>
   </nav>
 
   <!-- Tab: Resumen — dashboard de una sola vista -->
@@ -2936,6 +2995,41 @@
         <div class="admin-empty"><div class="spinner sm"></div><span>Cargando extras…</span></div>
       </div>
     </div>
+  </div>
+
+  <!-- Tab: Comisiones (movimientos por masajista, generados por pagos y cancelaciones) -->
+  <div class="admin-tab-panel" id="tab-comisiones" style="display:none">
+    <div class="com-head">
+      <div>
+        <h2 class="com-title">Comisiones del <em>equipo</em></h2>
+        <p class="com-sub">Movimientos que se crean solos cuando se registra un pago o una cancelación. Puedes editar el porcentaje o monto, marcar como pagadas, anular o crear movimientos manuales.</p>
+      </div>
+      <button type="button" class="cita-btn-primary" onclick="openComManualModal()">+ Movimiento manual</button>
+    </div>
+    <div class="com-toolbar">
+      <label>% comisión global
+        <input type="number" id="com-pct-global" min="0" max="100" step="1">
+        <button type="button" class="cita-btn-secondary" id="com-pct-save">Guardar</button>
+      </label>
+      <div class="com-spacer"></div>
+      <select id="com-filter-terapeuta" title="Filtrar por masajista">
+        <option value="">Todas las masajistas</option>
+      </select>
+      <select id="com-filter-estado" title="Filtrar por estado">
+        <option value="">Todos los estados</option>
+        <option value="esperando_pago_completo">Esperando pago 100%</option>
+        <option value="pendiente">Pendientes de pagar</option>
+        <option value="pagada">Pagadas</option>
+        <option value="anulada">Anuladas</option>
+      </select>
+      <input type="date" id="com-from" title="Desde">
+      <input type="date" id="com-to" title="Hasta">
+      <button class="cal-refresh" id="com-refresh" title="Refrescar">↻</button>
+    </div>
+    <div id="com-totales" class="com-totales">
+      <div class="stats-loading"><div class="spinner sm"></div><span>Cargando…</span></div>
+    </div>
+    <div id="com-list" class="com-list"></div>
   </div>
 
   <div class="admin-tab-panel active" id="tab-calendarios">
@@ -3227,6 +3321,9 @@
         initComparativa();
       } else if (name === 'catalogo') {
         fetchCatalogo();
+      } else if (name === 'comisiones') {
+        bindComToolbar();
+        fetchComisiones();
       }
     }
   }
@@ -3726,6 +3823,315 @@
     }).join('');
   }
   window.renderCatalogoExtras = renderCatalogoExtras;
+
+  // ── Tab Comisiones: CRUD de movimientos de comisión por masajista ──
+  // Habla con exentia-panel-admin-actions (action:'comisiones') → RPC exentia_admin_comisiones.
+  const comState = { data: [], totales: [], pct_global: 50, editingId: null, terapeutas: [], loading: false };
+
+  async function comApi(comAction, payload) {
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({ action: 'comisiones', com_action: comAction, payload: payload || {} })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error((data && (data.error || data.message)) || 'Error de conexión');
+    const result = data.result || {};
+    if (result.status !== 'ok') throw new Error(result.detail || result.error || 'Error');
+    return result;
+  }
+
+  function comReadFilters() {
+    return {
+      terapeuta_id: document.getElementById('com-filter-terapeuta').value || undefined,
+      estado: document.getElementById('com-filter-estado').value || undefined,
+      from_date: document.getElementById('com-from').value || undefined,
+      to_date: document.getElementById('com-to').value || undefined
+    };
+  }
+
+  async function fetchComisiones() {
+    const list = document.getElementById('com-list');
+    const tot = document.getElementById('com-totales');
+    if (comState.loading) return;
+    comState.loading = true;
+    tot.innerHTML = '<div class="stats-loading"><div class="spinner sm"></div><span>Cargando…</span></div>';
+    list.innerHTML = '';
+    try {
+      const [main, teras] = await Promise.all([
+        comApi('list', comReadFilters()),
+        comState.terapeutas.length ? Promise.resolve({ data: comState.terapeutas }) : comApi('terapeutas')
+      ]);
+      comState.data = main.data || [];
+      comState.totales = main.totales || [];
+      comState.pct_global = parseInt(main.pct_global || '50', 10);
+      if (teras && teras.data) comState.terapeutas = teras.data;
+      comPopulateFilters();
+      renderComisiones();
+    } catch (e) {
+      list.innerHTML = '<div class="com-empty">Error: ' + escapeHtml(e.message) + '</div>';
+      tot.innerHTML = '';
+    } finally {
+      comState.loading = false;
+    }
+  }
+  window.fetchComisiones = fetchComisiones;
+
+  function comPopulateFilters() {
+    const sel = document.getElementById('com-filter-terapeuta');
+    if (sel && sel.options.length <= 1) {
+      sel.innerHTML = '<option value="">Todas las masajistas</option>' +
+        comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
+    }
+    const pctEl = document.getElementById('com-pct-global');
+    if (pctEl && !pctEl.value) pctEl.value = comState.pct_global;
+  }
+
+  function _comMotivoLabel(m) {
+    if (m === 'pago_cita') return 'Pago de cita';
+    if (m === 'retencion_cancelacion') return 'Retención por cancelación';
+    if (m === 'ajuste_manual') return 'Ajuste manual';
+    return m || '—';
+  }
+  function _comFmtMoney(n) { return '$' + Number(n || 0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function _comFmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'});
+  }
+
+  function renderComisiones() {
+    // Totales agrupados por masajista
+    const tot = document.getElementById('com-totales');
+    const teraGroups = {};
+    comState.totales.forEach(t => {
+      const k = t.terapeuta_id || 'sin';
+      if (!teraGroups[k]) teraGroups[k] = { nombre: t.terapeuta_nombre || 'Sin asignar', esperando_pago_completo:0, pendiente:0, pagada:0, anulada:0 };
+      teraGroups[k][t.estado] = Number(t.total_mxn || 0);
+    });
+    const cards = Object.values(teraGroups).map(g => (
+      '<div class="com-total-card">' +
+        '<div class="com-total-nombre">' + escapeHtml(g.nombre) + '</div>' +
+        (g.esperando_pago_completo ? '<div class="com-total-row"><span>Esperando pago</span><b style="color:#4a5866">' + _comFmtMoney(g.esperando_pago_completo) + '</b></div>' : '') +
+        '<div class="com-total-row"><span>Pendiente</span><b class="com-pendiente">' + _comFmtMoney(g.pendiente) + '</b></div>' +
+        '<div class="com-total-row"><span>Pagada</span><b class="com-pagada">' + _comFmtMoney(g.pagada) + '</b></div>' +
+        (g.anulada ? '<div class="com-total-row"><span>Anulada</span><b class="com-anulada">' + _comFmtMoney(g.anulada) + '</b></div>' : '') +
+      '</div>'
+    ));
+    tot.innerHTML = cards.length ? cards.join('') : '<div class="com-empty">Aún no hay comisiones. Se generan solas al registrar un pago o una cancelación.</div>';
+
+    // Movimientos agrupados por masajista
+    const list = document.getElementById('com-list');
+    if (!comState.data.length) {
+      list.innerHTML = '<div class="com-empty">No hay movimientos con los filtros actuales.</div>';
+      return;
+    }
+    const groups = {};
+    comState.data.forEach(m => {
+      const k = m.terapeuta_id || 'sin';
+      if (!groups[k]) groups[k] = { nombre: m.terapeuta_nombre || 'Sin asignar', movs: [] };
+      groups[k].movs.push(m);
+    });
+    list.innerHTML = Object.values(groups).map(g => {
+      const subtotal = g.movs.filter(m => m.estado !== 'anulada').reduce((s, m) => s + Number(m.monto_comision || 0), 0);
+      const rows = g.movs.map(m => {
+        const citaLbl = m.booking_code
+          ? (escapeHtml(m.booking_code) + (m.cliente_nombre ? ' · ' + escapeHtml(m.cliente_nombre) : ''))
+          : '<em style="opacity:.6">manual</em>';
+        const acts = [
+          '<button class="com-btn" onclick="openComEditModal(\'' + m.id + '\')">Editar</button>',
+          m.estado === 'pendiente'
+            ? '<button class="com-btn com-btn-pay" onclick="comMarkPaid(\'' + m.id + '\')">Marcar pagada</button>'
+            : ''
+        ].filter(Boolean).join(' ');
+        return '<tr>' +
+          '<td>' + _comFmtDate(m.created_at) + '</td>' +
+          '<td>' + citaLbl + '</td>' +
+          '<td>' + escapeHtml(_comMotivoLabel(m.motivo)) + '</td>' +
+          '<td>' + _comFmtMoney(m.monto_base) + '</td>' +
+          '<td>' + (m.porcentaje || 0) + '%</td>' +
+          '<td><b>' + _comFmtMoney(m.monto_comision) + '</b></td>' +
+          '<td><span class="com-badge com-badge-' + m.estado + '">' + m.estado + '</span></td>' +
+          '<td>' + acts + '</td>' +
+        '</tr>';
+      }).join('');
+      return '<div class="com-group">' +
+        '<div class="com-group-head">' +
+          '<span>' + escapeHtml(g.nombre) + ' <small>' + g.movs.length + ' movimiento' + (g.movs.length === 1 ? '' : 's') + '</small></span>' +
+          '<span class="com-group-total">Subtotal activo: ' + _comFmtMoney(subtotal) + '</span>' +
+        '</div>' +
+        '<div class="com-table-wrap"><table class="com-table"><thead><tr>' +
+          '<th>Fecha</th><th>Cita</th><th>Motivo</th><th>Base</th><th>%</th><th>Comisión</th><th>Estado</th><th></th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function openComEditModal(id) {
+    const m = comState.data.find(x => x.id === id);
+    if (!m) return;
+    comState.editingId = id;
+    document.getElementById('com-modal-title').textContent = 'Editar movimiento';
+    document.getElementById('com-tera-wrap').style.display = 'none';
+    document.getElementById('com-btn-del').style.display = '';
+    document.getElementById('com-modal-context').innerHTML =
+      '<div class="com-context-row"><b>Masajista:</b> ' + escapeHtml(m.terapeuta_nombre || '—') + '</div>' +
+      (m.booking_code ? '<div class="com-context-row"><b>Cita:</b> ' + escapeHtml(m.booking_code) + (m.cliente_nombre ? ' · ' + escapeHtml(m.cliente_nombre) : '') + '</div>' : '') +
+      (m.cancel_horas_antes != null ? '<div class="com-context-row"><b>Cancelación:</b> ' + Math.round(m.cancel_horas_antes) + ' h antes · retención ' + (100 - (m.cancel_pct_reembolso || 0)) + '%</div>' : '') +
+      '<div class="com-context-formula">Base × % = Comisión</div>';
+    const form = document.getElementById('com-form');
+    form.motivo.value = m.motivo || '';
+    form.monto_base.value = Number(m.monto_base || 0).toFixed(2);
+    form.monto_base.readOnly = m.motivo === 'pago_cita' || m.motivo === 'retencion_cancelacion';
+    form.porcentaje.value = m.porcentaje || 0;
+    form.monto_comision.value = Number(m.monto_comision || 0).toFixed(2);
+    form.estado.value = m.estado || 'pendiente';
+    form.anulada_motivo.value = m.anulada_motivo || '';
+    comToggleAnul();
+    document.getElementById('com-modal-msg').textContent = '';
+    document.getElementById('com-modal').style.display = 'flex';
+  }
+  window.openComEditModal = openComEditModal;
+
+  function openComManualModal() {
+    comState.editingId = null;
+    document.getElementById('com-modal-title').textContent = 'Movimiento manual';
+    document.getElementById('com-tera-wrap').style.display = '';
+    document.getElementById('com-btn-del').style.display = 'none';
+    const sel = document.querySelector('#com-form select[name=terapeuta_id]');
+    sel.innerHTML = '<option value="">— Elige masajista —</option>' +
+      comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
+    document.getElementById('com-modal-context').innerHTML = '<div class="com-context-formula">Base × % = Comisión</div>';
+    const form = document.getElementById('com-form');
+    form.motivo.value = 'ajuste_manual';
+    form.monto_base.value = '';
+    form.monto_base.readOnly = false;
+    form.porcentaje.value = comState.pct_global;
+    form.monto_comision.value = '';
+    form.estado.value = 'pendiente';
+    form.anulada_motivo.value = '';
+    comToggleAnul();
+    document.getElementById('com-modal-msg').textContent = '';
+    document.getElementById('com-modal').style.display = 'flex';
+  }
+  window.openComManualModal = openComManualModal;
+
+  function closeComModal() { document.getElementById('com-modal').style.display = 'none'; }
+  window.closeComModal = closeComModal;
+
+  function comRecalc() {
+    const f = document.getElementById('com-form');
+    const base = parseFloat(f.monto_base.value) || 0;
+    const pct = parseFloat(f.porcentaje.value) || 0;
+    f.monto_comision.value = (base * pct / 100).toFixed(2);
+  }
+  window.comRecalc = comRecalc;
+
+  function comRecalcInverse() {
+    const f = document.getElementById('com-form');
+    const base = parseFloat(f.monto_base.value) || 0;
+    const mc = parseFloat(f.monto_comision.value) || 0;
+    if (base > 0) f.porcentaje.value = Math.round(mc / base * 100);
+  }
+  window.comRecalcInverse = comRecalcInverse;
+
+  function comToggleAnul() {
+    const f = document.getElementById('com-form');
+    document.getElementById('com-anul-wrap').style.display = f.estado.value === 'anulada' ? '' : 'none';
+  }
+  window.comToggleAnul = comToggleAnul;
+
+  async function submitComForm() {
+    const form = document.getElementById('com-form');
+    const msg = document.getElementById('com-modal-msg');
+    const btn = form.querySelector('button[type=submit]');
+    msg.textContent = '';
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    try {
+      if (comState.editingId) {
+        await comApi('update', {
+          id: comState.editingId,
+          porcentaje: parseInt(form.porcentaje.value, 10),
+          monto_comision: parseFloat(form.monto_comision.value),
+          motivo: form.motivo.value.trim(),
+          estado: form.estado.value,
+          anulada_motivo: form.estado.value === 'anulada' ? form.anulada_motivo.value.trim() : null
+        });
+      } else {
+        const teraId = form.terapeuta_id.value;
+        if (!teraId) throw new Error('Elige una masajista');
+        const base = parseFloat(form.monto_base.value);
+        if (!(base > 0)) throw new Error('Monto base debe ser mayor a 0');
+        await comApi('create_manual', {
+          terapeuta_id: teraId,
+          motivo: form.motivo.value.trim() || 'ajuste_manual',
+          monto_base: base,
+          porcentaje: parseInt(form.porcentaje.value, 10) || 0,
+          monto_comision: parseFloat(form.monto_comision.value) || 0
+        });
+      }
+      closeComModal();
+      fetchComisiones();
+      showToast('Movimiento guardado.', 'ok');
+    } catch (e) {
+      msg.textContent = e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Guardar';
+    }
+  }
+  window.submitComForm = submitComForm;
+
+  async function comMarkPaid(id) {
+    if (!confirm('¿Marcar esta comisión como pagada?')) return;
+    try {
+      await comApi('mark_paid', { id });
+      fetchComisiones();
+      showToast('Marcada como pagada.', 'ok');
+    } catch (e) {
+      showToast('Error: ' + e.message, 'err');
+    }
+  }
+  window.comMarkPaid = comMarkPaid;
+
+  async function comDeleteCurrent() {
+    if (!comState.editingId) return;
+    if (!confirm('Eliminar este movimiento definitivamente? Si prefieres conservarlo, cámbialo a "anulada".')) return;
+    try {
+      await comApi('delete', { id: comState.editingId });
+      closeComModal();
+      fetchComisiones();
+      showToast('Movimiento eliminado.', 'ok');
+    } catch (e) {
+      showToast('Error: ' + e.message, 'err');
+    }
+  }
+  window.comDeleteCurrent = comDeleteCurrent;
+
+  async function comSavePctGlobal() {
+    const val = parseInt(document.getElementById('com-pct-global').value, 10);
+    if (!(val >= 0 && val <= 100)) { showToast('% debe estar entre 0 y 100.', 'warn'); return; }
+    try {
+      await comApi('set_config', { key: 'comision_pct_masajista', value: String(val) });
+      comState.pct_global = val;
+      showToast('% global actualizado. Solo aplica a movimientos nuevos.', 'ok');
+    } catch (e) {
+      showToast('Error: ' + e.message, 'err');
+    }
+  }
+  window.comSavePctGlobal = comSavePctGlobal;
+
+  function bindComToolbar() {
+    ['com-filter-terapeuta','com-filter-estado','com-from','com-to'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el._boundCom) { el.addEventListener('change', fetchComisiones); el._boundCom = true; }
+    });
+    const rf = document.getElementById('com-refresh');
+    if (rf && !rf._boundCom) { rf.addEventListener('click', fetchComisiones); rf._boundCom = true; }
+    const sv = document.getElementById('com-pct-save');
+    if (sv && !sv._boundCom) { sv.addEventListener('click', comSavePctGlobal); sv._boundCom = true; }
+  }
+  window.bindComToolbar = bindComToolbar;
 
   // Debounce los cambios de precio para no spammear la API por cada tecla
   let _extraSaveTimer = null;
@@ -7656,6 +8062,55 @@
         <button type="button" class="cita-btn-primary" id="cat-save-btn" onclick="saveCatProducto()">Guardar</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal: editar/crear movimiento de comisión (admin) -->
+<div id="com-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeComModal()"></div>
+  <div class="cita-modal-box com-modal-box">
+    <button class="cita-modal-close" onclick="closeComModal()" aria-label="Cerrar">×</button>
+    <h2 class="cita-modal-title" id="com-modal-title">Editar movimiento</h2>
+    <form id="com-form" onsubmit="event.preventDefault(); submitComForm();">
+      <div id="com-modal-context" class="com-context"></div>
+      <label id="com-tera-wrap" style="display:none"><span>Masajista *</span>
+        <select name="terapeuta_id">
+          <option value="">— Elige masajista —</option>
+        </select>
+      </label>
+      <label><span>Motivo</span>
+        <input type="text" name="motivo" required maxlength="80">
+      </label>
+      <div class="com-inline">
+        <label><span>Monto base (MXN)</span>
+          <input type="number" name="monto_base" step="0.01" min="0" oninput="comRecalc(this)">
+        </label>
+        <label><span>%</span>
+          <input type="number" name="porcentaje" min="0" max="100" step="1" oninput="comRecalc(this)">
+        </label>
+        <label><span>Comisión (MXN)</span>
+          <input type="number" name="monto_comision" step="0.01" min="0" oninput="comRecalcInverse(this)">
+        </label>
+      </div>
+      <label><span>Estado</span>
+        <select name="estado" onchange="comToggleAnul()">
+          <option value="esperando_pago_completo">Esperando pago 100%</option>
+          <option value="pendiente">Pendiente de pagar</option>
+          <option value="pagada">Pagada</option>
+          <option value="anulada">Anulada</option>
+        </select>
+      </label>
+      <label id="com-anul-wrap" style="display:none"><span>Motivo de anulación</span>
+        <input type="text" name="anulada_motivo" maxlength="120">
+      </label>
+      <div class="cat-msg" id="com-modal-msg"></div>
+      <div class="com-actions">
+        <button type="button" class="com-btn-del" id="com-btn-del" onclick="comDeleteCurrent()" style="display:none">Eliminar</button>
+        <div class="com-spacer"></div>
+        <button type="button" class="cita-btn-secondary" onclick="closeComModal()">Cancelar</button>
+        <button type="submit" class="cita-btn-primary">Guardar</button>
+      </div>
+    </form>
   </div>
 </div>
 
