@@ -1950,6 +1950,7 @@
     font: 700 10.5px 'Lato', sans-serif; letter-spacing: 0.4px; text-transform: uppercase;
   }
   .pago-badge.pagado { background: rgba(30,105,45,0.13); color: #1b5e20; }
+  .pago-badge.pendiente { background: #fff3cd; color: #7a5a00; }
   .ucal-live-badge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 1px 6px; border-radius: 999px;
@@ -5554,7 +5555,15 @@
     _rowsExtra.forEach(r => rows.push(r));
     if (sexoInfo.letra) rows.push('<div class="row"><span class="lbl">Pidió</span>' + escapeHtml(sexoInfo.completo) + '</div>');
     const total = (Number(s.precio_total || s.precio_mxn) || 0) + (Number(s.costo_traslado) || 0);
-    if (total > 0) rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + ' <span class="pago-badge pagado" style="font-size:9.5px;padding:2px 7px;">Pagado en línea</span></div>');
+    if (total > 0) {
+      const _pagado = Number(s.total_pagado || s.precio_pagado_mxn || 0);
+      const _yaPagado = (s.estado_pago === 'pagado') || (_pagado > 0 && _pagado >= total);
+      const _badgeCls = _yaPagado ? 'pagado' : 'pendiente';
+      const _badgeTxt = _yaPagado
+        ? 'Pagado en línea'
+        : (s.tipo_cita === 'sucursal' ? 'Cobrar en sucursal' : 'Pago pendiente');
+      rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + ' <span class="pago-badge ' + _badgeCls + '" style="font-size:9.5px;padding:2px 7px;">' + _badgeTxt + '</span></div>');
+    }
     if (Number(s.extras_total || 0) > 0) rows.push('<div class="row"><span class="lbl">Extras</span>+$' + Number(s.extras_total).toLocaleString('es-MX') + ' <span style="color:var(--gray-soft);font-size:11.5px">(' + (s.extras_count || 0) + ')</span></div>');
     // Breakdown por persona si aplica
     let personasHtml = '';
@@ -6512,6 +6521,22 @@
     }
     const totalFinal = (Number(precioSvc) || 0) + (Number(costoTraslado) || 0);
     document.getElementById('cita-precio-total').textContent = totalFinal > 0 ? '$' + totalFinal.toLocaleString('es-MX') : '—';
+    // Badge dinámico de estado del pago del servicio principal
+    const pagoBadge = document.getElementById('cita-pago-badge');
+    if (pagoBadge) {
+      const pagado = Number(b.total_pagado || b.precio_pagado_mxn || 0);
+      const yaPagado = (b.estado_pago === 'pagado') || (pagado > 0 && pagado >= totalFinal);
+      if (yaPagado) {
+        pagoBadge.className = 'pago-badge pagado';
+        pagoBadge.textContent = 'Pagado en línea';
+      } else if (b.tipo_cita === 'sucursal') {
+        pagoBadge.className = 'pago-badge pendiente';
+        pagoBadge.textContent = 'Pago pendiente — cobrar en sucursal';
+      } else {
+        pagoBadge.className = 'pago-badge pendiente';
+        pagoBadge.textContent = 'Pago pendiente';
+      }
+    }
     renderExtrasSection(b);
 
     // ─── Sección 4: Lugar ───
@@ -8228,7 +8253,7 @@
         <div class="cita-precio-row" id="cita-precio-trasl-row" style="display:none"><span>Traslado a domicilio</span><span id="cita-precio-trasl">—</span></div>
         <div class="cita-precio-row cita-precio-total"><span>Total del servicio</span><span id="cita-precio-total">—</span></div>
         <div class="cita-servicio-pagado-row">
-          <span class="pago-badge pagado">Pagado en línea</span>
+          <span id="cita-pago-badge" class="pago-badge pagado">Pagado en línea</span>
         </div>
       </div>
     </div>
