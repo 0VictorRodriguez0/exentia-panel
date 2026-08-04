@@ -2180,23 +2180,30 @@
   }
   .admin-delete-confirm .del-list-item .del-hora { font-weight: 700; }
   .admin-delete-confirm .del-list-item .del-tera { opacity: 0.78; font-size: 11px; }
-  .admin-delete-confirm .del-motivo-label {
-    display: flex; flex-direction: column; gap: 4px;
-    margin-top: 10px;
+  .admin-delete-confirm .del-preview {
+    margin-top: 10px; padding: 10px 12px;
+    background: #fdfbf4; border: 1px solid #e8dfc0; border-radius: 8px;
+    font: 12.5px 'Inter', sans-serif; color: var(--brown, #5c3a1e);
   }
-  .admin-delete-confirm .del-motivo-label span {
-    font: 500 11.5px 'Inter', sans-serif; color: #6c4a34; letter-spacing: 0.1px;
+  .admin-delete-confirm .del-preview-hdr {
+    font-weight: 600; color: var(--olive-dark, #7d7c3f); margin-bottom: 8px; font-size: 12px;
   }
-  .admin-delete-confirm .del-motivo {
-    width: 100%; box-sizing: border-box;
-    padding: 8px 10px; border-radius: 8px;
-    border: 1.5px solid rgba(181,59,59,0.25);
-    background: #fffefa; color: var(--brown, #5c3a1e);
-    font: 13px 'Inter', sans-serif; resize: vertical; min-height: 46px;
+  .admin-delete-confirm .del-preview-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
   }
-  .admin-delete-confirm .del-motivo:focus {
-    outline: none; border-color: rgba(181,59,59,0.55);
-    box-shadow: 0 0 0 3px rgba(181,59,59,0.10);
+  .admin-delete-confirm .del-preview-cell {
+    padding: 8px 10px; background: #fff; border-radius: 6px; border: 1px solid #f0e6c8;
+  }
+  .admin-delete-confirm .del-preview-lbl {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--olive-dark, #7d7c3f); margin-bottom: 4px; font-weight: 600;
+  }
+  .admin-delete-confirm .del-preview-val { font-size: 15px; color: var(--brown, #5c3a1e); }
+  .admin-delete-confirm .del-preview-val b { color: #2e5a1e; }
+  .admin-delete-confirm .del-preview-none { color: #9a8672; font-style: italic; font-size: 13px; }
+  .admin-delete-confirm .del-preview-sub { font-size: 11px; color: #9a8672; margin-top: 3px; }
+  .admin-delete-confirm .del-preview-warn { color: #856404; font-size: 12px; }
+  @media (max-width: 520px) {
+    .admin-delete-confirm .del-preview-grid { grid-template-columns: 1fr; }
   }
   .admin-delete-confirm .del-actions {
     display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap;
@@ -7123,10 +7130,7 @@
       +   '<span class="del-title">' + tituloBase + '</span>'
       + '</div>'
       + listaHtml
-      + '<label class="del-motivo-label">'
-      +   '<span>Motivo (opcional, solo para historial interno):</span>'
-      +   '<textarea class="del-motivo" rows="2" maxlength="240" placeholder="Ej. cliente no contestó, choque de agenda, etc."></textarea>'
-      + '</label>'
+      + '<div class="del-preview" id="del-preview"><em style="opacity:.6">Calculando reembolso y comisión…</em></div>'
       + '<div class="del-actions">'
       +   '<button type="button" class="cita-btn-secondary admin-del-no">No</button>'
       +   '<button type="button" class="cita-btn-danger admin-del-yes">' + btnLabel + '</button>'
@@ -7135,13 +7139,80 @@
     row.appendChild(wrap);
     wrap.querySelector('.admin-del-no').addEventListener('click', () => { wrap.remove(); deleteBtn.style.display = ''; });
     wrap.querySelector('.admin-del-yes').addEventListener('click', () => {
-      const motivoLibre = (wrap.querySelector('.del-motivo').value || '').trim();
-      adminCancelBooking(booking, wrap, motivoLibre);
+      adminCancelBooking(booking, wrap);
     });
+
+    _renderCancelPreview(booking, hermanos.length || 1, wrap.querySelector('#del-preview'));
+  }
+
+  // Preview del reembolso + comisión antes de cancelar (misma escala que el trigger BD)
+  async function _renderCancelPreview(booking, nMasajistas, container) {
+    if (!container) return;
+    try {
+      // % comisión masajista global (cache 60s)
+      if (!window._pctMasCache || (Date.now() - window._pctMasCache.t) > 60000) {
+        const r = await comApi('get_config', { key: 'comision_pct_masajista' });
+        window._pctMasCache = { v: parseInt(r.value || '50', 10), t: Date.now() };
+      }
+      const pctMas = window._pctMasCache.v;
+
+      const fecha = booking.fecha_agendada || booking.fecha;
+      const hora = booking.hora_agendada || booking.hora;
+      const precio = Number(booking.precio_total_mxn || 0);
+      if (!fecha || !hora || precio <= 0) {
+        container.innerHTML = '<div class="del-preview-warn">No se pudo calcular el detalle (faltan datos de la cita).</div>';
+        return;
+      }
+      const dt = new Date(String(fecha).slice(0,10) + 'T' + String(hora).slice(0,5) + ':00-05:00');
+      const horas = (dt.getTime() - Date.now()) / 3600000;
+
+      // Escala reembolso al cliente (doc Yaz)
+      const pctReemb = horas >= 24 ? 100 : horas >= 6 ? 60 : horas >= 3 ? 40 : 0;
+      // Escala comisión al masajista (doc Yaz)
+      const pctEscala = horas >= 24 ? 0 : horas >= 6 ? 30 : horas >= 3 ? 50 : 100;
+
+      const reembolso = Math.round(precio * pctReemb) / 100;
+      const retenido = Math.round(precio * (100 - pctReemb)) / 100;
+      const comisionNormal = Math.round(precio * pctMas) / 100;
+      const comisionFinal = Math.round(comisionNormal * pctEscala) / 100;
+
+      const fmt = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const horasTxt = horas >= 24 ? Math.floor(horas) + ' h' : horas.toFixed(1) + ' h';
+      const varias = nMasajistas > 1;
+
+      let html = '<div class="del-preview-hdr">Faltan <b>' + horasTxt + '</b> para la cita &middot; precio ' + fmt(precio) + '</div>';
+      html += '<div class="del-preview-grid">';
+      // Reembolso
+      html += '<div class="del-preview-cell">';
+      html += '<div class="del-preview-lbl">Reembolso al cliente</div>';
+      if (pctReemb > 0) {
+        html += '<div class="del-preview-val"><b>' + fmt(reembolso) + '</b></div>';
+        html += '<div class="del-preview-sub">' + pctReemb + '% de ' + fmt(precio) + ' &middot; retiene ' + fmt(retenido) + '</div>';
+      } else {
+        html += '<div class="del-preview-val del-preview-none">Sin reembolso</div>';
+        html += '<div class="del-preview-sub">Canceló con menos de 3 h</div>';
+      }
+      html += '</div>';
+      // Comisión
+      html += '<div class="del-preview-cell">';
+      html += '<div class="del-preview-lbl">Comisión al masajista' + (varias ? ' (c/u)' : '') + '</div>';
+      if (pctEscala > 0) {
+        html += '<div class="del-preview-val"><b>' + fmt(comisionFinal) + '</b></div>';
+        html += '<div class="del-preview-sub">' + fmt(precio) + ' × ' + pctMas + '% × ' + pctEscala + '%</div>';
+      } else {
+        html += '<div class="del-preview-val del-preview-none">Sin comisión por la regla</div>';
+        html += '<div class="del-preview-sub">Cancelación con 24 h o más de anticipación</div>';
+      }
+      html += '</div>';
+      html += '</div>';
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = '<div class="del-preview-warn">No se pudo calcular la vista previa (' + escapeHtml(e.message || 'error') + '). La cancelación sí se aplicará.</div>';
+    }
   }
   window.showAdminDeleteConfirm = showAdminDeleteConfirm;
 
-  async function adminCancelBooking(booking, confirmWrap, motivoLibre) {
+  async function adminCancelBooking(booking, confirmWrap) {
     if (!booking) return;
     const bookingId = booking.booking_id || booking.id;
     if (!bookingId) { showToast('No se encontró el ID de la cita.', 'warn'); return; }
@@ -7149,9 +7220,8 @@
       const yes = confirmWrap.querySelector('.admin-del-yes');
       if (yes) { yes.disabled = true; yes.textContent = 'Cancelando…'; }
     }
-    // Motivo interno: fuera de zona tiene prioridad; sino admin_cancel + texto libre si hay
-    let motivo = (booking && booking.en_area_cobertura === false) ? 'fuera_de_cobertura' : 'admin_cancel';
-    if (motivoLibre) motivo += ': ' + motivoLibre;
+    // Motivo interno: fuera de zona tiene prioridad; sino admin_cancel
+    const motivo = (booking && booking.en_area_cobertura === false) ? 'fuera_de_cobertura' : 'admin_cancel';
     const jwt = localStorage.getItem(STORAGE_KEY);
     try {
       const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
