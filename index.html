@@ -6345,7 +6345,7 @@
     const tipoPill = b.tipo_cita === 'domicilio'
       ? `<span class="chip-pill chip-pill-tipo-domicilio">Domicilio</span>`
       : (b.tipo_cita === 'sucursal'
-        ? `<span class="chip-pill chip-pill-tipo-sucursal" title="El cliente paga al llegar a la sucursal">Sucursal · pago local</span>`
+        ? `<span class="chip-pill chip-pill-tipo-sucursal" title="El cliente paga al llegar a la sucursal">Sucursal</span>`
         : '');
     const _sexoInfo = sexoBadgeParts(b.preferencia_sexo);
     const sexoBadgeChip = _sexoInfo.letra
@@ -6483,7 +6483,7 @@
       tipoBadgeEl.style.display = '';
     } else if (b.tipo_cita === 'sucursal') {
       tipoBadgeEl.className = 'cita-tipo-badge is-sucursal';
-      tipoBadgeEl.textContent = 'Sucursal · cobrar al llegar';
+      tipoBadgeEl.textContent = 'Sucursal';
       tipoBadgeEl.title = 'El cliente paga en persona al llegar a la sucursal';
       tipoBadgeEl.style.display = '';
     } else {
