@@ -7163,9 +7163,10 @@
       }
       const pctMas = window._pctMasCache.v;
 
-      const fecha = booking.fecha_agendada || booking.fecha;
-      const hora = booking.hora_agendada || booking.hora;
-      const precio = Number(booking.precio_total_mxn || 0);
+      const fecha = booking.fecha || booking.fecha_agendada;
+      const hora = booking.hora || booking.hora_agendada;
+      const precio = Number(booking.precio_total || booking.precio_total_mxn || booking.precio_mxn || 0)
+                   + Number(booking.costo_traslado || 0);
       if (!fecha || !hora || precio <= 0) {
         container.innerHTML = '<div class="del-preview-warn">No se pudo calcular el detalle (faltan datos de la cita).</div>';
         return;
