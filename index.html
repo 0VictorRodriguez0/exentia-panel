@@ -1960,6 +1960,7 @@
   }
   .pago-badge.pagado { background: rgba(30,105,45,0.13); color: #1b5e20; }
   .pago-badge.pendiente { background: #fff3cd; color: #7a5a00; }
+  .pago-badge.anticipo { background: #dbeafe; color: #1e3a8a; }
   .ucal-live-badge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 1px 6px; border-radius: 999px;
@@ -5723,10 +5724,16 @@
     if (total > 0) {
       const _pagado = Number(s.total_pagado || s.precio_pagado_mxn || 0);
       const _yaPagado = (s.estado_pago === 'pagado') || (_pagado > 0 && _pagado >= total);
-      const _badgeCls = _yaPagado ? 'pagado' : 'pendiente';
-      const _badgeTxt = _yaPagado
-        ? 'Pagado en línea'
-        : (s.tipo_cita === 'sucursal' ? 'Cobrar en sucursal' : 'Pago pendiente');
+      let _badgeCls, _badgeTxt;
+      if (_yaPagado) {
+        _badgeCls = 'pagado'; _badgeTxt = 'Pagado en línea';
+      } else if (_pagado > 0) {
+        _badgeCls = 'anticipo';
+        _badgeTxt = 'Anticipo $' + _pagado.toLocaleString('es-MX') + ' · falta $' + (total - _pagado).toLocaleString('es-MX');
+      } else {
+        _badgeCls = 'pendiente';
+        _badgeTxt = s.tipo_cita === 'sucursal' ? 'Cobrar en sucursal' : 'Pago pendiente';
+      }
       rows.push('<div class="row"><span class="lbl">Total</span>$' + total.toLocaleString('es-MX') + ' <span class="pago-badge ' + _badgeCls + '" style="font-size:9.5px;padding:2px 7px;">' + _badgeTxt + '</span></div>');
     }
     if (Number(s.extras_total || 0) > 0) rows.push('<div class="row"><span class="lbl">Extras</span>+$' + Number(s.extras_total).toLocaleString('es-MX') + ' <span style="color:var(--gray-soft);font-size:11.5px">(' + (s.extras_count || 0) + ')</span></div>');
@@ -6690,10 +6697,16 @@
     const pagoBadge = document.getElementById('cita-pago-badge');
     if (pagoBadge) {
       const pagado = Number(b.total_pagado || b.precio_pagado_mxn || 0);
+      const falta = Math.max(0, totalFinal - pagado);
+      const fmtP = n => '$' + Number(n).toLocaleString('es-MX');
       const yaPagado = (b.estado_pago === 'pagado') || (pagado > 0 && pagado >= totalFinal);
       if (yaPagado) {
         pagoBadge.className = 'pago-badge pagado';
         pagoBadge.textContent = 'Pagado en línea';
+      } else if (pagado > 0) {
+        // Anticipo parcial: cliente ya pagó una parte por Stripe
+        pagoBadge.className = 'pago-badge anticipo';
+        pagoBadge.textContent = 'Anticipo ' + fmtP(pagado) + ' · falta ' + fmtP(falta) + (b.tipo_cita === 'sucursal' ? ' en sucursal' : '');
       } else if (b.tipo_cita === 'sucursal') {
         pagoBadge.className = 'pago-badge pendiente';
         pagoBadge.textContent = 'Pago pendiente — cobrar en sucursal';
