@@ -3554,6 +3554,7 @@
     document.getElementById('catf-incluye').value = p ? (p.incluye_texto || '') : '';
     // Checkbox "ofrecer extras": editando usa el valor guardado; nuevo arranca en ON.
     document.getElementById('catf-tiene-extras').checked = p ? (p.tiene_extras !== false) : true;
+    document.getElementById('catf-requiere-anticipo').checked = p ? !!p.requiere_anticipo : false;
     catToggleExtrasVisibility();
     // Duraciones
     document.getElementById('catf-duraciones').innerHTML = '';
@@ -3759,6 +3760,7 @@
       subseccion_id: document.getElementById('catf-subseccion').value || null,
       home_available: _catLugarValue(),
       tiene_extras: !!document.getElementById('catf-tiene-extras').checked,
+      requiere_anticipo: !!document.getElementById('catf-requiere-anticipo').checked,
       is_paquete: !!(sec && sec.slug === 'paquetes'),
       precio_old_mxn: document.getElementById('catf-precio-old').value || null,
       descuento_pct: document.getElementById('catf-descuento').value || null,
@@ -8290,6 +8292,15 @@
           <span>
             <b>Ofrecer extras al reservar</b>
             <small>Al momento de reservar, al cliente se le ofrecerán los extras de esta categoría (los verás en la vista previa de abajo).</small>
+          </span>
+        </label>
+      </div>
+      <div class="cat-field cat-field-full cat-extras-wrap">
+        <label class="cat-extras-check">
+          <input type="checkbox" id="catf-requiere-anticipo">
+          <span>
+            <b>Requiere 30% de anticipo en sucursal</b>
+            <small>Marca esto si el servicio involucra masaje (masajes, faciales, paquetes con masaje, spa kids). Cuando el cliente reserve en sucursal, la página cobrará por adelantado el 30% del precio de este producto; el resto se paga al llegar.</small>
           </span>
         </label>
       </div>
