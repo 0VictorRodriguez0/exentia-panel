@@ -1086,6 +1086,13 @@
   .com-context { background:#fdfbf4; border-left:3px solid var(--olive); padding:10px 14px; margin-bottom:14px; border-radius:0 6px 6px 0; }
   .com-context-row { font-size:13px; color:var(--brown); margin-bottom:2px; }
   .com-context-formula { font-size:12px; color:var(--olive-dark); font-style:italic; margin-top:6px; }
+  .com-desglose-title { font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--olive-dark); font-weight:600; margin:8px 0 4px; }
+  .com-desglose-list { background:#fff; border:1px solid #f0e6c8; border-radius:6px; padding:6px 10px; margin-bottom:6px; }
+  .com-desglose-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:3px 0; color:var(--brown); }
+  .com-desglose-row + .com-desglose-row { border-top:1px dashed #f0e6c8; }
+  .com-desglose-lbl { flex:1; }
+  .com-desglose-monto { font-variant-numeric:tabular-nums; }
+  .com-desglose-total { border-top:1px solid var(--olive-dark) !important; padding-top:6px !important; margin-top:2px; }
   .com-inline { display:grid; grid-template-columns:1fr 90px 1fr; gap:10px; margin-bottom:10px; }
   .com-inline label { margin-bottom:0; }
   .com-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid #f0e6c8; }
@@ -3993,6 +4000,56 @@
     }).join('');
   }
 
+  function _renderDesglose(m) {
+    const pct = m.porcentaje || 0;
+    const base = Number(m.monto_base || 0);
+    const com = Number(m.monto_comision || 0);
+    const fmt = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+    let html = '';
+    if (m.motivo === 'pago_cita') {
+      const pagos = Array.isArray(m.pagos_detalle) ? m.pagos_detalle : [];
+      if (pagos.length) {
+        html += '<div class="com-desglose-title">Pagos que suman a la base:</div>';
+        html += '<div class="com-desglose-list">';
+        pagos.forEach(p => {
+          const label = _comMetodoLabel(p.metodo) + (p.concepto ? ' · ' + _comConceptoLabel(p.concepto) : '');
+          const monto = Number(p.monto_neto || 0);
+          const refund = Number(p.refund_amount_mxn || 0);
+          html += '<div class="com-desglose-row">'
+                + '<span class="com-desglose-lbl">' + escapeHtml(label) + '</span>'
+                + '<span class="com-desglose-monto">' + fmt(monto) + (refund > 0 ? ' <small style="color:#a12626">(refund ' + fmt(refund) + ')</small>' : '') + '</span>'
+                + '</div>';
+        });
+        html += '<div class="com-desglose-row com-desglose-total">'
+              + '<span class="com-desglose-lbl"><b>Base total</b></span>'
+              + '<span class="com-desglose-monto"><b>' + fmt(base) + '</b></span>'
+              + '</div>';
+        html += '</div>';
+      }
+      html += '<div class="com-context-formula">' + fmt(base) + ' × ' + pct + '% = <b>' + fmt(com) + '</b></div>';
+    } else if (m.motivo === 'retencion_cancelacion') {
+      const precio = Number(m.booking_precio_total || 0);
+      const pctMas = comState.pct_global;
+      const pctEscala = pct && pctMas ? Math.round((pct / pctMas) * 100) : 0;
+      html += '<div class="com-desglose-title">Retención por cancelación anticipada</div>';
+      html += '<div class="com-desglose-list">';
+      html += '<div class="com-desglose-row"><span class="com-desglose-lbl">Precio cita</span><span class="com-desglose-monto">' + fmt(precio) + '</span></div>';
+      html += '<div class="com-desglose-row"><span class="com-desglose-lbl">% masajista global</span><span class="com-desglose-monto">' + pctMas + '%</span></div>';
+      html += '<div class="com-desglose-row"><span class="com-desglose-lbl">% escala cancelación</span><span class="com-desglose-monto">' + pctEscala + '%</span></div>';
+      html += '</div>';
+      html += '<div class="com-context-formula">' + fmt(precio) + ' × ' + pctMas + '% × ' + pctEscala + '% = <b>' + fmt(com) + '</b></div>';
+    } else {
+      html += '<div class="com-context-formula">' + fmt(base) + ' × ' + pct + '% = <b>' + fmt(com) + '</b></div>';
+    }
+    return html;
+  }
+  function _comMetodoLabel(m) {
+    return ({tarjeta:'Tarjeta',efectivo:'Efectivo',transferencia:'Transferencia',otro:'Otro'}[m]) || (m || 'Pago');
+  }
+  function _comConceptoLabel(c) {
+    return ({pago_reserva:'Cita',producto:'Producto',servicio_adicional:'Servicio adicional',propina:'Propina',otro:'Otro'}[c]) || c;
+  }
+
   function openComEditModal(id) {
     const m = comState.data.find(x => x.id === id);
     if (!m) return;
@@ -4004,7 +4061,7 @@
       '<div class="com-context-row"><b>Masajista:</b> ' + escapeHtml(m.terapeuta_nombre || '—') + '</div>' +
       (m.booking_code ? '<div class="com-context-row"><b>Cita:</b> ' + escapeHtml(m.booking_code) + (m.cliente_nombre ? ' · ' + escapeHtml(m.cliente_nombre) : '') + '</div>' : '') +
       (m.cancel_horas_antes != null ? '<div class="com-context-row"><b>Cancelación:</b> ' + Math.round(m.cancel_horas_antes) + ' h antes · retención ' + (100 - (m.cancel_pct_reembolso || 0)) + '%</div>' : '') +
-      '<div class="com-context-formula">Base × % = Comisión</div>';
+      _renderDesglose(m);
     const form = document.getElementById('com-form');
     form.motivo.value = m.motivo || '';
     form.monto_base.value = Number(m.monto_base || 0).toFixed(2);
@@ -8214,8 +8271,8 @@
           <option value="">— Elige masajista —</option>
         </select>
       </label>
-      <label><span>Motivo</span>
-        <input type="text" name="motivo" required maxlength="80">
+      <label><span>Concepto</span>
+        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. pago cita, ajuste manual, propina...">
       </label>
       <div class="com-inline">
         <label><span>Monto base (MXN)</span>
