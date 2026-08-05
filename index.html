@@ -4472,11 +4472,10 @@
     c2.value = 'Rango: ' + range.label + '  ·  ' + range.from.toISOString().slice(0,10) + ' al ' + range.to.toISOString().slice(0,10);
     c2.font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
 
-    // Row 3: generado
-    ws.mergeCells('A3:J3');
-    const c3 = ws.getCell('A3');
-    c3.value = 'Generado: ' + new Date().toLocaleString('es-MX');
-    c3.font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
+    // Row 3: generado + contadores dinámicos
+    ws.getCell('A3').value = 'Generado: ' + new Date().toLocaleString('es-MX');
+    ws.getCell('A3').font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
+    ws.mergeCells('A3:E3');
 
     // Row 5: headers
     const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado'];
@@ -4591,11 +4590,79 @@
     for (let c = 1; c <= 10; c++) totalRow.getCell(c).border = borderAll;
     totalRow.height = 28;
 
+    // Contadores dinámicos en fila 3 (a la derecha del "Generado")
+    const dRange = 'J' + dataStartRow + ':J' + dataLastRow;
+    ws.getCell('F3').value = 'Pendientes:';
+    ws.getCell('F3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF7A5A00' } };
+    ws.getCell('F3').alignment = { horizontal: 'right' };
+    ws.getCell('G3').value = { formula: 'COUNTIF(' + dRange + ',"pendiente")' };
+    ws.getCell('G3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF7A5A00' } };
+    ws.getCell('H3').value = 'Pagadas:';
+    ws.getCell('H3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B5E20' } };
+    ws.getCell('H3').alignment = { horizontal: 'right' };
+    ws.getCell('I3').value = { formula: 'COUNTIF(' + dRange + ',"pagada")' };
+    ws.getCell('I3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B5E20' } };
+    ws.getCell('J3').value = { formula: 'COUNTIF(' + dRange + ',"anulada")' };
+    ws.getCell('J3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF721C24' } };
+
+    // Conditional formatting: colorea la celda de Estado según el valor
+    ws.addConditionalFormatting({
+      ref: 'J' + dataStartRow + ':J' + dataLastRow,
+      rules: [
+        {
+          type: 'cellIs', operator: 'equal', priority: 1,
+          formulae: ['"pendiente"'],
+          style: {
+            fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFFF3CD' } },
+            font: { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF7A5A00' } }
+          }
+        },
+        {
+          type: 'cellIs', operator: 'equal', priority: 2,
+          formulae: ['"pagada"'],
+          style: {
+            fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFC8E6C9' } },
+            font: { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF1B5E20' } }
+          }
+        },
+        {
+          type: 'cellIs', operator: 'equal', priority: 3,
+          formulae: ['"anulada"'],
+          style: {
+            fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFF8D7DA' } },
+            font: { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF721C24' } }
+          }
+        }
+      ]
+    });
+
+    // Conditional formatting: fila completa tachada cuando Estado = "pagada"
+    ws.addConditionalFormatting({
+      ref: 'A' + dataStartRow + ':J' + dataLastRow,
+      rules: [
+        {
+          type: 'expression', priority: 4,
+          formulae: ['$J' + dataStartRow + '="pagada"'],
+          style: {
+            font: { name: 'Calibri', size: 11, strike: true, color: { argb: 'FF888888' } }
+          }
+        },
+        {
+          type: 'expression', priority: 5,
+          formulae: ['$J' + dataStartRow + '="anulada"'],
+          style: {
+            font: { name: 'Calibri', size: 11, italic: true, color: { argb: 'FFAA6A6A' } }
+          }
+        }
+      ]
+    });
+
     // Nota al pie
     const noteRow = currentRow + 2;
     ws.mergeCells('A' + noteRow + ':J' + noteRow);
-    ws.getCell('A' + noteRow).value = 'Nota: Cambia el Estado a "pagada" cuando realices la transferencia — el total se actualizará automáticamente.';
+    ws.getCell('A' + noteRow).value = 'Cambia el Estado a "pagada" cuando realices la transferencia — la fila se tacha en gris, la celda cambia a verde, los contadores y el total se actualizan automáticamente.';
     ws.getCell('A' + noteRow).font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF7D7C3F' } };
+    ws.getRow(noteRow).height = 20;
 
     return await wb.xlsx.writeBuffer();
   }
