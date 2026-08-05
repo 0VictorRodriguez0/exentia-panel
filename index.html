@@ -4153,7 +4153,7 @@
       comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
     document.getElementById('com-modal-context').innerHTML = '<div class="com-context-formula">Base × % = Comisión</div>';
     const form = document.getElementById('com-form');
-    form.motivo.value = 'ajuste_manual';
+    form.motivo.value = 'Ajuste manual';
     _comSetConcepto(form.concepto, 'masajes');
     form.monto_base.value = '';
     form.monto_base.readOnly = false;
@@ -4204,6 +4204,7 @@
           id: comState.editingId,
           porcentaje: parseInt(form.porcentaje.value, 10),
           monto_comision: parseFloat(form.monto_comision.value),
+          motivo: form.motivo.value.trim(),
           concepto: form.concepto.value,
           estado: form.estado.value,
           anulada_motivo: form.estado.value === 'anulada' ? form.anulada_motivo.value.trim() : null
@@ -4215,7 +4216,7 @@
         if (!(base > 0)) throw new Error('Monto base debe ser mayor a 0');
         await comApi('create_manual', {
           terapeuta_id: teraId,
-          motivo: 'ajuste_manual',
+          motivo: form.motivo.value.trim() || 'Ajuste manual',
           concepto: form.concepto.value,
           monto_base: base,
           porcentaje: parseInt(form.porcentaje.value, 10) || 0,
@@ -8372,7 +8373,10 @@
           <option value="">— Elige masajista —</option>
         </select>
       </label>
-      <label><span>Concepto</span>
+      <label><span>Motivo</span>
+        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. Ajuste manual, Bono, Reembolso, etc.">
+      </label>
+      <label><span>Concepto (categoría)</span>
         <select name="concepto" required>
           <option value="paquetes">Paquetes</option>
           <option value="masajes">Masajes</option>
@@ -8387,7 +8391,6 @@
           <option value="otro">Otro</option>
         </select>
       </label>
-      <input type="hidden" name="motivo">
       <div class="com-inline">
         <label><span>Monto base (MXN)</span>
           <input type="number" name="monto_base" step="0.01" min="0" oninput="comRecalc(this)">
