@@ -10,6 +10,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <!-- intl-tel-input v23: bandera + código de país en el input del SMS fallback (mismo CDN que el cliente exentia-pagina.html) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/css/intlTelInput.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/23.4.0/js/intlTelInput.min.js"></script>
@@ -4409,12 +4410,16 @@
         showToast('No hay comisiones pendientes en ese rango.', 'warn');
         return;
       }
-      const html = _buildReporteXlsHtml(rows, range);
-      const blob = new Blob(['﻿' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      if (typeof ExcelJS === 'undefined') {
+        showToast('Espera un momento a que cargue la librería de Excel...', 'warn');
+        return;
+      }
+      const buffer = await _buildReporteXlsxBuffer(rows, range);
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'comisiones_pendientes_' + new Date().toISOString().slice(0,10) + '.xls';
+      a.download = 'comisiones_pendientes_' + new Date().toISOString().slice(0,10) + '.xlsx';
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
       showToast(rows.length + ' comisiones descargadas.', 'ok');
@@ -4423,6 +4428,189 @@
     }
   }
   window.descargarReporteComisiones = descargarReporteComisiones;
+
+  async function _buildReporteXlsxBuffer(rows, range) {
+    // Genera XLSX real con ExcelJS: anchos, dropdown en Estado, SUMIFS que recalculan.
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Exentia Spa';
+    wb.created = new Date();
+    const ws = wb.addWorksheet('Comisiones', { views: [{ state: 'frozen', ySplit: 5 }] });
+
+    // Anchos por columna (en caracteres de Excel)
+    ws.columns = [
+      { header: '', width: 14 },  // A Fecha
+      { header: '', width: 18 },  // B Booking
+      { header: '', width: 24 },  // C Cliente
+      { header: '', width: 42 },  // D Servicios
+      { header: '', width: 20 },  // E Motivo
+      { header: '', width: 18 },  // F Concepto
+      { header: '', width: 14 },  // G Base
+      { header: '', width: 8  },  // H %
+      { header: '', width: 15 },  // I Comisión
+      { header: '', width: 14 },  // J Estado
+    ];
+
+    const COLORS = {
+      olive: 'FF7D7C3F', cream: 'FFF3E4C7', brown: 'FF5C3A1E',
+      soft: 'FFFDFBF4', headText: 'FFFFFFFF', greenBold: 'FF2E7D32',
+      border: 'FFD4C9A8'
+    };
+    const thinBorder = { style: 'thin', color: { argb: COLORS.border } };
+    const borderAll = { top: thinBorder, left: thinBorder, right: thinBorder, bottom: thinBorder };
+
+    // Row 1: título
+    ws.mergeCells('A1:J1');
+    const c1 = ws.getCell('A1');
+    c1.value = 'Reporte de comisiones por pagar';
+    c1.font = { name: 'Calibri', size: 14, bold: true, color: { argb: COLORS.olive } };
+    c1.alignment = { horizontal: 'left', vertical: 'middle' };
+    ws.getRow(1).height = 22;
+
+    // Row 2: rango
+    ws.mergeCells('A2:J2');
+    const c2 = ws.getCell('A2');
+    c2.value = 'Rango: ' + range.label + '  ·  ' + range.from.toISOString().slice(0,10) + ' al ' + range.to.toISOString().slice(0,10);
+    c2.font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
+
+    // Row 3: generado
+    ws.mergeCells('A3:J3');
+    const c3 = ws.getCell('A3');
+    c3.value = 'Generado: ' + new Date().toLocaleString('es-MX');
+    c3.font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
+
+    // Row 5: headers
+    const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado'];
+    const headerRow = ws.getRow(5);
+    headers.forEach((h, i) => {
+      const cell = headerRow.getCell(i + 1);
+      cell.value = h;
+      cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLORS.headText } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = borderAll;
+    });
+    headerRow.height = 26;
+
+    // Agrupar por masajista
+    const groups = {};
+    rows.forEach(m => {
+      const k = m.terapeuta_id || 'sin';
+      if (!groups[k]) groups[k] = { nombre: m.terapeuta_nombre || 'Sin asignar', movs: [] };
+      groups[k].movs.push(m);
+    });
+
+    let currentRow = 6;
+    const dataStartRow = currentRow;
+    const groupRanges = []; // {name, first, last}
+
+    Object.values(groups).forEach(g => {
+      // Group header row (merged A:J)
+      ws.mergeCells('A' + currentRow + ':J' + currentRow);
+      const gc = ws.getCell('A' + currentRow);
+      gc.value = g.nombre + '  ·  ' + g.movs.length + ' movimiento' + (g.movs.length===1?'':'s');
+      gc.font = { name: 'Calibri', size: 12, bold: true, color: { argb: COLORS.brown } };
+      gc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.cream } };
+      gc.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+      ws.getRow(currentRow).height = 22;
+      currentRow++;
+
+      const groupFirst = currentRow;
+      g.movs.forEach(m => {
+        const fecha = m.fecha_agendada ? String(m.fecha_agendada).slice(0,10) : (m.created_at ? String(m.created_at).slice(0,10) : '');
+        const svcArr = _reporteServiciosArr(m);
+        const serviciosStr = svcArr.join('\n');
+        const r = ws.getRow(currentRow);
+        r.getCell(1).value = fecha ? new Date(fecha) : '';
+        r.getCell(1).numFmt = 'dd/mm/yyyy';
+        r.getCell(2).value = m.booking_code || '—';
+        r.getCell(2).font = { name: 'Menlo', size: 10 };
+        r.getCell(3).value = m.cliente_nombre || '—';
+        r.getCell(4).value = serviciosStr || '—';
+        r.getCell(4).alignment = { wrapText: true, vertical: 'top' };
+        r.getCell(5).value = _comMotivoLabel(m.motivo);
+        r.getCell(6).value = _comConceptoLabel(m.concepto || '');
+        r.getCell(7).value = Number(m.monto_base || 0);
+        r.getCell(7).numFmt = '"$"#,##0.00';
+        r.getCell(8).value = (m.porcentaje || 0) / 100;
+        r.getCell(8).numFmt = '0%';
+        r.getCell(9).value = Number(m.monto_comision || 0);
+        r.getCell(9).numFmt = '"$"#,##0.00';
+        r.getCell(10).value = m.estado || 'pendiente';
+        // Data validation dropdown en Estado
+        r.getCell(10).dataValidation = {
+          type: 'list',
+          allowBlank: false,
+          formulae: ['"pendiente,pagada,anulada"']
+        };
+        r.getCell(10).alignment = { horizontal: 'center', vertical: 'middle' };
+        // Alto automático según servicios
+        const lineas = svcArr.length || 1;
+        r.height = Math.max(20, 16 * lineas + 6);
+        // Bordes
+        for (let c = 1; c <= 10; c++) r.getCell(c).border = borderAll;
+        // Font default
+        for (let c = 1; c <= 10; c++) if (c !== 2) r.getCell(c).font = { name: 'Calibri', size: 11 };
+        currentRow++;
+      });
+      const groupLast = currentRow - 1;
+      groupRanges.push({ name: g.nombre, first: groupFirst, last: groupLast });
+
+      // Subtotal row: SUMIFS que solo suma pendiente
+      const subRow = ws.getRow(currentRow);
+      ws.mergeCells('A' + currentRow + ':H' + currentRow);
+      subRow.getCell(1).value = 'Subtotal ' + g.nombre + ' (solo pendientes):';
+      subRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+      subRow.getCell(1).font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLORS.brown } };
+      subRow.getCell(9).value = { formula: 'SUMIFS(I' + groupFirst + ':I' + groupLast + ',J' + groupFirst + ':J' + groupLast + ',"pendiente")' };
+      subRow.getCell(9).numFmt = '"$"#,##0.00';
+      subRow.getCell(9).font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLORS.greenBold } };
+      subRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
+      subRow.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
+      subRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
+      for (let c = 1; c <= 10; c++) subRow.getCell(c).border = borderAll;
+      subRow.height = 22;
+      currentRow++;
+
+      // Espaciador
+      currentRow++;
+    });
+
+    // TOTAL GENERAL
+    const dataLastRow = currentRow - 3;
+    const totalRow = ws.getRow(currentRow);
+    ws.mergeCells('A' + currentRow + ':H' + currentRow);
+    totalRow.getCell(1).value = 'TOTAL GENERAL A PAGAR (solo pendientes)';
+    totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+    totalRow.getCell(1).font = { name: 'Calibri', size: 13, bold: true, color: { argb: COLORS.headText } };
+    totalRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
+    totalRow.getCell(9).value = { formula: 'SUMIFS(I' + dataStartRow + ':I' + dataLastRow + ',J' + dataStartRow + ':J' + dataLastRow + ',"pendiente")' };
+    totalRow.getCell(9).numFmt = '"$"#,##0.00';
+    totalRow.getCell(9).font = { name: 'Calibri', size: 13, bold: true, color: { argb: COLORS.headText } };
+    totalRow.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
+    totalRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
+    for (let c = 1; c <= 10; c++) totalRow.getCell(c).border = borderAll;
+    totalRow.height = 28;
+
+    // Nota al pie
+    const noteRow = currentRow + 2;
+    ws.mergeCells('A' + noteRow + ':J' + noteRow);
+    ws.getCell('A' + noteRow).value = 'Nota: Cambia el Estado a "pagada" cuando realices la transferencia — el total se actualizará automáticamente.';
+    ws.getCell('A' + noteRow).font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF7D7C3F' } };
+
+    return await wb.xlsx.writeBuffer();
+  }
+
+  function _reporteServiciosArr(m) {
+    const ps = m.booking_personas_servicios;
+    const svc = m.booking_servicios;
+    let out = [];
+    if (Array.isArray(ps) && ps.length) {
+      ps.forEach(p => (p.servicios || []).forEach(x => out.push(x.name || x.slug || '')));
+    } else if (Array.isArray(svc) && svc.length) {
+      out = svc.map(x => x.name || x.slug || '');
+    }
+    return out.filter(Boolean);
+  }
 
   function _buildReporteXlsHtml(rows, range) {
     // Genera HTML que Excel/Google Sheets abre como .xls con formato (widths, colores, wrap text, negritas)
