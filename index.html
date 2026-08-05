@@ -3102,19 +3102,11 @@
         <p class="com-sub">Movimientos que se crean solos cuando se registra un pago o una cancelación. Puedes editar el porcentaje o monto, marcar como pagadas, anular o crear movimientos manuales.</p>
       </div>
       <div class="com-head-actions">
-        <div class="com-reporte-group">
-          <button type="button" class="cita-btn-secondary com-reporte-btn" onclick="descargarReporteComisiones('semana_actual')" title="Descarga las comisiones pendientes de esta semana (mié → mar)">
-            <span style="margin-right:6px">⬇</span> Descargar reporte semanal
-          </button>
-          <button type="button" class="cita-btn-secondary com-reporte-more" onclick="openComReporteMenu(event)" title="Otros rangos">▾</button>
-        </div>
+        <button type="button" class="cita-btn-secondary" onclick="descargarReporteComisiones('todo_pendiente')" title="Descarga todas las comisiones pendientes de pagar (Show validado y pago 100%)">
+          <span style="margin-right:6px">⬇</span> Descargar reporte
+        </button>
         <button type="button" class="cita-btn-primary" onclick="openComManualModal()">+ Movimiento manual</button>
       </div>
-    </div>
-    <div id="com-reporte-menu" class="com-reporte-menu" style="display:none">
-      <button type="button" onclick="descargarReporteComisiones('semana_pasada')">Semana pasada</button>
-      <button type="button" onclick="descargarReporteComisiones('mes_actual')">Este mes</button>
-      <button type="button" onclick="descargarReporteComisiones('rango_libre')">Rango libre…</button>
     </div>
     <div class="com-toolbar">
       <label>% comisión global
@@ -4388,23 +4380,30 @@
   }
 
   async function descargarReporteComisiones(kind) {
-    document.getElementById('com-reporte-menu').style.display = 'none';
-    let range = _rangoParaReporte(kind);
-    if (kind === 'rango_libre') {
-      const from = prompt('Fecha desde (YYYY-MM-DD):');
-      if (!from) return;
-      const to = prompt('Fecha hasta (YYYY-MM-DD):');
-      if (!to) return;
-      range = { from: new Date(from), to: new Date(to), label: from + ' → ' + to };
-    }
-    if (!range) return;
-    try {
+    const menu = document.getElementById('com-reporte-menu');
+    if (menu) menu.style.display = 'none';
+    let range;
+    let payload = { estado: 'pendiente' };
+    if (kind === 'todo_pendiente') {
+      // Todo lo que esté pendiente hasta hoy (sin filtro de fecha)
+      const hoy = new Date();
+      range = { from: new Date(2020, 0, 1), to: hoy, label: 'Todo lo pendiente al día de hoy' };
+    } else {
+      range = _rangoParaReporte(kind);
+      if (kind === 'rango_libre') {
+        const from = prompt('Fecha desde (YYYY-MM-DD):');
+        if (!from) return;
+        const to = prompt('Fecha hasta (YYYY-MM-DD):');
+        if (!to) return;
+        range = { from: new Date(from), to: new Date(to), label: from + ' → ' + to };
+      }
+      if (!range) return;
       const iso = d => d.toISOString().slice(0,10);
-      const result = await comApi('list', {
-        from_date: iso(range.from),
-        to_date: iso(range.to),
-        estado: 'pendiente'
-      });
+      payload.from_date = iso(range.from);
+      payload.to_date = iso(range.to);
+    }
+    try {
+      const result = await comApi('list', payload);
       const rows = result.data || [];
       if (!rows.length) {
         showToast('No hay comisiones pendientes en ese rango.', 'warn');
@@ -4415,7 +4414,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'comisiones_' + new Date().toISOString().slice(0,10) + '_' + (kind === 'rango_libre' ? 'rango' : kind) + '.xls';
+      a.download = 'comisiones_pendientes_' + new Date().toISOString().slice(0,10) + '.xls';
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
       showToast(rows.length + ' comisiones descargadas.', 'ok');
@@ -4439,8 +4438,8 @@
 
     // Estilos que Excel entiende
     const CSS = `
-      table { border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 11pt; }
-      th, td { border: 0.5pt solid #d4c9a8; padding: 6px 10px; vertical-align: top; }
+      table { border-collapse: collapse; table-layout: fixed; font-family: Calibri, sans-serif; font-size: 11pt; }
+      th, td { border: 0.5pt solid #d4c9a8; padding: 8px 12px; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
       .title { font-size: 14pt; font-weight: bold; color: #7d7c3f; }
       .subtitle { font-size: 10pt; color: #5c3a1e; font-style: italic; }
       .headrow { background: #7d7c3f; color: #fff; font-weight: bold; text-align: center; }
@@ -4454,18 +4453,9 @@
       .fecha { white-space: nowrap; }
       .booking { font-family: Menlo, monospace; font-size: 10pt; color: #5c3a1e; }
     `;
-    const COLW = `
-      <col style="width:110px" />  <!-- Fecha -->
-      <col style="width:130px" />  <!-- Booking -->
-      <col style="width:190px" />  <!-- Cliente -->
-      <col style="width:320px" />  <!-- Servicios -->
-      <col style="width:150px" />  <!-- Motivo -->
-      <col style="width:130px" />  <!-- Concepto -->
-      <col style="width:100px" />  <!-- Monto base -->
-      <col style="width:60px" />   <!-- % -->
-      <col style="width:120px" />  <!-- Comisión -->
-      <col style="width:100px" />  <!-- Estado -->
-    `;
+    // Anchos por columna — usamos width attribute + inline style para máxima compatibilidad
+    // (Excel, Numbers y Google Sheets)
+    const widths = [130, 140, 210, 340, 160, 140, 110, 70, 130, 110]; // Fecha, Booking, Cliente, Servicios, Motivo, Concepto, Base, %, Comisión, Estado
 
     let html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
     html += '<head><meta charset="utf-8"><style>' + CSS + '</style>';
@@ -4473,18 +4463,27 @@
     html += '<xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Comisiones</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>';
     html += '</head><body>';
 
-    html += '<table>' + COLW;
+    html += '<table>';
+    // colgroup con width attribute Y style — máxima compatibilidad
+    html += '<colgroup>';
+    widths.forEach(w => {
+      html += '<col width="' + w + '" style="width:' + w + 'px; mso-width-source:userset; mso-width-alt:' + (w * 15) + '" />';
+    });
+    html += '</colgroup>';
+
     // Título
     html += '<tr><td colspan="10" class="title">Reporte de comisiones por pagar</td></tr>';
     html += '<tr><td colspan="10" class="subtitle">Rango: ' + esc(range.label) + ' &nbsp; · &nbsp; ' + range.from.toISOString().slice(0,10) + ' al ' + range.to.toISOString().slice(0,10) + '</td></tr>';
     html += '<tr><td colspan="10" class="subtitle">Generado: ' + esc(new Date().toLocaleString('es-MX')) + '</td></tr>';
     html += '<tr><td colspan="10" style="height:8px;border:none"></td></tr>';
 
-    // Headers
-    html += '<tr class="headrow">'
-          + '<th>Fecha servicio</th><th>Booking</th><th>Cliente</th><th>Servicios</th>'
-          + '<th>Motivo</th><th>Concepto</th><th>Monto base</th><th>%</th><th>Comisión</th><th>Estado</th>'
-          + '</tr>';
+    // Header row con width forzado en cada celda (segunda capa de refuerzo)
+    const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado'];
+    html += '<tr class="headrow">';
+    headers.forEach((h, i) => {
+      html += '<th width="' + widths[i] + '" style="width:' + widths[i] + 'px">' + h + '</th>';
+    });
+    html += '</tr>';
 
     let totalGeneral = 0;
     Object.values(groups).forEach(g => {
