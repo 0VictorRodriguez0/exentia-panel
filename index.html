@@ -4410,12 +4410,12 @@
         showToast('No hay comisiones pendientes en ese rango.', 'warn');
         return;
       }
-      const csv = _buildReporteCsv(rows, range);
-      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+      const html = _buildReporteXlsHtml(rows, range);
+      const blob = new Blob(['﻿' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'comisiones_' + new Date().toISOString().slice(0,10) + '_' + (kind === 'rango_libre' ? 'rango' : kind) + '.csv';
+      a.download = 'comisiones_' + new Date().toISOString().slice(0,10) + '_' + (kind === 'rango_libre' ? 'rango' : kind) + '.xls';
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
       showToast(rows.length + ' comisiones descargadas.', 'ok');
@@ -4424,6 +4424,103 @@
     }
   }
   window.descargarReporteComisiones = descargarReporteComisiones;
+
+  function _buildReporteXlsHtml(rows, range) {
+    // Genera HTML que Excel/Google Sheets abre como .xls con formato (widths, colores, wrap text, negritas)
+    const groups = {};
+    rows.forEach(m => {
+      const k = m.terapeuta_id || 'sin';
+      if (!groups[k]) groups[k] = { nombre: m.terapeuta_nombre || 'Sin asignar', movs: [], total: 0 };
+      groups[k].movs.push(m);
+      groups[k].total += Number(m.monto_comision || 0);
+    });
+    const money = n => '$' + Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2, maximumFractionDigits:2});
+    const esc = s => (s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    // Estilos que Excel entiende
+    const CSS = `
+      table { border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 11pt; }
+      th, td { border: 0.5pt solid #d4c9a8; padding: 6px 10px; vertical-align: top; }
+      .title { font-size: 14pt; font-weight: bold; color: #7d7c3f; }
+      .subtitle { font-size: 10pt; color: #5c3a1e; font-style: italic; }
+      .headrow { background: #7d7c3f; color: #fff; font-weight: bold; text-align: center; }
+      .groupheader { background: #f3e4c7; color: #5c3a1e; font-weight: bold; font-size: 12pt; text-align: left; padding: 8px 10px; }
+      .subtotal { background: #fdfbf4; font-weight: bold; color: #5c3a1e; text-align: right; }
+      .subtotal .money { color: #2e7d32; }
+      .totalrow { background: #7d7c3f; color: #fff; font-weight: bold; font-size: 12pt; text-align: right; }
+      .money { mso-number-format: '&quot;$&quot;#,##0.00'; text-align: right; font-variant-numeric: tabular-nums; }
+      .center { text-align: center; }
+      .servicios { white-space: pre-line; max-width: 320px; }
+      .fecha { white-space: nowrap; }
+      .booking { font-family: Menlo, monospace; font-size: 10pt; color: #5c3a1e; }
+    `;
+    const COLW = `
+      <col style="width:110px" />  <!-- Fecha -->
+      <col style="width:130px" />  <!-- Booking -->
+      <col style="width:190px" />  <!-- Cliente -->
+      <col style="width:320px" />  <!-- Servicios -->
+      <col style="width:150px" />  <!-- Motivo -->
+      <col style="width:130px" />  <!-- Concepto -->
+      <col style="width:100px" />  <!-- Monto base -->
+      <col style="width:60px" />   <!-- % -->
+      <col style="width:120px" />  <!-- Comisión -->
+      <col style="width:100px" />  <!-- Estado -->
+    `;
+
+    let html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+    html += '<head><meta charset="utf-8"><style>' + CSS + '</style>';
+    // Auto-print settings para Excel (opcional)
+    html += '<xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Comisiones</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>';
+    html += '</head><body>';
+
+    html += '<table>' + COLW;
+    // Título
+    html += '<tr><td colspan="10" class="title">Reporte de comisiones por pagar</td></tr>';
+    html += '<tr><td colspan="10" class="subtitle">Rango: ' + esc(range.label) + ' &nbsp; · &nbsp; ' + range.from.toISOString().slice(0,10) + ' al ' + range.to.toISOString().slice(0,10) + '</td></tr>';
+    html += '<tr><td colspan="10" class="subtitle">Generado: ' + esc(new Date().toLocaleString('es-MX')) + '</td></tr>';
+    html += '<tr><td colspan="10" style="height:8px;border:none"></td></tr>';
+
+    // Headers
+    html += '<tr class="headrow">'
+          + '<th>Fecha servicio</th><th>Booking</th><th>Cliente</th><th>Servicios</th>'
+          + '<th>Motivo</th><th>Concepto</th><th>Monto base</th><th>%</th><th>Comisión</th><th>Estado</th>'
+          + '</tr>';
+
+    let totalGeneral = 0;
+    Object.values(groups).forEach(g => {
+      // Group header
+      html += '<tr><td colspan="10" class="groupheader">' + esc(g.nombre) + ' &nbsp; · &nbsp; ' + g.movs.length + ' movimiento' + (g.movs.length===1?'':'s') + '</td></tr>';
+      g.movs.forEach(m => {
+        const fecha = m.fecha_agendada ? String(m.fecha_agendada).slice(0,10) : (m.created_at ? String(m.created_at).slice(0,10) : '—');
+        const servicios = _reporteServicios(m);
+        const serviciosHtml = servicios === '—' ? '—' : servicios.split(' · ').join('\n');
+        html += '<tr>'
+              + '<td class="fecha">' + esc(fecha) + '</td>'
+              + '<td class="booking">' + esc(m.booking_code || '—') + '</td>'
+              + '<td>' + esc(m.cliente_nombre || '—') + '</td>'
+              + '<td class="servicios">' + esc(serviciosHtml) + '</td>'
+              + '<td>' + esc(_comMotivoLabel(m.motivo)) + '</td>'
+              + '<td>' + esc(_comConceptoLabel(m.concepto || '')) + '</td>'
+              + '<td class="money">' + esc(Number(m.monto_base||0).toFixed(2)) + '</td>'
+              + '<td class="center">' + esc((m.porcentaje||0) + '%') + '</td>'
+              + '<td class="money">' + esc(Number(m.monto_comision||0).toFixed(2)) + '</td>'
+              + '<td class="center">' + esc(m.estado) + '</td>'
+              + '</tr>';
+      });
+      // Subtotal
+      html += '<tr class="subtotal"><td colspan="8">Subtotal ' + esc(g.nombre) + ':</td>'
+            + '<td class="money">' + esc(Number(g.total).toFixed(2)) + '</td><td></td></tr>';
+      totalGeneral += g.total;
+    });
+
+    // Total general
+    html += '<tr><td colspan="10" style="height:6px;border:none"></td></tr>';
+    html += '<tr class="totalrow"><td colspan="8">TOTAL GENERAL A PAGAR:</td>'
+          + '<td class="money">' + esc(Number(totalGeneral).toFixed(2)) + '</td><td></td></tr>';
+
+    html += '</table></body></html>';
+    return html;
+  }
 
   function _buildReporteCsv(rows, range) {
     // Agrupar por masajista
