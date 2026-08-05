@@ -1093,6 +1093,7 @@
   .com-desglose-lbl { flex:1; }
   .com-desglose-monto { font-variant-numeric:tabular-nums; }
   .com-desglose-total { border-top:1px solid var(--olive-dark) !important; padding-top:6px !important; margin-top:2px; }
+  .com-cita-svc { font-size:11px; color:var(--brown); opacity:.72; margin-top:3px; line-height:1.35; }
   .com-inline { display:grid; grid-template-columns:1fr 90px 1fr; gap:10px; margin-bottom:10px; }
   .com-inline label { margin-bottom:0; }
   .com-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid #f0e6c8; }
@@ -3968,8 +3969,10 @@
     list.innerHTML = Object.values(groups).map(g => {
       const subtotal = g.movs.filter(m => m.estado !== 'anulada').reduce((s, m) => s + Number(m.monto_comision || 0), 0);
       const rows = g.movs.map(m => {
+        const svcResumen = _comBookingSvcResumen(m);
         const citaLbl = m.booking_code
-          ? (escapeHtml(m.booking_code) + (m.cliente_nombre ? ' · ' + escapeHtml(m.cliente_nombre) : ''))
+          ? (escapeHtml(m.booking_code) + (m.cliente_nombre ? ' · ' + escapeHtml(m.cliente_nombre) : '')
+             + (svcResumen ? '<div class="com-cita-svc">' + escapeHtml(svcResumen) + '</div>' : ''))
           : '<em style="opacity:.6">manual</em>';
         const acts = [
           '<button class="com-btn" onclick="openComEditModal(\'' + m.id + '\')">Editar</button>',
@@ -4058,6 +4061,21 @@
       producto:'Producto', servicio_adicional:'Servicio adicional',
       propina:'Propina', otro:'Otro'
     }[c]) || c;
+  }
+  function _comBookingSvcResumen(m) {
+    // Resumen corto de servicios para mostrar bajo el código de cita en la tabla
+    const ps = m.booking_personas_servicios;
+    const svc = m.booking_servicios;
+    let nombres = [];
+    if (Array.isArray(ps) && ps.length) {
+      ps.forEach(p => (p.servicios || []).forEach(x => nombres.push(x.name || x.slug || '')));
+    } else if (Array.isArray(svc) && svc.length) {
+      nombres = svc.map(x => x.name || x.slug || '');
+    }
+    nombres = nombres.filter(Boolean);
+    if (!nombres.length) return '';
+    if (nombres.length <= 2) return nombres.join(' · ');
+    return nombres.slice(0, 2).join(' · ') + ' +' + (nombres.length - 2);
   }
   function _comServiciosBookingHtml(m) {
     // Preferir personas_servicios (breakdown por persona en grupo/pareja);
@@ -8313,7 +8331,21 @@
         </select>
       </label>
       <label><span>Concepto</span>
-        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. pago cita, ajuste manual, propina...">
+        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. Masajes, Faciales, ajuste manual..." list="com-concepto-sugerencias">
+        <datalist id="com-concepto-sugerencias">
+          <option value="Paquetes"></option>
+          <option value="Masajes"></option>
+          <option value="Faciales"></option>
+          <option value="Manicura"></option>
+          <option value="Pedicura"></option>
+          <option value="Cabello"></option>
+          <option value="Maquillaje"></option>
+          <option value="Depilación"></option>
+          <option value="SpaKids"></option>
+          <option value="Lash & Cejas"></option>
+          <option value="Ajuste manual"></option>
+          <option value="Propina"></option>
+        </datalist>
       </label>
       <div class="com-inline">
         <label><span>Monto base (MXN)</span>
