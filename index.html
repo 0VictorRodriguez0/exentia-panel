@@ -1094,6 +1094,7 @@
   .com-desglose-monto { font-variant-numeric:tabular-nums; }
   .com-desglose-total { border-top:1px solid var(--olive-dark) !important; padding-top:6px !important; margin-top:2px; }
   .com-cita-svc { font-size:11px; color:var(--brown); opacity:.72; margin-top:3px; line-height:1.35; }
+  .com-concepto-pill { display:inline-block; padding:2px 8px; margin-left:4px; background:#f8f0d9; color:var(--olive-dark); border-radius:10px; font-size:10px; font-weight:600; letter-spacing:.3px; }
   .com-inline { display:grid; grid-template-columns:1fr 90px 1fr; gap:10px; margin-bottom:10px; }
   .com-inline label { margin-bottom:0; }
   .com-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid #f0e6c8; }
@@ -3980,10 +3981,11 @@
             ? '<button class="com-btn com-btn-pay" onclick="comMarkPaid(\'' + m.id + '\')">Marcar pagada</button>'
             : ''
         ].filter(Boolean).join(' ');
+        const conceptoPill = m.concepto ? ' <span class="com-concepto-pill">' + escapeHtml(_comConceptoLabel(m.concepto)) + '</span>' : '';
         return '<tr>' +
           '<td>' + _comFmtDate(m.created_at) + '</td>' +
           '<td>' + citaLbl + '</td>' +
-          '<td>' + escapeHtml(_comMotivoLabel(m.motivo)) + '</td>' +
+          '<td>' + escapeHtml(_comMotivoLabel(m.motivo)) + conceptoPill + '</td>' +
           '<td>' + _comFmtMoney(m.monto_base) + '</td>' +
           '<td>' + (m.porcentaje || 0) + '%</td>' +
           '<td><b>' + _comFmtMoney(m.monto_comision) + '</b></td>' +
@@ -4062,18 +4064,18 @@
       propina:'Propina', otro:'Otro'
     }[c]) || c;
   }
-  function _comSetMotivo(sel, val) {
-    // Si el valor no está entre las opciones (ej. pago_cita, retencion_cancelacion, legacy),
-    // agrega una opción temporal para poder mostrarlo sin perder el original al guardar.
+  function _comSetConcepto(sel, val) {
+    // Si el concepto no está entre las 10 categorías (ej. legacy 'producto', 'servicio_adicional'),
+    // agrega una opción temporal para poder mostrarlo sin perder el valor original.
     if (!sel) return;
     const opts = Array.from(sel.options).map(o => o.value);
     if (val && !opts.includes(val)) {
       const o = document.createElement('option');
       o.value = val;
-      o.textContent = _comMotivoLabel(val) + ' (actual)';
+      o.textContent = _comConceptoLabel(val) + ' (actual)';
       sel.insertBefore(o, sel.firstChild);
     }
-    sel.value = val;
+    sel.value = val || 'otro';
   }
   function _comBookingSvcResumen(m) {
     // Resumen corto de servicios para mostrar bajo el código de cita en la tabla
@@ -4124,7 +4126,8 @@
       (m.cancel_horas_antes != null ? '<div class="com-context-row"><b>Cancelación:</b> ' + Math.round(m.cancel_horas_antes) + ' h antes · retención ' + (100 - (m.cancel_pct_reembolso || 0)) + '%</div>' : '') +
       _renderDesglose(m);
     const form = document.getElementById('com-form');
-    _comSetMotivo(form.motivo, m.motivo || 'masajes');
+    form.motivo.value = m.motivo || 'ajuste_manual';
+    _comSetConcepto(form.concepto, m.concepto || 'otro');
     form.monto_base.value = Number(m.monto_base || 0).toFixed(2);
     form.monto_base.readOnly = m.motivo === 'pago_cita' || m.motivo === 'retencion_cancelacion';
     form.porcentaje.value = m.porcentaje || 0;
@@ -4147,7 +4150,8 @@
       comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
     document.getElementById('com-modal-context').innerHTML = '<div class="com-context-formula">Base × % = Comisión</div>';
     const form = document.getElementById('com-form');
-    _comSetMotivo(form.motivo, 'masajes');
+    form.motivo.value = 'ajuste_manual';
+    _comSetConcepto(form.concepto, 'masajes');
     form.monto_base.value = '';
     form.monto_base.readOnly = false;
     form.porcentaje.value = comState.pct_global;
@@ -4197,7 +4201,7 @@
           id: comState.editingId,
           porcentaje: parseInt(form.porcentaje.value, 10),
           monto_comision: parseFloat(form.monto_comision.value),
-          motivo: form.motivo.value.trim(),
+          concepto: form.concepto.value,
           estado: form.estado.value,
           anulada_motivo: form.estado.value === 'anulada' ? form.anulada_motivo.value.trim() : null
         });
@@ -4208,7 +4212,8 @@
         if (!(base > 0)) throw new Error('Monto base debe ser mayor a 0');
         await comApi('create_manual', {
           terapeuta_id: teraId,
-          motivo: form.motivo.value.trim() || 'ajuste_manual',
+          motivo: 'ajuste_manual',
+          concepto: form.concepto.value,
           monto_base: base,
           porcentaje: parseInt(form.porcentaje.value, 10) || 0,
           monto_comision: parseFloat(form.monto_comision.value) || 0
@@ -8344,7 +8349,7 @@
         </select>
       </label>
       <label><span>Concepto</span>
-        <select name="motivo" required>
+        <select name="concepto" required>
           <option value="paquetes">Paquetes</option>
           <option value="masajes">Masajes</option>
           <option value="faciales">Faciales</option>
@@ -8358,6 +8363,7 @@
           <option value="otro">Otro</option>
         </select>
       </label>
+      <input type="hidden" name="motivo">
       <div class="com-inline">
         <label><span>Monto base (MXN)</span>
           <input type="number" name="monto_base" step="0.01" min="0" oninput="comRecalc(this)">
