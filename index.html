@@ -1087,7 +1087,7 @@
   .com-table th, .com-table td { padding:9px 12px; text-align:left; border-top:1px solid #f0e6c8; font-size:13px; color:var(--brown); vertical-align:middle; }
   .com-table th { background:#fdfbf4; color:var(--olive-dark); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.5px; border-top:none; }
   .com-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
-  .com-badge-pendiente { background:#fff3cd; color:#856404; }
+  .com-badge-pagable { background:#fff3cd; color:#856404; }
   .com-badge-pagada { background:#c8e6c9; color:#1b5e20; }
   .com-badge-anulada { background:#f8d7da; color:#721c24; }
   .com-badge-esperando_pago_completo { background:#e1e8ed; color:#4a5866; font-size:9px; padding:3px 7px; }
@@ -3103,7 +3103,7 @@
         <p class="com-sub">Movimientos que se crean solos cuando se registra un pago o una cancelación. Puedes editar el porcentaje o monto, marcar como pagadas, anular o crear movimientos manuales.</p>
       </div>
       <div class="com-head-actions">
-        <button type="button" class="cita-btn-secondary" onclick="descargarReporteComisiones('todo_pendiente')" title="Descarga todas las comisiones pendientes de pagar (Show validado y pago 100%)">
+        <button type="button" class="cita-btn-secondary" onclick="descargarReporteComisiones('todo_pendiente')" title="Descarga todas las comisiones pagables (Show validado y pago 100%)">
           <span style="margin-right:6px">⬇</span> Descargar reporte
         </button>
         <button type="button" class="cita-btn-primary" onclick="openComManualModal()">+ Movimiento manual</button>
@@ -3123,7 +3123,7 @@
         <option value="esperando_pago_completo">Esperando pago 100%</option>
         <option value="esperando_surtido">Esperando servicio terminado</option>
         <option value="esperando_show">Esperando validación de Yaz</option>
-        <option value="pendiente">Pendientes de pagar</option>
+        <option value="pagable">Pagables</option>
         <option value="pagada">Pagadas</option>
         <option value="anulada">Anuladas</option>
       </select>
@@ -4014,14 +4014,14 @@
     const teraGroups = {};
     comState.totales.forEach(t => {
       const k = t.terapeuta_id || 'sin';
-      if (!teraGroups[k]) teraGroups[k] = { nombre: t.terapeuta_nombre || 'Sin asignar', esperando_pago_completo:0, pendiente:0, pagada:0, anulada:0 };
+      if (!teraGroups[k]) teraGroups[k] = { nombre: t.terapeuta_nombre || 'Sin asignar', esperando_pago_completo:0, pagable:0, pagada:0, anulada:0 };
       teraGroups[k][t.estado] = Number(t.total_mxn || 0);
     });
     const cards = Object.values(teraGroups).map(g => (
       '<div class="com-total-card">' +
         '<div class="com-total-nombre">' + escapeHtml(g.nombre) + '</div>' +
         (g.esperando_pago_completo ? '<div class="com-total-row"><span>Esperando pago</span><b style="color:#4a5866">' + _comFmtMoney(g.esperando_pago_completo) + '</b></div>' : '') +
-        '<div class="com-total-row"><span>Pendiente</span><b class="com-pendiente">' + _comFmtMoney(g.pendiente) + '</b></div>' +
+        '<div class="com-total-row"><span>Pagable</span><b class="com-pendiente">' + _comFmtMoney(g.pagable) + '</b></div>' +
         '<div class="com-total-row"><span>Pagada</span><b class="com-pagada">' + _comFmtMoney(g.pagada) + '</b></div>' +
         (g.anulada ? '<div class="com-total-row"><span>Anulada</span><b class="com-anulada">' + _comFmtMoney(g.anulada) + '</b></div>' : '') +
       '</div>'
@@ -4050,7 +4050,7 @@
           : '<em style="opacity:.6">manual</em>';
         const acts = [
           '<button class="com-btn" onclick="openComEditModal(\'' + m.id + '\')">Editar</button>',
-          m.estado === 'pendiente'
+          m.estado === 'pagable'
             ? '<button class="com-btn com-btn-pay" onclick="comMarkPaid(\'' + m.id + '\')">Marcar pagada</button>'
             : ''
         ].filter(Boolean).join(' ');
@@ -4207,7 +4207,7 @@
     form.monto_base.readOnly = m.motivo === 'pago_cita' || m.motivo === 'retencion_cancelacion';
     form.porcentaje.value = m.porcentaje || 0;
     form.monto_comision.value = Number(m.monto_comision || 0).toFixed(2);
-    form.estado.value = m.estado || 'pendiente';
+    form.estado.value = m.estado || 'pagable';
     form.anulada_motivo.value = m.anulada_motivo || '';
     comToggleAnul();
     document.getElementById('com-modal-msg').textContent = '';
@@ -4231,7 +4231,7 @@
     form.monto_base.readOnly = false;
     form.porcentaje.value = comState.pct_global;
     form.monto_comision.value = '';
-    form.estado.value = 'pendiente';
+    form.estado.value = 'pagable';
     form.anulada_motivo.value = '';
     comToggleAnul();
     document.getElementById('com-modal-msg').textContent = '';
@@ -4384,11 +4384,11 @@
     const menu = document.getElementById('com-reporte-menu');
     if (menu) menu.style.display = 'none';
     let range;
-    let payload = { estado: 'pendiente' };
+    let payload = { estado: 'pagable' };
     if (kind === 'todo_pendiente') {
-      // Todo lo que esté pendiente hasta hoy (sin filtro de fecha)
+      // Todo lo pagable hasta hoy (sin filtro de fecha)
       const hoy = new Date();
-      range = { from: new Date(2020, 0, 1), to: hoy, label: 'Todo lo pendiente al día de hoy' };
+      range = { from: new Date(2020, 0, 1), to: hoy, label: 'Todo lo pagable al día de hoy' };
     } else {
       range = _rangoParaReporte(kind);
       if (kind === 'rango_libre') {
@@ -4407,7 +4407,7 @@
       const result = await comApi('list', payload);
       const rows = result.data || [];
       if (!rows.length) {
-        showToast('No hay comisiones pendientes en ese rango.', 'warn');
+        showToast('No hay comisiones pagables en ese rango.', 'warn');
         return;
       }
       if (typeof ExcelJS === 'undefined') {
@@ -4419,7 +4419,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'comisiones_pendientes_' + new Date().toISOString().slice(0,10) + '.xlsx';
+      a.download = 'comisiones_pagables_' + new Date().toISOString().slice(0,10) + '.xlsx';
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
       showToast(rows.length + ' comisiones descargadas.', 'ok');
@@ -4534,12 +4534,12 @@
         r.getCell(8).numFmt = '0%';
         r.getCell(9).value = Number(m.monto_comision || 0);
         r.getCell(9).numFmt = '"$"#,##0.00';
-        r.getCell(10).value = m.estado || 'pendiente';
+        r.getCell(10).value = m.estado || 'pagable';
         // Data validation dropdown en Estado
         r.getCell(10).dataValidation = {
           type: 'list',
           allowBlank: false,
-          formulae: ['"pendiente,pagada,anulada"']
+          formulae: ['"pagable,pagada,anulada"']
         };
         r.getCell(10).alignment = { horizontal: 'center', vertical: 'middle' };
         // Alto automático según servicios
@@ -4554,13 +4554,13 @@
       const groupLast = currentRow - 1;
       groupRanges.push({ name: g.nombre, first: groupFirst, last: groupLast });
 
-      // Subtotal row: SUMIFS que solo suma pendiente
+      // Subtotal row: SUMIFS que solo suma pagable
       const subRow = ws.getRow(currentRow);
       ws.mergeCells('A' + currentRow + ':H' + currentRow);
-      subRow.getCell(1).value = 'Subtotal ' + g.nombre + ' (solo pendientes):';
+      subRow.getCell(1).value = 'Subtotal ' + g.nombre + ' (solo pagables):';
       subRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
       subRow.getCell(1).font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLORS.brown } };
-      subRow.getCell(9).value = { formula: 'SUMIFS(I' + groupFirst + ':I' + groupLast + ',J' + groupFirst + ':J' + groupLast + ',"pendiente")' };
+      subRow.getCell(9).value = { formula: 'SUMIFS(I' + groupFirst + ':I' + groupLast + ',J' + groupFirst + ':J' + groupLast + ',"pagable")' };
       subRow.getCell(9).numFmt = '"$"#,##0.00';
       subRow.getCell(9).font = { name: 'Calibri', size: 11, bold: true, color: { argb: COLORS.greenBold } };
       subRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
@@ -4578,11 +4578,11 @@
     const dataLastRow = currentRow - 3;
     const totalRow = ws.getRow(currentRow);
     ws.mergeCells('A' + currentRow + ':H' + currentRow);
-    totalRow.getCell(1).value = 'TOTAL GENERAL A PAGAR (solo pendientes)';
+    totalRow.getCell(1).value = 'TOTAL GENERAL A PAGAR (solo pagables)';
     totalRow.getCell(1).alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
     totalRow.getCell(1).font = { name: 'Calibri', size: 13, bold: true, color: { argb: COLORS.headText } };
     totalRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
-    totalRow.getCell(9).value = { formula: 'SUMIFS(I' + dataStartRow + ':I' + dataLastRow + ',J' + dataStartRow + ':J' + dataLastRow + ',"pendiente")' };
+    totalRow.getCell(9).value = { formula: 'SUMIFS(I' + dataStartRow + ':I' + dataLastRow + ',J' + dataStartRow + ':J' + dataLastRow + ',"pagable")' };
     totalRow.getCell(9).numFmt = '"$"#,##0.00';
     totalRow.getCell(9).font = { name: 'Calibri', size: 13, bold: true, color: { argb: COLORS.headText } };
     totalRow.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
@@ -4592,10 +4592,10 @@
 
     // Contadores dinámicos en fila 3 (a la derecha del "Generado")
     const dRange = 'J' + dataStartRow + ':J' + dataLastRow;
-    ws.getCell('F3').value = 'Pendientes:';
+    ws.getCell('F3').value = 'Pagables:';
     ws.getCell('F3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF7A5A00' } };
     ws.getCell('F3').alignment = { horizontal: 'right' };
-    ws.getCell('G3').value = { formula: 'COUNTIF(' + dRange + ',"pendiente")' };
+    ws.getCell('G3').value = { formula: 'COUNTIF(' + dRange + ',"pagable")' };
     ws.getCell('G3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF7A5A00' } };
     ws.getCell('H3').value = 'Pagadas:';
     ws.getCell('H3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1B5E20' } };
@@ -4611,7 +4611,7 @@
       rules: [
         {
           type: 'cellIs', operator: 'equal', priority: 1,
-          formulae: ['"pendiente"'],
+          formulae: ['"pagable"'],
           style: {
             fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFFF3CD' } },
             font: { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF7A5A00' } }
@@ -9056,7 +9056,7 @@
           <option value="esperando_pago_completo">Esperando pago 100%</option>
           <option value="esperando_surtido">Esperando servicio terminado</option>
           <option value="esperando_show">Esperando validación de Yaz</option>
-          <option value="pendiente">Pendiente de pagar</option>
+          <option value="pagable">Pagable</option>
           <option value="pagada">Pagada</option>
           <option value="anulada">Anulada</option>
         </select>
