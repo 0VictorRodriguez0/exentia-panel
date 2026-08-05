@@ -4153,7 +4153,7 @@
       comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
     document.getElementById('com-modal-context').innerHTML = '<div class="com-context-formula">Base × % = Comisión</div>';
     const form = document.getElementById('com-form');
-    form.motivo.value = 'Ajuste manual';
+    form.motivo.value = 'ajuste_manual';
     _comSetConcepto(form.concepto, 'masajes');
     form.monto_base.value = '';
     form.monto_base.readOnly = false;
@@ -8374,7 +8374,12 @@
         </select>
       </label>
       <label><span>Motivo</span>
-        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. Ajuste manual, Bono, Reembolso, etc.">
+        <select name="motivo" required>
+          <option value="ajuste_manual">Ajuste manual</option>
+          <option value="pago_cita">Pago de cita</option>
+          <option value="retencion_cancelacion">Retención por cancelación</option>
+          <option value="otro">Otro</option>
+        </select>
       </label>
       <label><span>Concepto (categoría)</span>
         <select name="concepto" required>
