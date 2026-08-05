@@ -4062,6 +4062,19 @@
       propina:'Propina', otro:'Otro'
     }[c]) || c;
   }
+  function _comSetMotivo(sel, val) {
+    // Si el valor no está entre las opciones (ej. pago_cita, retencion_cancelacion, legacy),
+    // agrega una opción temporal para poder mostrarlo sin perder el original al guardar.
+    if (!sel) return;
+    const opts = Array.from(sel.options).map(o => o.value);
+    if (val && !opts.includes(val)) {
+      const o = document.createElement('option');
+      o.value = val;
+      o.textContent = _comMotivoLabel(val) + ' (actual)';
+      sel.insertBefore(o, sel.firstChild);
+    }
+    sel.value = val;
+  }
   function _comBookingSvcResumen(m) {
     // Resumen corto de servicios para mostrar bajo el código de cita en la tabla
     const ps = m.booking_personas_servicios;
@@ -4111,7 +4124,7 @@
       (m.cancel_horas_antes != null ? '<div class="com-context-row"><b>Cancelación:</b> ' + Math.round(m.cancel_horas_antes) + ' h antes · retención ' + (100 - (m.cancel_pct_reembolso || 0)) + '%</div>' : '') +
       _renderDesglose(m);
     const form = document.getElementById('com-form');
-    form.motivo.value = m.motivo || '';
+    _comSetMotivo(form.motivo, m.motivo || 'masajes');
     form.monto_base.value = Number(m.monto_base || 0).toFixed(2);
     form.monto_base.readOnly = m.motivo === 'pago_cita' || m.motivo === 'retencion_cancelacion';
     form.porcentaje.value = m.porcentaje || 0;
@@ -4134,7 +4147,7 @@
       comState.terapeutas.map(t => '<option value="' + t.id + '">' + escapeHtml(t.nombre) + '</option>').join('');
     document.getElementById('com-modal-context').innerHTML = '<div class="com-context-formula">Base × % = Comisión</div>';
     const form = document.getElementById('com-form');
-    form.motivo.value = 'ajuste_manual';
+    _comSetMotivo(form.motivo, 'masajes');
     form.monto_base.value = '';
     form.monto_base.readOnly = false;
     form.porcentaje.value = comState.pct_global;
@@ -8331,21 +8344,19 @@
         </select>
       </label>
       <label><span>Concepto</span>
-        <input type="text" name="motivo" required maxlength="80" placeholder="Ej. Masajes, Faciales, ajuste manual..." list="com-concepto-sugerencias">
-        <datalist id="com-concepto-sugerencias">
-          <option value="Paquetes"></option>
-          <option value="Masajes"></option>
-          <option value="Faciales"></option>
-          <option value="Manicura"></option>
-          <option value="Pedicura"></option>
-          <option value="Cabello"></option>
-          <option value="Maquillaje"></option>
-          <option value="Depilación"></option>
-          <option value="SpaKids"></option>
-          <option value="Lash & Cejas"></option>
-          <option value="Ajuste manual"></option>
-          <option value="Propina"></option>
-        </datalist>
+        <select name="motivo" required>
+          <option value="paquetes">Paquetes</option>
+          <option value="masajes">Masajes</option>
+          <option value="faciales">Faciales</option>
+          <option value="manicura">Manicura</option>
+          <option value="pedicura">Pedicura</option>
+          <option value="cabello">Cabello</option>
+          <option value="maquillaje">Maquillaje</option>
+          <option value="depilacion">Depilación</option>
+          <option value="spakids">SpaKids</option>
+          <option value="lash_cejas">Lash &amp; Cejas</option>
+          <option value="otro">Otro</option>
+        </select>
       </label>
       <div class="com-inline">
         <label><span>Monto base (MXN)</span>
