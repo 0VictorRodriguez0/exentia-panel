@@ -1078,6 +1078,17 @@
   .com-badge-esperando_pago_completo { background:#e1e8ed; color:#4a5866; font-size:9px; padding:3px 7px; }
   .com-badge-esperando_surtido { background:#fff3cd; color:#7a5a00; font-size:9px; padding:3px 7px; }
   .com-badge-esperando_show { background:#dbeafe; color:#1e3a8a; font-size:9px; padding:3px 7px; }
+  .com-head-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .com-reporte-menu {
+    background:#fff; border:1px solid #e8dfc0; border-radius:8px;
+    padding:6px; margin-bottom:12px; box-shadow:0 3px 10px rgba(92,58,30,0.08);
+    display:flex; flex-direction:column; gap:2px; max-width:340px; margin-left:auto;
+  }
+  .com-reporte-menu button {
+    padding:9px 12px; text-align:left; background:transparent; border:none; cursor:pointer;
+    font:500 13px 'Inter',sans-serif; color:var(--brown); border-radius:6px;
+  }
+  .com-reporte-menu button:hover { background:#fdfbf4; color:var(--olive-dark); }
   .com-btn { padding:5px 10px; font-size:11px; border-radius:6px; border:1px solid #b5b062; background:#fff; color:var(--olive-dark); cursor:pointer; margin-right:4px; font-family:inherit; }
   .com-btn:hover { background:#f8f0d9; }
   .com-btn-pay { background:#c8e6c9; border-color:#2e7d32; color:#1b5e20; }
@@ -3073,7 +3084,18 @@
         <h2 class="com-title">Comisiones del <em>equipo</em></h2>
         <p class="com-sub">Movimientos que se crean solos cuando se registra un pago o una cancelación. Puedes editar el porcentaje o monto, marcar como pagadas, anular o crear movimientos manuales.</p>
       </div>
-      <button type="button" class="cita-btn-primary" onclick="openComManualModal()">+ Movimiento manual</button>
+      <div class="com-head-actions">
+        <button type="button" class="cita-btn-secondary" onclick="openComReporteMenu(event)" title="Descargar reporte para pagar (miércoles)">
+          <span style="margin-right:6px">⬇</span> Descargar reporte
+        </button>
+        <button type="button" class="cita-btn-primary" onclick="openComManualModal()">+ Movimiento manual</button>
+      </div>
+    </div>
+    <div id="com-reporte-menu" class="com-reporte-menu" style="display:none">
+      <button type="button" onclick="descargarReporteComisiones('semana_actual')">Esta semana (mié → mar)</button>
+      <button type="button" onclick="descargarReporteComisiones('semana_pasada')">Semana pasada</button>
+      <button type="button" onclick="descargarReporteComisiones('mes_actual')">Este mes</button>
+      <button type="button" onclick="descargarReporteComisiones('rango_libre')">Rango libre…</button>
     </div>
     <div class="com-toolbar">
       <label>% comisión global
@@ -4308,6 +4330,134 @@
     }
   }
   window.comSavePctGlobal = comSavePctGlobal;
+
+  // ═══ Reporte semanal para pagar miércoles (Fase 3B) ═══
+  function openComReporteMenu(ev) {
+    if (ev) ev.stopPropagation();
+    const menu = document.getElementById('com-reporte-menu');
+    if (!menu) return;
+    menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'flex' : 'none';
+  }
+  window.openComReporteMenu = openComReporteMenu;
+
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('com-reporte-menu');
+    if (menu && menu.style.display === 'flex' && !menu.contains(e.target) && !(e.target.closest('button')?.getAttribute('onclick')||'').includes('openComReporteMenu')) {
+      menu.style.display = 'none';
+    }
+  });
+
+  function _rangoParaReporte(kind) {
+    const hoy = new Date();
+    const dow = hoy.getDay(); // 0=dom, 3=mié
+    // Miércoles de esta semana (o el pasado si hoy < mié)
+    const diasDesdeMie = (dow >= 3) ? (dow - 3) : (dow + 4);
+    const mieActual = new Date(hoy); mieActual.setDate(hoy.getDate() - diasDesdeMie); mieActual.setHours(0,0,0,0);
+    const mieAnterior = new Date(mieActual); mieAnterior.setDate(mieActual.getDate() - 7);
+    const marActual = new Date(mieActual); marActual.setDate(mieActual.getDate() + 6);
+    const marAnterior = new Date(mieAnterior); marAnterior.setDate(mieAnterior.getDate() + 6);
+    if (kind === 'semana_actual') return { from: mieActual, to: marActual, label: 'Esta semana' };
+    if (kind === 'semana_pasada') return { from: mieAnterior, to: marAnterior, label: 'Semana pasada' };
+    if (kind === 'mes_actual') {
+      const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+      return { from: inicio, to: fin, label: 'Este mes' };
+    }
+    return null;
+  }
+
+  async function descargarReporteComisiones(kind) {
+    document.getElementById('com-reporte-menu').style.display = 'none';
+    let range = _rangoParaReporte(kind);
+    if (kind === 'rango_libre') {
+      const from = prompt('Fecha desde (YYYY-MM-DD):');
+      if (!from) return;
+      const to = prompt('Fecha hasta (YYYY-MM-DD):');
+      if (!to) return;
+      range = { from: new Date(from), to: new Date(to), label: from + ' → ' + to };
+    }
+    if (!range) return;
+    try {
+      const iso = d => d.toISOString().slice(0,10);
+      const result = await comApi('list', {
+        from_date: iso(range.from),
+        to_date: iso(range.to),
+        estado: 'pendiente'
+      });
+      const rows = result.data || [];
+      if (!rows.length) {
+        showToast('No hay comisiones pendientes en ese rango.', 'warn');
+        return;
+      }
+      const csv = _buildReporteCsv(rows, range);
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'comisiones_' + new Date().toISOString().slice(0,10) + '_' + (kind === 'rango_libre' ? 'rango' : kind) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      showToast(rows.length + ' comisiones descargadas.', 'ok');
+    } catch (e) {
+      showToast('Error al descargar: ' + e.message, 'err');
+    }
+  }
+  window.descargarReporteComisiones = descargarReporteComisiones;
+
+  function _buildReporteCsv(rows, range) {
+    // Agrupar por masajista
+    const groups = {};
+    rows.forEach(m => {
+      const k = m.terapeuta_id || 'sin';
+      if (!groups[k]) groups[k] = { nombre: m.terapeuta_nombre || 'Sin asignar', movs: [], total: 0 };
+      groups[k].movs.push(m);
+      groups[k].total += Number(m.monto_comision || 0);
+    });
+    const csvRows = [];
+    const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado'];
+    const esc = s => {
+      if (s == null) return '';
+      const t = String(s).replace(/"/g,'""');
+      return /[",\n;]/.test(t) ? '"' + t + '"' : t;
+    };
+    csvRows.push('REPORTE DE COMISIONES POR PAGAR');
+    csvRows.push('Rango: ' + range.label + '  (' + range.from.toISOString().slice(0,10) + ' — ' + range.to.toISOString().slice(0,10) + ')');
+    csvRows.push('Generado: ' + new Date().toLocaleString('es-MX'));
+    csvRows.push('');
+    csvRows.push(headers.join(','));
+    let totalGeneral = 0;
+    Object.values(groups).forEach(g => {
+      csvRows.push('');
+      csvRows.push(esc('=== ' + g.nombre + ' ==='));
+      g.movs.forEach(m => {
+        const fecha = m.fecha_agendada ? String(m.fecha_agendada).slice(0,10) : (m.created_at ? String(m.created_at).slice(0,10) : '');
+        const servicios = _reporteServicios(m);
+        csvRows.push([
+          esc(fecha), esc(m.booking_code || '—'), esc(m.cliente_nombre || '—'),
+          esc(servicios), esc(_comMotivoLabel(m.motivo)), esc(_comConceptoLabel(m.concepto || '')),
+          esc(Number(m.monto_base||0).toFixed(2)), esc((m.porcentaje||0) + '%'),
+          esc(Number(m.monto_comision||0).toFixed(2)), esc(m.estado)
+        ].join(','));
+      });
+      csvRows.push([',,,,,,,Subtotal ' + esc(g.nombre) + ':', '', esc(Number(g.total).toFixed(2))].join(','));
+      totalGeneral += g.total;
+    });
+    csvRows.push('');
+    csvRows.push([',,,,,,,TOTAL GENERAL:', '', esc(Number(totalGeneral).toFixed(2))].join(','));
+    return csvRows.join('\n');
+  }
+
+  function _reporteServicios(m) {
+    const ps = m.booking_personas_servicios;
+    const svc = m.booking_servicios;
+    let out = [];
+    if (Array.isArray(ps) && ps.length) {
+      ps.forEach(p => (p.servicios || []).forEach(x => out.push(x.name || x.slug || '')));
+    } else if (Array.isArray(svc) && svc.length) {
+      out = svc.map(x => x.name || x.slug || '');
+    }
+    return out.filter(Boolean).join(' · ') || '—';
+  }
 
   function bindComToolbar() {
     ['com-filter-terapeuta','com-filter-estado','com-from','com-to'].forEach(id => {
