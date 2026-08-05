@@ -4007,6 +4007,7 @@
     const fmt = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
     let html = '';
     if (m.motivo === 'pago_cita') {
+      html += _comServiciosBookingHtml(m);
       const pagos = Array.isArray(m.pagos_detalle) ? m.pagos_detalle : [];
       if (pagos.length) {
         html += '<div class="com-desglose-title">Pagos que suman a la base:</div>';
@@ -4028,6 +4029,7 @@
       }
       html += '<div class="com-context-formula">' + fmt(base) + ' × ' + pct + '% = <b>' + fmt(com) + '</b></div>';
     } else if (m.motivo === 'retencion_cancelacion') {
+      html += _comServiciosBookingHtml(m);
       const precio = Number(m.booking_precio_total || 0);
       const pctMas = comState.pct_global;
       const pctEscala = pct && pctMas ? Math.round((pct / pctMas) * 100) : 0;
@@ -4047,7 +4049,35 @@
     return ({tarjeta:'Tarjeta',efectivo:'Efectivo',transferencia:'Transferencia',otro:'Otro'}[m]) || (m || 'Pago');
   }
   function _comConceptoLabel(c) {
-    return ({pago_reserva:'Cita',producto:'Producto',servicio_adicional:'Servicio adicional',propina:'Propina',otro:'Otro'}[c]) || c;
+    return ({
+      pago_reserva:'Cita',
+      paquetes:'Paquetes', masajes:'Masajes', faciales:'Faciales',
+      manicura:'Manicura', pedicura:'Pedicura', cabello:'Cabello',
+      maquillaje:'Maquillaje', depilacion:'Depilación',
+      spakids:'SpaKids', lash_cejas:'Lash & Cejas',
+      producto:'Producto', servicio_adicional:'Servicio adicional',
+      propina:'Propina', otro:'Otro'
+    }[c]) || c;
+  }
+  function _comServiciosBookingHtml(m) {
+    // Preferir personas_servicios (breakdown por persona en grupo/pareja);
+    // fallback: servicios (lista simple)
+    const ps = m.booking_personas_servicios;
+    const svc = m.booking_servicios;
+    let items = [];
+    if (Array.isArray(ps) && ps.length) {
+      ps.forEach(p => {
+        const list = (p.servicios || []).map(x => escapeHtml(x.name || x.slug || '—'));
+        const label = list.length ? list.join(' · ') : '—';
+        items.push('<div class="com-desglose-row"><span class="com-desglose-lbl">Persona ' + (p.persona_id != null ? p.persona_id : '') + '</span><span class="com-desglose-monto">' + label + '</span></div>');
+      });
+    } else if (Array.isArray(svc) && svc.length) {
+      const list = svc.map(x => escapeHtml(x.name || x.slug || '—')).join(' · ');
+      items.push('<div class="com-desglose-row"><span class="com-desglose-lbl">Servicios</span><span class="com-desglose-monto">' + list + '</span></div>');
+    }
+    if (!items.length) return '';
+    return '<div class="com-desglose-title">Servicios de la cita:</div>'
+         + '<div class="com-desglose-list">' + items.join('') + '</div>';
   }
 
   function openComEditModal(id) {
@@ -5050,6 +5080,17 @@
   const pagoState = { bookingId: null, open: false };
 
   const CONCEPTO_LABEL = {
+    paquetes: 'Paquetes',
+    masajes: 'Masajes',
+    faciales: 'Faciales',
+    manicura: 'Manicura',
+    pedicura: 'Pedicura',
+    cabello: 'Cabello',
+    maquillaje: 'Maquillaje',
+    depilacion: 'Depilación',
+    spakids: 'SpaKids',
+    lash_cejas: 'Lash & Cejas',
+    // Legacy: se conservan para movimientos históricos
     propina: 'Propina',
     producto: 'Producto vendido',
     servicio_adicional: 'Servicio adicional',
@@ -8366,8 +8407,16 @@
         <label class="cita-pago-full">
           <span>Concepto</span>
           <select id="cita-pago-concepto">
-            <option value="producto">Producto vendido</option>
-            <option value="servicio_adicional">Servicio adicional</option>
+            <option value="paquetes">Paquetes</option>
+            <option value="masajes">Masajes</option>
+            <option value="faciales">Faciales</option>
+            <option value="manicura">Manicura</option>
+            <option value="pedicura">Pedicura</option>
+            <option value="cabello">Cabello</option>
+            <option value="maquillaje">Maquillaje</option>
+            <option value="depilacion">Depilación</option>
+            <option value="spakids">SpaKids</option>
+            <option value="lash_cejas">Lash &amp; Cejas</option>
             <option value="otro">Otro</option>
           </select>
         </label>
