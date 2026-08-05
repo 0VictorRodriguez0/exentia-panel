@@ -647,6 +647,20 @@
     letter-spacing: 0.5px;
   }
   .cal-chip-busy .cal-chip-cliente,
+  /* Info de pago en el chip del calendario (masajista/admin ven anticipo, pendiente, o pagado) */
+  .cal-chip-pago {
+    display:flex; justify-content:space-between; align-items:center; gap:6px;
+    font: 600 10px 'Lato', sans-serif; letter-spacing:0.3px;
+    padding: 3px 8px; border-radius: 6px;
+    margin-top: 3px;
+  }
+  .cal-chip-pago-anticipo { background:#dbeafe; color:#1e3a8a; }
+  .cal-chip-pago-cobrar { background:#fff3cd; color:#7a5a00; justify-content:center; }
+  .cal-chip-pago-ok { background:rgba(30,105,45,0.15); color:#1b5e20; justify-content:center; }
+  /* En chip "mine" el fondo del chip es oscuro, ajustar contraste */
+  .cal-chip-mine .cal-chip-pago-anticipo { background:rgba(219,234,254,0.85); color:#1e3a8a; }
+  .cal-chip-mine .cal-chip-pago-cobrar { background:rgba(255,243,205,0.9); color:#7a5a00; }
+  .cal-chip-mine .cal-chip-pago-ok { background:rgba(255,255,255,0.22); color:#fff; }
   .cal-chip-busy .cal-chip-svc {
     font-size: 9.5px;
     line-height: 1.2;
@@ -6687,14 +6701,31 @@
     const horaTxt = sinFecha ? 'Contactar cliente' : fmtHora(b.hora);
     const personaLine = (isMulti && b.persona_label)
       ? `<div class="cal-chip-persona">${escapeHtml(b.persona_label)}</div>` : '';
-    // Total a cobrar = servicios + traslado
+    // Total a cobrar = servicios + traslado. Chip muestra info de anticipo si aplica.
     const precioTotalChip = (Number(b.precio_total) || 0) + (Number(b.costo_traslado) || 0);
+    const pagadoChip = Number(b.total_pagado || 0);
+    const faltaChip = Math.max(0, precioTotalChip - pagadoChip);
+    const esAnticipoChip = pagadoChip > 0 && pagadoChip < precioTotalChip;
+    const yaPagadoChip = pagadoChip >= precioTotalChip && precioTotalChip > 0;
     const durPrecioBlock = (b.duracion_min || precioTotalChip > 0)
       ? `<div class="cal-chip-svc" style="display:flex;align-items:center;gap:6px;justify-content:space-between;margin-top:3px;">`
         + (b.duracion_min ? `<span style="display:inline-flex;align-items:center;gap:3px;">${iconClock}${b.duracion_min} min</span>` : '<span></span>')
         + (precioTotalChip > 0 ? `<span style="font-weight:800;color:var(--olive-dark);">$${precioTotalChip.toLocaleString('es-MX')}</span>` : '')
         + '</div>' : '';
-    const durBlock = durPrecioBlock;
+    // Sub-fila con info de pago: anticipo (falta X), pagado, o cobrar total en sucursal
+    let pagoInfoBlock = '';
+    if (precioTotalChip > 0) {
+      if (esAnticipoChip) {
+        pagoInfoBlock = `<div class="cal-chip-pago cal-chip-pago-anticipo" title="Cliente pagó $${pagadoChip.toLocaleString('es-MX')} de anticipo"><span>Anticipo pagado $${pagadoChip.toLocaleString('es-MX')}</span><span>Cobrar $${faltaChip.toLocaleString('es-MX')}</span></div>`;
+      } else if (yaPagadoChip) {
+        pagoInfoBlock = `<div class="cal-chip-pago cal-chip-pago-ok">Pagado en línea</div>`;
+      } else if (b.tipo_cita === 'sucursal') {
+        pagoInfoBlock = `<div class="cal-chip-pago cal-chip-pago-cobrar">Cobrar en sucursal $${precioTotalChip.toLocaleString('es-MX')}</div>`;
+      } else {
+        pagoInfoBlock = `<div class="cal-chip-pago cal-chip-pago-cobrar">Pago pendiente $${precioTotalChip.toLocaleString('es-MX')}</div>`;
+      }
+    }
+    const durBlock = durPrecioBlock + pagoInfoBlock;
     const svcBlock = b.servicios_label
       ? `<div class="cal-chip-svc">${escapeHtml(b.servicios_label)}</div>` : '';
 
