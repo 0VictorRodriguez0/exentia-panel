@@ -4056,7 +4056,7 @@
         ].filter(Boolean).join(' ');
         const conceptoPill = m.concepto ? ' <span class="com-concepto-pill">' + escapeHtml(_comConceptoLabel(m.concepto)) + '</span>' : '';
         return '<tr>' +
-          '<td>' + _comFmtDate(m.created_at) + '</td>' +
+          '<td>' + _comFmtDate(m.fecha_agendada || m.created_at) + '</td>' +
           '<td>' + citaLbl + '</td>' +
           '<td>' + escapeHtml(_comMotivoLabel(m.motivo)) + conceptoPill + '</td>' +
           '<td>' + _comFmtMoney(m.monto_base) + '</td>' +
