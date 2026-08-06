@@ -8570,7 +8570,7 @@
   }
   window.adminQuitarShow = adminQuitarShow;
 
-  // Toggle único: valida si estaba gris, quita si estaba verde
+  // Toggle único: valida si estaba gris, quita si estaba verde. Actualiza el botón in place (no cierra modal).
   async function adminToggleShow(slotId, btn, wasValidated) {
     if (!slotId) { showToast('Slot inválido.', 'warn'); return; }
     const action = wasValidated ? 'quitar_show' : 'validar_show';
@@ -8595,8 +8595,35 @@
       if (!res.ok || data.ok === false) throw new Error((data && (data.error || data.message)) || 'No se pudo procesar.');
       const result = data.result || {};
       if (result.status && result.status !== 'ok') throw new Error(result.error || 'Error en el servidor');
+      // Cambio de estado in place
+      const nowValidated = !wasValidated;
+      btn.disabled = false;
+      btn.textContent = 'Show';
+      btn.className = 'admin-show-btn' + (nowValidated ? ' is-on' : '');
+      btn.title = nowValidated
+        ? 'Show validado — toca de nuevo si fue por error'
+        : 'Toca para validar Show y liberar la comisión';
+      // Re-bindear con el nuevo estado para el siguiente click
+      const nuevoBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(nuevoBtn, btn);
+      nuevoBtn.addEventListener('click', () => adminToggleShow(slotId, nuevoBtn, nowValidated));
+      // Actualizar el mensaje del banner
+      const banner = nuevoBtn.parentNode;
+      const msgEl = banner && banner.querySelector('.admin-show-msg');
+      if (msgEl) {
+        if (nowValidated) {
+          const showAt = result.validado_at ? new Date(result.validado_at) : new Date();
+          const showPor = result.validado_por || 'Yaz';
+          const showTxt = showAt.toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+          msgEl.textContent = 'Show validado por ' + showPor + ' · ' + showTxt + ' · comisión liberada';
+          banner.className = 'admin-serv-banner admin-show-done';
+        } else {
+          msgEl.textContent = 'Toca "Show" para liberar la comisión de la masajista.';
+          banner.className = 'admin-serv-banner admin-show-pending';
+        }
+      }
       showToast(wasValidated ? 'Show quitado.' : 'Show validado. Comisión liberada.', 'ok');
-      closeCitaModal();
+      // Refresca la lista en background (sin cerrar el modal)
       if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
     } catch (e) {
       btn.disabled = false;
