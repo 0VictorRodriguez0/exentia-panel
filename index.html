@@ -3263,7 +3263,7 @@
         </label>
         <label>
           Hora
-          <input type="time" id="admin-resch-hora" step="900">
+          <input type="time" id="admin-resch-hora" step="900" min="07:00" max="20:00" title="Domicilio 7:00-20:00 · Sucursal 9:00-18:00">
         </label>
       </div>
       <div class="admin-reschedule-msg" id="admin-resch-msg">
@@ -5841,8 +5841,8 @@
 
   const UCAL_COLORS = ['#7d7c3f', '#a3542c', '#3f6e7d', '#7d3f6e', '#2c7d54', '#8a6d1f'];
   const UCAL_POOL_COLOR = '#9a8a75';
-  const UCAL_START_MIN = 9 * 60;   // 9:00
-  const UCAL_END_MIN = 19 * 60;    // 19:00
+  const UCAL_START_MIN = 7 * 60;   // 7:00 (Exentia At Home arranca 7:00)
+  const UCAL_END_MIN = 22 * 60;    // 22:00 (último inicio domicilio 20:00 + duración servicio)
   const UCAL_PX_PER_HOUR = 66;
   const ucalMobileQuery = window.matchMedia('(max-width: 768px)');
   if (ucalMobileQuery.addEventListener) {
