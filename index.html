@@ -8077,67 +8077,55 @@
     let prepHtml = '';
     if (pr) {
       // Acceso
+      // Helpers locales para este render
+      const yn = v => v === true ? 'Sí' : (v === false ? 'No' : null);
+      const DIST = { 'en_el_lugar':'En el mismo lugar', 'menos_50m':'Menos de 50 m', '50_200m':'Entre 50 y 200 m', 'mas_200m':'A más de 200 m' };
+
       const acc = pr.acceso || {};
       let accInner = '';
-      if (acc.caseta) accInner += cdetRow('Caseta', acc.caseta === true ? 'Sí' : acc.caseta);
-      if (acc.registro) accInner += cdetRow('Registro', acc.registro);
-      if (acc.codigo) accInner += cdetRow('Código', acc.codigo);
-      if (acc.instrucciones) accInner += cdetRow('Instrucciones', acc.instrucciones);
+      if (acc.tiene_caseta != null) accInner += cdetRow('Caseta', yn(acc.tiene_caseta));
+      if (acc.requiere_registro != null) accInner += cdetRow('Registro requerido', yn(acc.requiere_registro));
+      if (acc.codigo_acceso) accInner += cdetRow('Código de acceso', acc.codigo_acceso);
+      if (acc.instrucciones_acceso) accInner += cdetRow('Instrucciones', acc.instrucciones_acceso);
       if (accInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Acceso</div>' + accInner + '</div>';
 
       // Llegada
       const ll = pr.llegada || {};
       let llInner = '';
-      const est = cdetLabel('estacionamiento', ll.estacionamiento);
-      if (est) llInner += cdetRow('Estacionamiento', est);
-      const asc = cdetLabel('ascenso', ll.ascenso_descenso);
-      if (asc) llInner += cdetRow('Ascenso/Descenso', asc);
-      const dst = cdetLabel('distancia', ll.distancia);
-      if (dst) llInner += cdetRow('Distancia', dst);
+      if (ll.tiene_estacionamiento != null) llInner += cdetRow('Estacionamiento', yn(ll.tiene_estacionamiento));
+      if (ll.zona_ascenso_descenso != null) llInner += cdetRow('Zona ascenso/descenso', yn(ll.zona_ascenso_descenso));
+      if (ll.distancia_estacionamiento) llInner += cdetRow('Distancia', DIST[ll.distancia_estacionamiento] || ll.distancia_estacionamiento);
       if (llInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Llegada</div>' + llInner + '</div>';
 
       // Instalación
       const inst = pr.instalacion || {};
       let instInner = '';
-      if (inst.espacio_camillas != null) {
-        const esp = cdetLabel('espacio', inst.espacio_camillas) || inst.espacio_camillas;
-        instInner += cdetRow('Espacio camillas', esp);
-      }
-      const pi = cdetLabel('piso', inst.piso);
-      if (pi) instInner += cdetRow('Piso', pi);
-      if (inst.elevador != null) {
-        const el = cdetLabel('elevador', inst.elevador);
-        if (el) instInner += cdetRow('Elevador', el);
-      }
-      if (inst.escaleras != null) {
-        instInner += cdetRow('Escaleras', inst.escaleras === true || inst.escaleras === 'si' ? 'Sí' : 'No');
-      }
+      if (inst.espacio_camillas_ok != null) instInner += cdetRow('Espacio para camillas', inst.espacio_camillas_ok === true ? 'OK' : 'Ajustado');
+      if (inst.piso) instInner += cdetRow('Piso', inst.piso);
+      if (inst.tiene_elevador != null) instInner += cdetRow('Elevador', yn(inst.tiene_elevador));
+      if (inst.hay_escaleras != null) instInner += cdetRow('Escaleras', yn(inst.hay_escaleras));
       if (instInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Instalación</div>' + instInner + '</div>';
 
       // Ambiente
       const am = pr.ambiente || {};
       let amInner = '';
-      if (am.aire_acondicionado != null) {
-        const a = cdetLabel('aire', am.aire_acondicionado);
-        if (a) amInner += cdetRow('Aire acondicionado', a);
-      }
-      if (am.mascotas != null) {
-        const m = cdetLabel('mascotas', am.mascotas);
-        if (m) amInner += cdetRow('Mascotas', m);
-      }
+      if (am.tiene_aire_acondicionado != null) amInner += cdetRow('Aire acondicionado', yn(am.tiene_aire_acondicionado));
+      if (am.hay_mascotas != null) amInner += cdetRow('Mascotas', yn(am.hay_mascotas));
+      if (am.mascotas_detalle) amInner += cdetRow('Detalle mascotas', am.mascotas_detalle);
       if (am.condiciones_especiales) amInner += cdetRow('Condiciones especiales', am.condiciones_especiales);
       if (amInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Ambiente</div>' + amInner + '</div>';
 
       // Recibe
       const rc = pr.recibe || {};
       let rcInner = '';
-      if (rc.es_cliente != null) {
-        const val = rc.es_cliente === true || rc.es_cliente === 'si' ? 'El cliente mismo' : (rc.receptor_nombre ? 'Otra persona: ' + rc.receptor_nombre : 'Otra persona');
-        rcInner += cdetRow('Recibe', val);
-      } else if (rc.receptor_nombre) {
-        rcInner += cdetRow('Recibe', rc.receptor_nombre);
+      if (rc.es_cliente === true) {
+        rcInner += cdetRow('Recibe', 'El cliente mismo');
+      } else if (rc.nombre) {
+        rcInner += cdetRow('Recibe', rc.nombre);
+        if (rc.telefono) rcInner += cdetRow('Tel. receptor', rc.telefono);
+      } else if (rc.telefono) {
+        rcInner += cdetRow('Tel. receptor', rc.telefono);
       }
-      if (rc.receptor_telefono) rcInner += cdetRow('Tel. receptor', rc.receptor_telefono);
       if (rcInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Recibe</div>' + rcInner + '</div>';
 
       // Observaciones
