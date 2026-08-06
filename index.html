@@ -2695,21 +2695,30 @@
   }
   .cdet-card-title svg { flex: 0 0 auto; }
   .cdet-row {
-    display: grid;
-    grid-template-columns: 110px 1fr;
-    gap: 4px 10px;
-    font: 400 13.5px 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font: 400 14px 'Inter', sans-serif;
     color: var(--brown);
-    padding: 3px 0;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(154,152,84,0.15);
   }
+  .cdet-row:last-child { border-bottom: none; }
   .cdet-row-label {
     color: var(--gray-soft);
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
   }
-  .cdet-row-val { color: #3a2a1a; word-wrap: break-word; }
+  .cdet-row-val {
+    color: #3a2a1a;
+    font-weight: 500;
+    font-size: 14.5px;
+    word-wrap: break-word;
+    line-height: 1.35;
+  }
   .cdet-sub {
     margin-top: 6px; padding: 8px 10px;
     background: #fdfbf4;
@@ -2803,11 +2812,10 @@
 
   @media (max-width: 600px) {
     #cliente-detalles-modal .cita-modal-box { max-width: 92vw; }
-    .cdet-row { grid-template-columns: 100px 1fr; font-size: 13px; }
+    .cdet-row { font-size: 13.5px; }
   }
   @media (max-width: 380px) {
-    .cdet-row { grid-template-columns: 1fr; gap: 0; }
-    .cdet-row-label { margin-top: 4px; }
+    .cdet-row { font-size: 13px; padding: 5px 0; }
   }
 
   .cita-servicio-done {
