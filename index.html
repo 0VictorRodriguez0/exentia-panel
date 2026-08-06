@@ -2036,15 +2036,19 @@
   .admin-serv-banner.admin-show-pending .admin-show-msg { font-size: 12.5px; opacity: 0.85; margin-bottom: 10px; }
   .admin-show-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 20px; border-radius: 999px;
-    background: #2e7d32; color: #fff; border: none;
-    font: 600 13px 'Inter', sans-serif; letter-spacing: 0.4px;
+    padding: 10px 22px; border-radius: 999px;
+    background: #b5b5b5; color: #fff; border: none;
+    font: 700 13px 'Inter', sans-serif; letter-spacing: 0.5px; text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 3px 10px rgba(46,125,50,0.25);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     transition: all 0.15s ease;
   }
-  .admin-show-btn:hover { background: #1b5e20; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(27,94,32,0.35); }
+  .admin-show-btn:hover { background: #9e9e9e; transform: translateY(-1px); }
+  .admin-show-btn.is-on { background: #2e7d32; box-shadow: 0 3px 10px rgba(46,125,50,0.25); }
+  .admin-show-btn.is-on:hover { background: #1b5e20; box-shadow: 0 4px 14px rgba(27,94,32,0.35); }
   .admin-show-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .admin-show-btn::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.55); }
+  .admin-show-btn.is-on::before { background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.35); }
   /* Banner Show validado — verde suave */
   .admin-serv-banner.admin-show-done {
     background: #eaf5eb; color: #1b5e20; border-left: 4px solid #2e7d32;
@@ -7553,33 +7557,27 @@
             banner.innerHTML = '<b>' + _servEst.icon + ' ' + _servEst.label + '</b> — el masajista inició el servicio'
               + (hIni ? ' a las ' + hIni : '') + '. No se puede cambiar ni eliminar.';
             actions.appendChild(banner);
-          } else if (_servEst.key === 'done' && !showAt) {
-            // Servicio terminado pero falta Validar Show
-            banner.className = 'admin-serv-banner admin-show-pending';
+          } else if (_servEst.key === 'done') {
+            // Servicio terminado — toggle Show (gris = no validado, verde = validado)
+            const isValidated = !!showAt;
+            const showTxt = isValidated ? showAt.toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+            banner.className = 'admin-serv-banner ' + (isValidated ? 'admin-show-done' : 'admin-show-pending');
             banner.innerHTML =
               '<div class="admin-show-title"><b>✓ Servicio finalizado</b>' + (hIni && hFin ? ' — ' + hIni + ' – ' + hFin : '') + '</div>' +
-              '<div class="admin-show-msg">Falta tu validación para liberar la comisión de la masajista.</div>';
+              '<div class="admin-show-msg">' +
+                (isValidated
+                  ? 'Show validado' + (showPor ? ' por ' + escapeHtml(showPor) : '') + ' · ' + showTxt + ' · comisión liberada'
+                  : 'Toca "Show" para liberar la comisión de la masajista.') +
+              '</div>';
             const btnShow = document.createElement('button');
             btnShow.type = 'button';
-            btnShow.className = 'admin-show-btn';
-            btnShow.textContent = '✓ Validar Show';
-            btnShow.addEventListener('click', () => adminValidarShow(b.slot_id || b.id, btnShow));
+            btnShow.className = 'admin-show-btn' + (isValidated ? ' is-on' : '');
+            btnShow.textContent = 'Show';
+            btnShow.title = isValidated
+              ? 'Show validado — toca de nuevo si fue por error'
+              : 'Toca para validar Show y liberar la comisión';
+            btnShow.addEventListener('click', () => adminToggleShow(b.slot_id || b.id, btnShow, isValidated));
             banner.appendChild(btnShow);
-            actions.appendChild(banner);
-          } else if (_servEst.key === 'done' && showAt) {
-            // Ya validado
-            banner.className = 'admin-serv-banner admin-show-done';
-            const showTxt = showAt.toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
-            banner.innerHTML =
-              '<div class="admin-show-title"><b>✓ Show validado</b>' + (showPor ? ' por ' + escapeHtml(showPor) : '') + ' · ' + showTxt + '</div>' +
-              '<div class="admin-show-msg">Comisión liberada para pago.' + (hIni && hFin ? ' Servicio: ' + hIni + ' – ' + hFin : '') + '</div>';
-            const btnUndo = document.createElement('button');
-            btnUndo.type = 'button';
-            btnUndo.className = 'admin-show-undo';
-            btnUndo.textContent = 'Quitar validación';
-            btnUndo.title = 'Solo si te equivocaste — vuelve la comisión a esperando_show';
-            btnUndo.addEventListener('click', () => adminQuitarShow(b.slot_id || b.id, btnUndo));
-            banner.appendChild(btnUndo);
             actions.appendChild(banner);
           }
         }
@@ -8571,6 +8569,43 @@
     }
   }
   window.adminQuitarShow = adminQuitarShow;
+
+  // Toggle único: valida si estaba gris, quita si estaba verde
+  async function adminToggleShow(slotId, btn, wasValidated) {
+    if (!slotId) { showToast('Slot inválido.', 'warn'); return; }
+    const action = wasValidated ? 'quitar_show' : 'validar_show';
+    const msg = wasValidated
+      ? '¿Quitar la validación de Show? La comisión vuelve a "esperando show".'
+      : '¿Confirmas que el servicio salió bien? Se libera la comisión de la masajista.';
+    if (!confirm(msg)) return;
+    const jwt = localStorage.getItem(STORAGE_KEY);
+    if (!jwt) { showToast('Sesión inválida.', 'err'); return; }
+    const prevClass = btn.className;
+    btn.disabled = true;
+    btn.textContent = wasValidated ? 'Quitando…' : 'Validando…';
+    try {
+      const body = { action, slot_id: slotId };
+      if (!wasValidated) body.validado_por = 'Yaz';
+      const res = await fetch(ADMIN_ACTIONS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error((data && (data.error || data.message)) || 'No se pudo procesar.');
+      const result = data.result || {};
+      if (result.status && result.status !== 'ok') throw new Error(result.error || 'Error en el servidor');
+      showToast(wasValidated ? 'Show quitado.' : 'Show validado. Comisión liberada.', 'ok');
+      closeCitaModal();
+      if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+    } catch (e) {
+      btn.disabled = false;
+      btn.className = prevClass;
+      btn.textContent = 'Show';
+      showToast('Error: ' + e.message, 'err');
+    }
+  }
+  window.adminToggleShow = adminToggleShow;
 
   async function adminCancelBooking(booking, confirmWrap) {
     if (!booking) return;
