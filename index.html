@@ -5919,7 +5919,8 @@
       totalRow.style.display = 'none';
     } else {
       list.innerHTML = extras.map(e => {
-        const concepto = CONCEPTO_LABEL[e.concepto] || 'Pago';
+        // concepto es texto libre — se muestra tal cual; fallback si viene vacío
+        const concepto = (e.concepto && e.concepto.trim()) || (CONCEPTO_LABEL[e.concepto] || 'Pago');
         const metodo = METODO_LABEL[e.metodo] || (e.metodo || '');
         const monto = '$' + Number(e.monto || 0).toLocaleString('es-MX');
         const fecha = fmtFechaCorta(e.created_at);
