@@ -2431,7 +2431,7 @@
     animation: fadeIn 180ms ease-out;
   }
   /* Sub-modales (se abren desde encima del cita-modal): siempre por delante */
-  #admin-reschedule-modal, #historico-modal, #terapeuta-modal { z-index: 1200; }
+  #admin-reschedule-modal, #historico-modal, #terapeuta-modal, #cliente-detalles-modal { z-index: 1200; }
   .cita-modal-backdrop {
     position: absolute; inset: 0;
     background: rgba(92,58,30,0.45);
@@ -2650,6 +2650,154 @@
     background: rgba(181,59,59,0.08);
     border-left-color: #b53b3b;
   }
+
+  /* ── Sub-modal Detalles del cliente ── */
+  .cdet-body { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 8px; }
+  .cdet-header {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #fdfbf4 0%, #f5efe0 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(154,152,84,0.22);
+  }
+  .cdet-header-name {
+    font: 700 16px 'Cormorant Garamond', serif;
+    color: var(--brown);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cdet-header-wa {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--olive-dark);
+    text-decoration: none;
+    font: 600 13px 'Inter', sans-serif;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    border: 1px dashed var(--olive);
+    align-self: flex-start;
+  }
+  .cdet-header-wa:hover { background: #fff; }
+  .cdet-card {
+    background: #fff;
+    border: 1px solid rgba(154,138,117,0.18);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .cdet-card-title {
+    display: flex; align-items: center; gap: 8px;
+    font: 700 11px 'Lato', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--olive-dark);
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(154,138,117,0.15);
+  }
+  .cdet-card-title svg { flex: 0 0 auto; }
+  .cdet-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 4px 10px;
+    font: 400 13.5px 'Inter', sans-serif;
+    color: var(--brown);
+    padding: 3px 0;
+  }
+  .cdet-row-label {
+    color: var(--gray-soft);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .cdet-row-val { color: #3a2a1a; word-wrap: break-word; }
+  .cdet-sub {
+    margin-top: 6px; padding: 8px 10px;
+    background: #fdfbf4;
+    border-radius: 8px;
+    border-left: 3px solid var(--olive);
+  }
+  .cdet-sub-title {
+    font: 700 11px 'Inter', sans-serif;
+    color: var(--olive-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .cdet-empty {
+    text-align: center;
+    padding: 14px 12px;
+    color: var(--gray-soft);
+    font: italic 12.5px 'Inter', sans-serif;
+    background: #fafaf3;
+    border-radius: 8px;
+  }
+  .cdet-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 600 10.5px 'Inter', sans-serif;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .cdet-badge.syncing { background: rgba(154,152,84,0.15); color: var(--olive-dark); }
+  .cdet-badge.synced { background: rgba(46,125,50,0.12); color: #1d6b2f; }
+  .cdet-badge.updated { background: rgba(197,145,44,0.15); color: #8a5a11; }
+  .cdet-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+  .cdet-badge.syncing .cdet-badge-dot { animation: cdetPulse 1s ease-in-out infinite; }
+  @keyframes cdetPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+  .cdet-obs {
+    font: italic 13px 'Inter', sans-serif;
+    color: var(--brown);
+    padding: 8px 10px;
+    background: #fafaf3;
+    border-radius: 8px;
+    white-space: pre-wrap;
+  }
+  .cdet-skeleton {
+    height: 60px; background: linear-gradient(90deg, #f5efe0 0%, #fdfbf4 50%, #f5efe0 100%);
+    background-size: 200% 100%;
+    animation: cdetShimmer 1.4s ease-in-out infinite;
+    border-radius: 12px;
+  }
+  @keyframes cdetShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .cdet-time-ago { font-size: 11px; color: var(--gray-soft); font-weight: 500; }
+  .cdet-maps-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--olive-dark);
+    text-decoration: underline;
+    margin-top: 4px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .cita-btn-detalles {
+    padding: 10px 14px;
+    background: #fff;
+    color: var(--brown);
+    border: 1.5px solid rgba(154,152,84,0.4);
+    border-radius: 8px;
+    cursor: pointer;
+    font: 600 13px 'Inter', sans-serif;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background .15s, border-color .15s;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+  .cita-btn-detalles:hover { background: #fdfbf4; border-color: var(--olive); }
+  .cita-btn-detalles svg { flex: 0 0 auto; }
+
+  @media (max-width: 600px) {
+    #cliente-detalles-modal .cita-modal-box { max-width: 92vw; }
+    .cdet-row { grid-template-columns: 100px 1fr; font-size: 13px; }
+  }
+  @media (max-width: 380px) {
+    .cdet-row { grid-template-columns: 1fr; gap: 0; }
+    .cdet-row-label { margin-top: 4px; }
+  }
+
   .cita-servicio-done {
     display: inline-flex; align-items: center;
     padding: 10px 16px; border-radius: 8px;
@@ -3273,6 +3421,24 @@
     <div class="cita-modal-actions">
       <button class="cita-btn-secondary" onclick="closeAdminRescheduleModal()">Cancelar</button>
       <button class="cita-btn-primary" id="admin-resch-submit" onclick="submitAdminReschedule()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div id="cliente-detalles-modal" class="cita-modal" style="display:none">
+  <div class="cita-modal-backdrop" onclick="closeClienteDetallesModal()"></div>
+  <div class="cita-modal-box" style="max-width:520px;">
+    <button class="cita-modal-close" onclick="closeClienteDetallesModal()" aria-label="Cerrar">×</button>
+    <div class="cita-modal-badge">Detalles del cliente</div>
+    <h2 class="cita-modal-title" id="cdet-title" style="margin-bottom:4px;">Cargando…</h2>
+    <p class="cita-modal-when" id="cdet-subtitle">—</p>
+    <div class="cdet-body" id="cdet-body">
+      <div class="cdet-skeleton"></div>
+      <div class="cdet-skeleton"></div>
+      <div class="cdet-skeleton"></div>
+    </div>
+    <div class="cita-modal-actions">
+      <button class="cita-btn-secondary" onclick="closeClienteDetallesModal()" style="width:100%;">Cerrar</button>
     </div>
   </div>
 </div>
@@ -7340,6 +7506,15 @@
     const note = document.getElementById('cita-note');
     actions.innerHTML = '';
     note.textContent = '';
+
+    // Botón "Detalles del cliente" — SIEMPRE visible (admin + masajista, cualquier estado)
+    const detBtn = document.createElement('button');
+    detBtn.type = 'button';
+    detBtn.className = 'cita-btn-detalles';
+    detBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Detalles del cliente</span>';
+    detBtn.addEventListener('click', () => openClienteDetallesModal(b));
+    actions.appendChild(detBtn);
+
     if (readOnly) {
       // Info de asignación
       if (opts.terapeuta_id && adminState.data && adminState.data.terapeutas) {
@@ -7715,6 +7890,305 @@
   }
   // expongo al onclick inline del backdrop/cerrar
   window.closeCitaModal = closeCitaModal;
+
+  // ─── Detalles del cliente (sub-modal) ────────────────────────────────
+  const CLIENTE_DETALLES_RPC = SUPABASE_URL + '/rest/v1/rpc/exentia_cliente_detalles';
+  const CLIENTE_SYNC_ENDPOINT = 'https://n8n-ntcue-clone-u59578.vm.elestio.app/webhook/exentia-panel-cliente-sync';
+  let _cdetCurrent = { bookingId: null, data: null };
+
+  function closeClienteDetallesModal() {
+    document.getElementById('cliente-detalles-modal').style.display = 'none';
+    _cdetCurrent = { bookingId: null, data: null };
+  }
+  window.closeClienteDetallesModal = closeClienteDetallesModal;
+
+  async function fetchClienteDetalles(bookingId) {
+    try {
+      const res = await fetch(CLIENTE_DETALLES_RPC, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ p_booking_id: bookingId })
+      });
+      if (!res.ok) throw new Error('http ' + res.status);
+      return await res.json();
+    } catch (e) {
+      console.warn('[cliente-detalles] fetch fail', e);
+      return null;
+    }
+  }
+
+  function fireGhlSync(ghlContactId) {
+    return fetch(CLIENTE_SYNC_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ghl_contact_id: ghlContactId })
+    })
+      .then(r => r.ok ? r.json() : null)
+      .catch(err => { console.warn('[cliente-detalles] sync fail', err); return null; });
+  }
+
+  function cdetTimeAgo(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (diff < 60) return 'hace unos segundos';
+    if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + ' h';
+    const days = Math.floor(diff / 86400);
+    if (days < 30) return 'hace ' + days + ' d';
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  const CDET_LABELS = {
+    // llegada.estacionamiento
+    estacionamiento: { publico: 'Estacionamiento público', privado: 'Estacionamiento privado', calle: 'En la calle', valet: 'Valet parking', ninguno: 'Sin estacionamiento' },
+    // llegada.ascenso_descenso
+    ascenso: { permite: 'Permite ascenso/descenso', no_permite: 'No permite ascenso/descenso', complicado: 'Complicado', no_aplica: 'No aplica' },
+    // llegada.distancia
+    distancia: { menos_50m: 'Menos de 50 m', '50_100m': '50 – 100 m', '100_200m': '100 – 200 m', mas_200m: 'Más de 200 m' },
+    // instalacion.piso
+    piso: { pb: 'Planta baja', primer: '1er piso', segundo: '2do piso', tercer: '3er piso', mayor: 'Piso alto' },
+    // ambiente.aire / mascotas
+    aire: { si: 'Sí', no: 'No', desconoce: 'No sé' },
+    mascotas: { si: 'Sí', no: 'No', encierran: 'Encerradas durante servicio' },
+    // recibe
+    es_cliente: { si: 'El cliente mismo', no: 'Otra persona' },
+    // ascensor/elevador
+    elevador: { si: 'Sí', no: 'No', pequeno: 'Pequeño (no cabe camilla)' },
+    // espacio
+    espacio: { holgado: 'Espacio holgado', justo: 'Justo', apretado: 'Apretado' }
+  };
+
+  function cdetLabel(group, val) {
+    if (val == null || val === '') return null;
+    const g = CDET_LABELS[group];
+    if (g && g[val]) return g[val];
+    // Fallback: reemplaza _ por espacio y capitaliza
+    return String(val).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function cdetRow(label, val, opts) {
+    opts = opts || {};
+    if (val == null || val === '' || (Array.isArray(val) && !val.length)) return '';
+    const shown = Array.isArray(val) ? val.map(v => escapeHtml(String(v))).join(', ') : (opts.raw ? val : escapeHtml(String(val)));
+    return '<div class="cdet-row"><div class="cdet-row-label">' + escapeHtml(label) + '</div><div class="cdet-row-val">' + shown + '</div></div>';
+  }
+
+  function cdetSection(title, iconSvg, innerHtml) {
+    if (!innerHtml || !innerHtml.trim()) return '';
+    return '<div class="cdet-card"><div class="cdet-card-title">' + iconSvg + '<span>' + escapeHtml(title) + '</span></div>' + innerHtml + '</div>';
+  }
+
+  const CDET_ICONS = {
+    ubicacion: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    prefs: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-7-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.65-7 10-7 10z" opacity="0.35"/><path d="M12 8v6M9 11h6"/></svg>',
+    prep: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15l2 2 4-4"/></svg>',
+    wa: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.9-1.7-2.2-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1-1.1 2.5s1.1 3 1.3 3.2c.2.2 2.2 3.5 5.5 4.9.8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.2L2 22l4.9-1.3c1.5.8 3.3 1.3 5.1 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>'
+  };
+
+  function renderClienteDetallesSkeleton() {
+    document.getElementById('cdet-title').textContent = 'Cargando…';
+    document.getElementById('cdet-subtitle').textContent = '';
+    document.getElementById('cdet-body').innerHTML =
+      '<div class="cdet-skeleton"></div><div class="cdet-skeleton"></div><div class="cdet-skeleton"></div>';
+  }
+
+  function renderClienteDetalles(detalles, opts) {
+    opts = opts || {};
+    if (!detalles || detalles.status === 'error' || !detalles.cliente) {
+      document.getElementById('cdet-title').textContent = 'Sin datos';
+      document.getElementById('cdet-subtitle').textContent = '';
+      document.getElementById('cdet-body').innerHTML =
+        '<div class="cdet-empty">No se pudieron cargar los detalles del cliente. Intenta cerrar y abrir de nuevo.</div>';
+      return;
+    }
+
+    const c = detalles.cliente || {};
+    const tel = (c.telefono || '').toString();
+    const telDigits = tel.replace(/[^\d]/g, '');
+    document.getElementById('cdet-title').textContent = c.nombre || 'Cliente';
+    document.getElementById('cdet-subtitle').textContent = c.email || '';
+
+    // ── Header con WhatsApp ──
+    const header = tel
+      ? '<div class="cdet-header"><div class="cdet-header-name">' + escapeHtml(c.nombre || 'Cliente') + '</div>' +
+        '<a class="cdet-header-wa" href="https://wa.me/' + telDigits + '" target="_blank" rel="noopener">' +
+        CDET_ICONS.wa + '<span>' + escapeHtml(tel) + '</span></a></div>'
+      : '';
+
+    // ── Ubicación ──
+    const u = detalles.ubicacion || {};
+    let ubicHtml = '';
+    if (u.direccion) {
+      let dir = escapeHtml(u.direccion);
+      if (u.maps_url) {
+        dir += '<br><a class="cdet-maps-link" href="' + escapeHtml(u.maps_url) + '" target="_blank" rel="noopener">Abrir en Google Maps &#8599;</a>';
+      }
+      ubicHtml += cdetRow('Dirección', dir, { raw: true });
+    }
+    if (u.zona) ubicHtml += cdetRow('Zona', u.zona);
+    const ubicacionCard = cdetSection('Ubicación', CDET_ICONS.ubicacion, ubicHtml);
+
+    // ── Preferencias ──
+    const pf = detalles.preferencias;
+    let prefBadge = '';
+    if (opts.syncStatus === 'syncing') {
+      prefBadge = '<span class="cdet-badge syncing" id="cdet-sync-badge"><span class="cdet-badge-dot"></span>Sincronizando…</span>';
+    } else if (opts.syncStatus === 'synced') {
+      prefBadge = '<span class="cdet-badge synced" id="cdet-sync-badge"><span class="cdet-badge-dot"></span>Sin cambios</span>';
+    } else if (opts.syncStatus === 'updated') {
+      prefBadge = '<span class="cdet-badge updated" id="cdet-sync-badge"><span class="cdet-badge-dot"></span>Actualizado desde CRM</span>';
+    }
+    let prefsHtml = '';
+    if (pf) {
+      prefsHtml += cdetRow('Presión', pf.presion);
+      prefsHtml += cdetRow('Aromas', pf.aromas);
+      prefsHtml += cdetRow('Género terapeuta', pf.genero_terapeuta);
+      if (pf.notas) prefsHtml += '<div class="cdet-obs">' + escapeHtml(pf.notas) + '</div>';
+      if (pf.updated_at) {
+        prefsHtml += '<div class="cdet-time-ago">Actualizado ' + cdetTimeAgo(pf.updated_at) + '</div>';
+      }
+    } else {
+      prefsHtml = '<div class="cdet-empty">El cliente aún no llenó sus preferencias.</div>';
+    }
+    const prefsTitle = '<div class="cdet-card-title">' + CDET_ICONS.prefs +
+      '<span>Preferencias del cliente</span>' +
+      (prefBadge ? '<span style="margin-left:auto;">' + prefBadge + '</span>' : '') +
+      '</div>';
+    const prefsCard = '<div class="cdet-card">' + prefsTitle + prefsHtml + '</div>';
+
+    // ── Preparación ──
+    const pr = detalles.preparacion;
+    let prepHtml = '';
+    if (pr) {
+      // Acceso
+      const acc = pr.acceso || {};
+      let accInner = '';
+      if (acc.caseta) accInner += cdetRow('Caseta', acc.caseta === true ? 'Sí' : acc.caseta);
+      if (acc.registro) accInner += cdetRow('Registro', acc.registro);
+      if (acc.codigo) accInner += cdetRow('Código', acc.codigo);
+      if (acc.instrucciones) accInner += cdetRow('Instrucciones', acc.instrucciones);
+      if (accInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Acceso</div>' + accInner + '</div>';
+
+      // Llegada
+      const ll = pr.llegada || {};
+      let llInner = '';
+      const est = cdetLabel('estacionamiento', ll.estacionamiento);
+      if (est) llInner += cdetRow('Estacionamiento', est);
+      const asc = cdetLabel('ascenso', ll.ascenso_descenso);
+      if (asc) llInner += cdetRow('Ascenso/Descenso', asc);
+      const dst = cdetLabel('distancia', ll.distancia);
+      if (dst) llInner += cdetRow('Distancia', dst);
+      if (llInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Llegada</div>' + llInner + '</div>';
+
+      // Instalación
+      const inst = pr.instalacion || {};
+      let instInner = '';
+      if (inst.espacio_camillas != null) {
+        const esp = cdetLabel('espacio', inst.espacio_camillas) || inst.espacio_camillas;
+        instInner += cdetRow('Espacio camillas', esp);
+      }
+      const pi = cdetLabel('piso', inst.piso);
+      if (pi) instInner += cdetRow('Piso', pi);
+      if (inst.elevador != null) {
+        const el = cdetLabel('elevador', inst.elevador);
+        if (el) instInner += cdetRow('Elevador', el);
+      }
+      if (inst.escaleras != null) {
+        instInner += cdetRow('Escaleras', inst.escaleras === true || inst.escaleras === 'si' ? 'Sí' : 'No');
+      }
+      if (instInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Instalación</div>' + instInner + '</div>';
+
+      // Ambiente
+      const am = pr.ambiente || {};
+      let amInner = '';
+      if (am.aire_acondicionado != null) {
+        const a = cdetLabel('aire', am.aire_acondicionado);
+        if (a) amInner += cdetRow('Aire acondicionado', a);
+      }
+      if (am.mascotas != null) {
+        const m = cdetLabel('mascotas', am.mascotas);
+        if (m) amInner += cdetRow('Mascotas', m);
+      }
+      if (am.condiciones_especiales) amInner += cdetRow('Condiciones especiales', am.condiciones_especiales);
+      if (amInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Ambiente</div>' + amInner + '</div>';
+
+      // Recibe
+      const rc = pr.recibe || {};
+      let rcInner = '';
+      if (rc.es_cliente != null) {
+        const val = rc.es_cliente === true || rc.es_cliente === 'si' ? 'El cliente mismo' : (rc.receptor_nombre ? 'Otra persona: ' + rc.receptor_nombre : 'Otra persona');
+        rcInner += cdetRow('Recibe', val);
+      } else if (rc.receptor_nombre) {
+        rcInner += cdetRow('Recibe', rc.receptor_nombre);
+      }
+      if (rc.receptor_telefono) rcInner += cdetRow('Tel. receptor', rc.receptor_telefono);
+      if (rcInner) prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Recibe</div>' + rcInner + '</div>';
+
+      // Observaciones
+      if (pr.observaciones && pr.observaciones.trim()) {
+        prepHtml += '<div class="cdet-sub"><div class="cdet-sub-title">Observaciones</div><div class="cdet-obs">' + escapeHtml(pr.observaciones) + '</div></div>';
+      }
+    }
+    if (!prepHtml) {
+      prepHtml = '<div class="cdet-empty">El cliente aún no llenó los datos de preparación del servicio.</div>';
+    }
+    const prepCard = cdetSection('Preparación del servicio', CDET_ICONS.prep, prepHtml);
+
+    document.getElementById('cdet-body').innerHTML = header + ubicacionCard + prefsCard + prepCard;
+  }
+
+  function markClienteDetallesAsSynced(hadChanges) {
+    const badge = document.getElementById('cdet-sync-badge');
+    if (!badge) return;
+    if (hadChanges) {
+      badge.className = 'cdet-badge updated';
+      badge.innerHTML = '<span class="cdet-badge-dot"></span>Actualizado desde CRM';
+    } else {
+      badge.className = 'cdet-badge synced';
+      badge.innerHTML = '<span class="cdet-badge-dot"></span>Sin cambios';
+    }
+  }
+
+  async function openClienteDetallesModal(booking) {
+    if (!booking) return;
+    const bookingId = booking.booking_id || booking.id;
+    if (!bookingId) { console.warn('[cliente-detalles] sin booking id'); return; }
+    _cdetCurrent = { bookingId: bookingId, data: null };
+
+    // Mostrar modal con skeleton
+    document.getElementById('cliente-detalles-modal').style.display = 'flex';
+    renderClienteDetallesSkeleton();
+
+    // Fetch inicial desde Supabase
+    const detalles = await fetchClienteDetalles(bookingId);
+    if (_cdetCurrent.bookingId !== bookingId) return; // el usuario ya cerró/cambió
+    _cdetCurrent.data = detalles;
+    const initialStatus = detalles && detalles.ghl_contact_id ? 'syncing' : null;
+    renderClienteDetalles(detalles, { syncStatus: initialStatus });
+
+    // Background sync desde GHL
+    if (detalles && detalles.ghl_contact_id) {
+      fireGhlSync(detalles.ghl_contact_id).then(async syncResult => {
+        if (_cdetCurrent.bookingId !== bookingId) return;
+        if (syncResult && syncResult.changed) {
+          // Re-fetch y re-render mostrando badge actualizado
+          const fresh = await fetchClienteDetalles(bookingId);
+          if (_cdetCurrent.bookingId !== bookingId) return;
+          _cdetCurrent.data = fresh;
+          renderClienteDetalles(fresh, { syncStatus: 'updated' });
+        } else {
+          markClienteDetallesAsSynced(false);
+        }
+      });
+    }
+  }
+  window.openClienteDetallesModal = openClienteDetallesModal;
 
   // ── Admin actions: reagendar / eliminar ──
   let _adminReschedule = { booking: null, terapeuta_id: null, scope: 'booking' };
