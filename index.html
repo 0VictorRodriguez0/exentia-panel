@@ -4638,6 +4638,7 @@
       { header: '', width: 8  },  // H %
       { header: '', width: 15 },  // I Comisión
       { header: '', width: 14 },  // J Estado
+      { header: '', width: 38 },  // K Desglose de pagos
     ];
 
     const COLORS = {
@@ -4649,7 +4650,7 @@
     const borderAll = { top: thinBorder, left: thinBorder, right: thinBorder, bottom: thinBorder };
 
     // Row 1: título
-    ws.mergeCells('A1:J1');
+    ws.mergeCells('A1:K1');
     const c1 = ws.getCell('A1');
     c1.value = 'Reporte de comisiones por pagar';
     c1.font = { name: 'Calibri', size: 14, bold: true, color: { argb: COLORS.olive } };
@@ -4657,7 +4658,7 @@
     ws.getRow(1).height = 22;
 
     // Row 2: rango
-    ws.mergeCells('A2:J2');
+    ws.mergeCells('A2:K2');
     const c2 = ws.getCell('A2');
     c2.value = 'Rango: ' + range.label + '  ·  ' + range.from.toISOString().slice(0,10) + ' al ' + range.to.toISOString().slice(0,10);
     c2.font = { name: 'Calibri', size: 10, italic: true, color: { argb: COLORS.brown } };
@@ -4668,7 +4669,7 @@
     ws.mergeCells('A3:E3');
 
     // Row 5: headers
-    const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado'];
+    const headers = ['Fecha servicio','Booking','Cliente','Servicios','Motivo','Concepto','Monto base','%','Comisión','Estado','Desglose de pagos'];
     const headerRow = ws.getRow(5);
     headers.forEach((h, i) => {
       const cell = headerRow.getCell(i + 1);
@@ -4693,8 +4694,8 @@
     const groupRanges = []; // {name, first, last}
 
     Object.values(groups).forEach(g => {
-      // Group header row (merged A:J)
-      ws.mergeCells('A' + currentRow + ':J' + currentRow);
+      // Group header row (merged A:K)
+      ws.mergeCells('A' + currentRow + ':K' + currentRow);
       const gc = ws.getCell('A' + currentRow);
       gc.value = g.nombre + '  ·  ' + g.movs.length + ' movimiento' + (g.movs.length===1?'':'s');
       gc.font = { name: 'Calibri', size: 12, bold: true, color: { argb: COLORS.brown } };
@@ -4732,13 +4733,28 @@
           formulae: ['"pagable,pagada,anulada"']
         };
         r.getCell(10).alignment = { horizontal: 'center', vertical: 'middle' };
-        // Alto automático según servicios
-        const lineas = svcArr.length || 1;
-        r.height = Math.max(20, 16 * lineas + 6);
+        // Desglose de pagos (col K): lista todos los pagos de la cita con concepto+monto
+        const pagos = Array.isArray(m.pagos_detalle) ? m.pagos_detalle : [];
+        const desglose = pagos.map(p => {
+          const mt = Number(p.monto_neto || p.monto_mxn || 0);
+          const monto = '$' + mt.toLocaleString('es-MX');
+          let label;
+          if (p.origen === 'stripe_prepago') label = 'Prepago (tarjeta)';
+          else if (p.concepto && p.concepto.trim()) label = p.concepto.trim();
+          else label = 'Extra (' + (p.metodo || 'efectivo') + ')';
+          const notas = p.notas ? ' — ' + p.notas : '';
+          return '• ' + label + ' ' + monto + notas;
+        }).join('\n');
+        r.getCell(11).value = desglose || '—';
+        r.getCell(11).alignment = { wrapText: true, vertical: 'top' };
+        // Alto automático según servicios/pagos (lo que sea mayor)
+        const lineasSvc = svcArr.length || 1;
+        const lineasPagos = pagos.length || 1;
+        r.height = Math.max(20, 16 * Math.max(lineasSvc, lineasPagos) + 6);
         // Bordes
-        for (let c = 1; c <= 10; c++) r.getCell(c).border = borderAll;
+        for (let c = 1; c <= 11; c++) r.getCell(c).border = borderAll;
         // Font default
-        for (let c = 1; c <= 10; c++) if (c !== 2) r.getCell(c).font = { name: 'Calibri', size: 11 };
+        for (let c = 1; c <= 11; c++) if (c !== 2) r.getCell(c).font = { name: 'Calibri', size: 11 };
         currentRow++;
       });
       const groupLast = currentRow - 1;
@@ -4756,7 +4772,8 @@
       subRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
       subRow.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
       subRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
-      for (let c = 1; c <= 10; c++) subRow.getCell(c).border = borderAll;
+      subRow.getCell(11).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.soft } };
+      for (let c = 1; c <= 11; c++) subRow.getCell(c).border = borderAll;
       subRow.height = 22;
       currentRow++;
 
@@ -4777,7 +4794,8 @@
     totalRow.getCell(9).font = { name: 'Calibri', size: 13, bold: true, color: { argb: COLORS.headText } };
     totalRow.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
     totalRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
-    for (let c = 1; c <= 10; c++) totalRow.getCell(c).border = borderAll;
+    totalRow.getCell(11).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLORS.olive } };
+    for (let c = 1; c <= 11; c++) totalRow.getCell(c).border = borderAll;
     totalRow.height = 28;
 
     // Contadores dinámicos en fila 3 (a la derecha del "Generado")
@@ -4828,7 +4846,7 @@
 
     // Conditional formatting: fila completa tachada cuando Estado = "pagada"
     ws.addConditionalFormatting({
-      ref: 'A' + dataStartRow + ':J' + dataLastRow,
+      ref: 'A' + dataStartRow + ':K' + dataLastRow,
       rules: [
         {
           type: 'expression', priority: 4,
@@ -4849,7 +4867,7 @@
 
     // Nota al pie
     const noteRow = currentRow + 2;
-    ws.mergeCells('A' + noteRow + ':J' + noteRow);
+    ws.mergeCells('A' + noteRow + ':K' + noteRow);
     ws.getCell('A' + noteRow).value = 'Cambia el Estado a "pagada" cuando realices la transferencia — la fila se tacha en gris, la celda cambia a verde, los contadores y el total se actualizan automáticamente.';
     ws.getCell('A' + noteRow).font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF7D7C3F' } };
     ws.getRow(noteRow).height = 20;
