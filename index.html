@@ -2818,6 +2818,11 @@
     margin: 0 0 12px;
   }
   .cdet-prep-heredada b { color: #5a4300; }
+  .cdet-prep-crm {
+    background: #eef4fb; border: 1px solid #b9d1ea; color: #1e4a7a;
+    padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45;
+    margin: 0 0 12px;
+  }
   .cdet-maps-link {
     display: inline-flex; align-items: center; gap: 4px;
     color: var(--olive-dark);
@@ -8130,13 +8135,16 @@
     const pr = detalles.preparacion;
     let prepHtml = '';
     if (pr) {
-      // Banner con fecha de última actualización + aviso si viene heredada de otro booking
+      // Origen de los datos: esta_cita (form de este servicio) | crm (ficha GHL) | cita_anterior
       const ts = pr.completado_at || pr.updated_at;
-      if (pr.heredada && pr.heredada_de_booking_code) {
+      const origen = pr.origen || (pr.heredada ? 'cita_anterior' : 'esta_cita');
+      if (origen === 'cita_anterior' && pr.heredada_de_booking_code) {
         const _fh = pr.heredada_de_fecha ? new Date(pr.heredada_de_fecha + 'T12:00:00-05:00').toLocaleDateString('es-MX',{day:'2-digit', month:'short', year:'numeric'}) : '';
-        prepHtml += '<div class="cdet-prep-heredada">Datos heredados de la cita <b>' + escapeHtml(pr.heredada_de_booking_code) + '</b>' + (_fh?' del '+ _fh:'') + '. Se reemplazarán cuando el cliente complete el formulario de esta cita.</div>';
+        prepHtml += '<div class="cdet-prep-heredada">Datos de la cita anterior <b>' + escapeHtml(pr.heredada_de_booking_code) + '</b>' + (_fh?' del '+ _fh:'') + '. Se reemplazarán cuando el cliente complete el formulario de esta cita.</div>';
+      } else if (origen === 'crm') {
+        prepHtml += '<div class="cdet-prep-crm">Ficha del cliente en el CRM' + (ts ? ' · sincronizado ' + cdetTimeAgo(ts) : '') + '. El cliente aún no llenó el formulario de esta cita.</div>';
       } else if (ts) {
-        prepHtml += '<div class="cdet-prep-meta">Rellenado ' + cdetTimeAgo(ts) + '</div>';
+        prepHtml += '<div class="cdet-prep-meta">Rellenado para esta cita ' + cdetTimeAgo(ts) + '</div>';
       }
 
       // Acceso
