@@ -6444,7 +6444,9 @@
     const pop = document.createElement('div');
     pop.className = 'ucal-popover';
     pop.innerHTML = html;
-    document.body.appendChild(pop);
+    // Debe ir DENTRO de #panel-root (z-index MAX_INT del NUCLEAR ESCAPE);
+    // si va en body queda debajo del wrapper y el click cae en panel-root.
+    (document.getElementById('panel-root') || document.body).appendChild(pop);
     _ucalPopoverEl = pop;
     const isMobile = ucalMobileQuery.matches;
     if (isMobile) {
