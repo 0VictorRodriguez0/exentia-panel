@@ -4194,7 +4194,11 @@
   function _comFmtMoney(n) { return '$' + Number(n || 0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function _comFmtDate(iso) {
     if (!iso) return '';
-    const d = new Date(iso);
+    // Parsear como local (evita shift UTC → un día menos en Cancún cuando viene un date puro YYYY-MM-DD)
+    const s = String(iso).slice(0, 10);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return String(iso);
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
     return d.toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'2-digit'});
   }
 
@@ -8318,6 +8322,8 @@
       closeCitaModal();
       showToast('Cita reagendada correctamente.', 'ok');
       if (typeof fetchAdminCitas === 'function') fetchAdminCitas({ silent: true });
+      // Comisiones jala fecha por JOIN con bookings — refrescar tab si está cargado
+      if (typeof fetchComisiones === 'function') fetchComisiones({ silent: true });
     } catch (err) {
       msg.classList.add('error');
       msg.textContent = err.message || 'Error al reagendar.';
