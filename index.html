@@ -2811,6 +2811,13 @@
   }
   @keyframes cdetShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   .cdet-time-ago { font-size: 11px; color: var(--gray-soft); font-weight: 500; }
+  .cdet-prep-meta { font-size: 11.5px; color: var(--gray-soft); margin: 0 0 10px; font-weight: 500; }
+  .cdet-prep-heredada {
+    background: #fff9e6; border: 1px solid #f0d780; color: #7a5a00;
+    padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45;
+    margin: 0 0 12px;
+  }
+  .cdet-prep-heredada b { color: #5a4300; }
   .cdet-maps-link {
     display: inline-flex; align-items: center; gap: 4px;
     color: var(--olive-dark);
@@ -8123,6 +8130,15 @@
     const pr = detalles.preparacion;
     let prepHtml = '';
     if (pr) {
+      // Banner con fecha de última actualización + aviso si viene heredada de otro booking
+      const ts = pr.completado_at || pr.updated_at;
+      if (pr.heredada && pr.heredada_de_booking_code) {
+        const _fh = pr.heredada_de_fecha ? new Date(pr.heredada_de_fecha + 'T12:00:00-05:00').toLocaleDateString('es-MX',{day:'2-digit', month:'short', year:'numeric'}) : '';
+        prepHtml += '<div class="cdet-prep-heredada">Datos heredados de la cita <b>' + escapeHtml(pr.heredada_de_booking_code) + '</b>' + (_fh?' del '+ _fh:'') + '. Se reemplazarán cuando el cliente complete el formulario de esta cita.</div>';
+      } else if (ts) {
+        prepHtml += '<div class="cdet-prep-meta">Rellenado ' + cdetTimeAgo(ts) + '</div>';
+      }
+
       // Acceso
       // Helpers locales para este render
       const yn = v => v === true ? 'Sí' : (v === false ? 'No' : null);
